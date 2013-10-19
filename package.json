@@ -1,0 +1,22 @@
+{
+  "name": "multi-example",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.2.6",
+    "socket.io": "0.9.16",
+    "jade": "*",
+    "less-middleware": "*",
+    "qunit": "*"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-qunit": "~0.2.2",
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-jsdoc": "~0.4.0"
+  }
+}
