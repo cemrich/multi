@@ -5,6 +5,8 @@ Before starting run `npm install` in your terminal.
 
 To start the application run `node app` in your terminal and visit http://localhost
 
+For development run `grunt jsdoc` to generate documentation and `grunt watch` to jshint all javascript files on file change.
+
 ### Licence ###
 
 The MIT License (MIT)
