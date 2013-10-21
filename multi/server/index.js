@@ -16,6 +16,11 @@ function init(app, options) {
 		res.render(options.gameViewSubdir + 'example1');
 	});
 
-};
+}
 
+var EventDispatcher = require('../shared/eventDispatcher');
+var dispatcher = new EventDispatcher();
+dispatcher.dispatchEvent('test', {});
 module.exports = init;
+
+

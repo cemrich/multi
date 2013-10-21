@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 
 		jsdoc : {
 			multi : {
-				src: ['multi', 'README.md'], 
+				src: ['multi/**/*.js', 'README.md'], 
 				options: {
 					destination: './documentation/'
 				}
@@ -28,9 +28,32 @@ module.exports = function(grunt) {
 			}
 		},
 
+		/* 
+		* builds the client side multi lib into one file 
+		* see https://github.com/gruntjs/grunt-contrib-requirejs
+		*/
+		requirejs: {
+			client: {
+				options: {
+					baseUrl: 'multi/client',
+					out: 'public/js/lib/multi.js',
+					name: 'main',
+					optimize: 'none'
+				}
+			}
+		},
+
 		watch: {
-			files: ['<%= jshint.files %>'],
-			tasks: ['test']
+			/* test js files on file change */
+			all: {
+				files: ['<%= jshint.files %>'],
+				tasks: ['test']
+			},
+			/* build client lib on file change */
+			client: {
+				files: ['multi/client/**/*.js', 'multi/shared/**/*.js'],
+				tasks: ['requirejs:client']
+			}
 		}
 	});
 
@@ -38,6 +61,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-qunit');
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-requirejs');
 
 	grunt.registerTask('test', ['jshint']);
 	grunt.registerTask('default', ['test', 'jsdoc']);

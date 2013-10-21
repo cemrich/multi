@@ -17,6 +17,9 @@
     "grunt-contrib-qunit": "~0.2.2",
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-watch": "~0.5.3",
-    "grunt-jsdoc": "~0.4.0"
+    "grunt-jsdoc": "~0.4.0",
+    "grunt-contrib-requirejs": "~0.4.1",
+    "requirejs": "~2.1.9",
+    "amdefine": "~0.1.0"
   }
 }
