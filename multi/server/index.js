@@ -2,7 +2,7 @@
 * Entry point for the server side multi library for developing
 * multiscreen games.
 * Call {@link module:multi.init|init()} to initialize this library.
-* @module multi
+* @module server/multi
 */
 
 /**

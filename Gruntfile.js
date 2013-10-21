@@ -37,9 +37,9 @@ module.exports = function(grunt) {
 				options: {
 					baseUrl: 'multi/client',
 					out: 'public/js/lib/multi.js',
-					name: 'main',
+					name: 'index',
 					wrap: {
-						end: 'define(["main"], function(main) { return main; });'
+						end: 'define(["index"], function(index) { return index; });'
 					},
 					optimize: 'none'
 				}

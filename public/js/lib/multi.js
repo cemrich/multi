@@ -94,14 +94,33 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 
 	return exports.EventDispatcher;
  });
-define('main',['../shared/eventDispatcher'], function(EventDispatcher) {
+/**
+* Entry point for the client side multi library for developing
+* multiscreen games.
+* @module client/multi
+*/
 
-	// createSession()
+define('index',['require','exports','module','../shared/eventDispatcher'],function(require, exports, module) {
+
+	var EventDispatcher = require('../shared/eventDispatcher');
+
 	var Player = function () {};
-
 	Player.prototype = new EventDispatcher();
+
+
+	/**
+	 * @public
+	 */
+	exports.createSession = function () {
+		// return session
+	};
 	
-	return { test: 'test' };
+	/**
+	 * @public
+	 */
+	exports.connectToSession = function (sessionId) {
+		// return session
+	};
 
 });
-define(["main"], function(main) {return main;});
+define(["index"], function(index) { return index; });
