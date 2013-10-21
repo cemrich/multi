@@ -9,7 +9,7 @@
  * Call this once to initialize the multi framework.
  * @public
  */
-exports.init = function (app, options) {
+function init(app, options) {
 
 	// adding route for first game
 	app.get(options.gameUrlSuffix + 'example1', function(req, res) {
@@ -17,3 +17,5 @@ exports.init = function (app, options) {
 	});
 
 };
+
+module.exports = init;

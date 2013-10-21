@@ -33,7 +33,6 @@ server.listen(app.get('port'), function(){
 // initialize multi
 var options = {
 	gameUrlSuffix: '/',
-	gameViewSubdir: 'game/'
+	gameViewSubdir: 'games/'
 };
-var multi = require('./multi');
-multi.init(app, options);
+var multi = require('./multi')(app, options);
