@@ -9,13 +9,14 @@
  * Call this once to initialize the multi framework.
  * @public
  */
-function init(app, options) {
+function init(app, server, options) {
 
 	// adding route for first game
 	app.get(options.gameUrlSuffix + 'example1', function(req, res) {
 		res.render(options.gameViewSubdir + 'example1');
 	});
 
+	var io = require('socket.io').listen(server);
 }
 
 var EventDispatcher = require('../shared/eventDispatcher');

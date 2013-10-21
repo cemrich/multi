@@ -94,32 +94,68 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 
 	return exports.EventDispatcher;
  });
+
+define('player',['require','exports','module','../shared/eventDispatcher'],function(require, exports, module) {
+
+	var EventDispatcher = require('../shared/eventDispatcher');
+
+	exports.Player = function () {
+		
+	};
+
+	exports.Player.prototype = new EventDispatcher();
+	return exports.Player;
+
+});
+
+define('session',['require','exports','module','../shared/eventDispatcher'],function(require, exports, module) {
+
+	var EventDispatcher = require('../shared/eventDispatcher');
+
+	exports.Session = function () {
+		
+	};
+
+	exports.Session.prototype = new EventDispatcher();
+	return exports.Session;
+
+});
 /**
 * Entry point for the client side multi library for developing
 * multiscreen games.
 * @module client/multi
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher'],function(require, exports, module) {
+define('index',['require','exports','module','../shared/eventDispatcher','player','session'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
-
-	var Player = function () {};
-	Player.prototype = new EventDispatcher();
-
+	var Player = require('player');
+	var Session = require('session');
 
 	/**
 	 * @public
 	 */
-	exports.createSession = function () {
-		// return session
-	};
-	
-	/**
-	 * @public
-	 */
-	exports.connectToSession = function (sessionId) {
-		// return session
+	exports.init = function (options) {
+
+		var io = options.io;
+		var server = options.server;
+
+		/**
+		 * @public
+		 */
+		exports.createSession = function () {
+			var socket = io.connect(server);
+			console.log(socket);
+			// return session, player
+		};
+		
+		/**
+		 * @public
+		 */
+		exports.connectToSession = function (sessionId) {
+			// return session, player
+		};
+		
 	};
 
 });
