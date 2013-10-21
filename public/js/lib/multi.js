@@ -94,17 +94,14 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 
 	return exports.EventDispatcher;
  });
-
 define('main',['../shared/eventDispatcher'], function(EventDispatcher) {
 
-	function Player() {
-	
-	}
-	
+	// createSession()
+	var Player = function () {};
+
 	Player.prototype = new EventDispatcher();
 	
-	return {
-		player: new Player()
-	};
-	
+	return { test: 'test' };
+
 });
+define(["main"], function(main) {return main;});

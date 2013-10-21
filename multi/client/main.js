@@ -1,14 +1,10 @@
-
 define(['../shared/eventDispatcher'], function(EventDispatcher) {
 
-	function Player() {
-	
-	}
-	
+	// createSession()
+	var Player = function () {};
+
 	Player.prototype = new EventDispatcher();
 	
-	return {
-		player: new Player()
-	};
-	
+	return { test: 'test' };
+
 });
