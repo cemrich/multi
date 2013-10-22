@@ -35,4 +35,5 @@ var options = {
 	gameUrlSuffix: '/',
 	gameViewSubdir: 'games/'
 };
-var multi = require('./multi/server')(app, server, options);
+var multi = require('./multi/server');
+multi.start(app, server, options);

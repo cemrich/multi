@@ -21,19 +21,38 @@ define(function(require, exports, module) {
 		/**
 		 * @public
 		 */
-		exports.createSession = function () {
-			var socket = io.connect(server);
-			console.log(socket);
-			// return session, player
+		exports.joinSession = function (sessionToken) {
+			console.log('joining session', sessionToken);
+			var socket = io.connect(server, {
+					'force new connection': true
+				});
+			socket.on('connect', function () {
+				socket.emit('joinSession', { token: sessionToken });
+				socket.on('sessionJoined', function (data) {
+					console.log('joined session successfully', data);
+					// return session, player
+				});
+			});
 		};
-		
+
 		/**
 		 * @public
 		 */
-		exports.connectToSession = function (sessionId) {
-			// return session, player
+		exports.createSession = function () {
+			console.log('creating new session');
+			var socket = io.connect(server, {
+					'force new connection': true
+				});
+			socket.on('connect', function () {
+				socket.emit('createSession');
+				socket.on('sessionCreated', function (data) {
+					console.log('session created successfully', data);
+					exports.joinSession(data.token);
+					// return session, player
+				});
+			});
 		};
-		
+
 	};
 
 });
