@@ -10,7 +10,7 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * @class
  * @protected
  */
-var Session = function () {
+var Session = function (io) {
 	/** 
 	 * unique session token (3 digits) 
 	 * @type {number}
@@ -21,6 +21,7 @@ var Session = function () {
 	 * @readonly
 	 */
 	this.players = [];
+	this.io = io;
 
 	EventDispatcher.call(this);
 };
@@ -45,6 +46,8 @@ Session.prototype.pack = function() {
  */
 Session.prototype.addPlayer = function (player) {
 	var session = this;
+	this.io.sockets.in(this.token).emit('playerJoined', player.pack());
+	player.socket.join(this.token);
 	this.players.push(player);
 	player.on('disconnect', function(event) {
 		session.removePlayer(player);
@@ -88,8 +91,8 @@ exports.getSession = function (token) {
  * Creates a new session.
  * @returns {module:server/session~Session} newly created session
  */
-exports.create = function() {
-	var session = new Session();
+exports.create = function(io) {
+	var session = new Session(io);
 	sessions.push(session);
 	return session;
 };

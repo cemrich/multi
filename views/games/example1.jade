@@ -3,13 +3,22 @@ extends ../layout
 block content
 	h1 Example1
 
-	h2.status
-
-	div.session
+	.sessionstart
 		button.new NEW SESSION
 
 		br
 		input.token
 		button.join JOIN SESSION
+
+	p
+		em Session: 
+		span.session
+
+	p
+		em Myself: 
+		span.myself
+
+	em Players:
+	ul.players
 
 	script(data-main='/js/example1/example1.js', src='/js/lib/require.js')

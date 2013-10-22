@@ -142,7 +142,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','util'
 	var Player = function () {
 
 		EventDispatcher.call(this);
-		this.socket = null;
+		this.id = null;
 
 	};
 
@@ -152,12 +152,11 @@ define('player',['require','exports','module','../shared/eventDispatcher','util'
 	* Unpacks a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
-	exports.fromPackedData = function (data, socket) {
-		var player = new Player(socket);
+	exports.fromPackedData = function (data) {
+		var player = new Player();
 		for (var i in data) {
 			player[i] = data[i];
 		}
-		player.socket = socket || null;
 		return player;
 	};
 
@@ -181,12 +180,18 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	* @mixes EventDispatcher
 	* @memberof module:client/session
 	*/
-	var Session = function () {
+	var Session = function (myself, socket) {
 
 		EventDispatcher.call(this);
+		var session = this;
 		this.players = [];
-		this.myself = null;
+		this.myself = myself;
+		this.socket = socket;
 
+		socket.on('playerJoined', function (data) {
+			var player = playerModule.fromPackedData(data);
+			session.dispatchEvent('playerJoined', { player: player });
+		});
 	};
 
 	util.inherits(Session, EventDispatcher);
@@ -195,20 +200,20 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	* Unpacks a session object send over a socket connection.
 	* @returns {module:client/session~Session}
 	*/
-	exports.fromPackedData = function (data, myself) {
-		var session = new Session();
-		for (var i in data) {
+	exports.fromPackedData = function (data, socket) {
+		var myself = playerModule.fromPackedData(data.player);
+		var session = new Session(myself, socket);
+		for (var i in data.session) {
 			if (i === 'players') {
 				var players = [];
-				for (var j in data.players) {
-					players[j] = playerModule.fromPackedData(data.players[j]);
+				for (var j in data.session.players) {
+					players[j] = playerModule.fromPackedData(data.session.players[j]);
 					session.players = players;
 				}
 			} else {
-				session[i] = data[i];
+				session[i] = data.session[i];
 			}
 		}
-		session.myself = myself;
 		return session;
 	};
 
@@ -221,10 +226,9 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 * @module client/multi
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher','player','session','util'],function(require, exports, module) {
+define('index',['require','exports','module','../shared/eventDispatcher','session','util'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
-	var playerModule = require('player');
 	var sessionModule = require('session');
 	var util = require('util');
 
@@ -243,8 +247,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 		this.server = options.server;
 
 		this.onSession = function (eventString, data, socket) {
-			var player = playerModule.fromPackedData(data.player, socket);
-			var session = sessionModule.fromPackedData(data.session, player);
+			var session = sessionModule.fromPackedData(data, socket);
 			var event = { session: session };
 			this.dispatchEvent(eventString, event);
 		};

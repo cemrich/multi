@@ -7,7 +7,6 @@
 define(function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
-	var playerModule = require('player');
 	var sessionModule = require('session');
 	var util = require('util');
 
@@ -26,8 +25,7 @@ define(function(require, exports, module) {
 		this.server = options.server;
 
 		this.onSession = function (eventString, data, socket) {
-			var player = playerModule.fromPackedData(data.player, socket);
-			var session = sessionModule.fromPackedData(data.session, player);
+			var session = sessionModule.fromPackedData(data, socket);
 			var event = { session: session };
 			this.dispatchEvent(eventString, event);
 		};

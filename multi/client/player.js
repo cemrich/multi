@@ -17,7 +17,7 @@ define(function(require, exports, module) {
 	var Player = function () {
 
 		EventDispatcher.call(this);
-		this.socket = null;
+		this.id = null;
 
 	};
 
@@ -27,12 +27,11 @@ define(function(require, exports, module) {
 	* Unpacks a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
-	exports.fromPackedData = function (data, socket) {
-		var player = new Player(socket);
+	exports.fromPackedData = function (data) {
+		var player = new Player();
 		for (var i in data) {
 			player[i] = data[i];
 		}
-		player.socket = socket || null;
 		return player;
 	};
 

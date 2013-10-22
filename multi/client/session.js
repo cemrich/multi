@@ -15,12 +15,18 @@ define(function(require, exports, module) {
 	* @mixes EventDispatcher
 	* @memberof module:client/session
 	*/
-	var Session = function () {
+	var Session = function (myself, socket) {
 
 		EventDispatcher.call(this);
+		var session = this;
 		this.players = [];
-		this.myself = null;
+		this.myself = myself;
+		this.socket = socket;
 
+		socket.on('playerJoined', function (data) {
+			var player = playerModule.fromPackedData(data);
+			session.dispatchEvent('playerJoined', { player: player });
+		});
 	};
 
 	util.inherits(Session, EventDispatcher);
@@ -29,20 +35,20 @@ define(function(require, exports, module) {
 	* Unpacks a session object send over a socket connection.
 	* @returns {module:client/session~Session}
 	*/
-	exports.fromPackedData = function (data, myself) {
-		var session = new Session();
-		for (var i in data) {
+	exports.fromPackedData = function (data, socket) {
+		var myself = playerModule.fromPackedData(data.player);
+		var session = new Session(myself, socket);
+		for (var i in data.session) {
 			if (i === 'players') {
 				var players = [];
-				for (var j in data.players) {
-					players[j] = playerModule.fromPackedData(data.players[j]);
+				for (var j in data.session.players) {
+					players[j] = playerModule.fromPackedData(data.session.players[j]);
 					session.players = players;
 				}
 			} else {
-				session[i] = data[i];
+				session[i] = data.session[i];
 			}
 		}
-		session.myself = myself;
 		return session;
 	};
 

@@ -47,7 +47,7 @@ var Multi = function (app, server, options) {
 		});
 		// create new session
 		socket.on('createSession', function(event) {
-			var session = sessionModule.create();
+			var session = sessionModule.create(io);
 			multi.dispatchEvent('sessionCreated', { session: session });
 			socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });
 			session.addPlayer(player);

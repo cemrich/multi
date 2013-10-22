@@ -10,23 +10,38 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	var multi = multiModule.init(multiOptions);
 
+	function showPlayer(player) {
+		var p = $('<li></li>', {'class': player.id}).text(player.id);
+		$('.players').append(p);
+	}
+
+	function handleSession(session, message) {
+		$('.session').text(message + ' session ' + session.token);
+		$('.myself').text(session.myself.id);
+
+		for (var i in session.players) {
+			showPlayer(session.players[i]);
+		}
+		session.on('playerJoined', function (event) {
+			showPlayer(event.player);
+		});
+	}
+
 	multi.on('sessionCreated', function (event) {
-		console.log('sessionCreated', event);
-		$('.status').text('created session ' + event.session.token);
+		handleSession(event.session, 'created');
 	});
 
 	multi.on('sessionJoined', function (event) {
-		console.log('sessionJoined', event);
-		$('.status').text('joined session ' + event.session.token);
+		handleSession(event.session, 'joined');
 	});
 
-	$('.session .new').click(function(event) {
-		$('.session').hide();
+	$('.sessionstart .new').click(function(event) {
+		$('.sessionstart').hide();
 		multi.createSession();
 	});
-	$('.session .join').click(function(event) {
-		var token = $('.session .token').val();
-		$('.session').hide();
+	$('.sessionstart .join').click(function(event) {
+		var token = $('.sessionstart .token').val();
+		$('.sessionstart').hide();
 		multi.joinSession(token);
 	});
 
