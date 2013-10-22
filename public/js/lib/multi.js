@@ -122,14 +122,15 @@ define('session',['require','exports','module','../shared/eventDispatcher'],func
 });
 /**
 * Collection of util functions.
-* @module client/multi
+* @module client/util
 */
 
 define('util',['require','exports','module'],function(require, exports, module) {
 
 	/**
 	* Inherit the prototype methods from one constructor into another.
-	* From the node.js util package. See https://github.com/joyent/node/blob/master/lib/util.js
+	* <br/><br/>
+	* From the node.js util package. See {@link https://github.com/joyent/node/blob/master/lib/util.js#L566 https://github.com/joyent/node/blob/master/lib/util.js}
 	*
 	* @param {function} ctor Constructor function which needs to inherit the
 	* prototype.
@@ -164,7 +165,10 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 	var instance = null;
 
 	/**
+	* @inner
 	* @class
+	* @memberof module:client/multi
+	* @mixes EventDispatcher
 	*/
 	var Multi = function (options) {
 
@@ -175,9 +179,10 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 	};
 
 	util.inherits(Multi, EventDispatcher);
-	
+
 	/**
 	 * @public
+	 * @fires module:client/multi~Multi#sessionJoined
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
 		console.log('joining session', sessionToken);
@@ -197,6 +202,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 
 	/**
 	 * @public
+	 * @fires module:client/multi~Multi#sessionCreated
 	 */
 	Multi.prototype.createSession = function () {
 		console.log('creating new session');
@@ -214,7 +220,16 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 	};
 
 	/**
+	 * @event module:client/multi~Multi#sessionCreated
+	 */
+
+	/**
+	 * @event module:client/multi~Multi#sessionJoined
+	 */
+
+	/**
 	 * @public
+	 * @returns {module:client/multi~Multi} the one and only Multi instance
 	 */
 	exports.init = function (options) {
 		if (instance === null) {

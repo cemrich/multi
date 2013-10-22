@@ -1,7 +1,7 @@
 /**
 * Entry point for the server side multi library for developing
 * multiscreen games.
-* Call {@link module:multi.start|start()} to initialize this library.
+* Call {@link module:server/multi.init|init()} to initialize this library.
 * @module server/multi
 */
 
@@ -14,7 +14,10 @@ var util = require('util');
 var instance = null;
 
 /**
+* @inner
 * @class
+* @mixes EventDispatcher
+* @fires module:server/multi~Multi#sessionCreated
 */
 var Multi = function (app, server, options) {
 
@@ -57,8 +60,13 @@ var Multi = function (app, server, options) {
 util.inherits(Multi, EventDispatcher);
 
 /**
+ * @event module:server/multi~Multi#sessionCreated
+ */
+
+/**
  * Call this once to initialize the multi framework.
  * @public
+ * @returns {module:server/multi~Multi} the one and only Multi instance
  */
 exports.init = function (app, server, options) {
 	if (instance === null) {

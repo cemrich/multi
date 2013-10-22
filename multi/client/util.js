@@ -1,13 +1,14 @@
 /**
 * Collection of util functions.
-* @module client/multi
+* @module client/util
 */
 
 define(function(require, exports, module) {
 
 	/**
 	* Inherit the prototype methods from one constructor into another.
-	* From the node.js util package. See https://github.com/joyent/node/blob/master/lib/util.js
+	* <br/><br/>
+	* From the node.js util package. See {@link https://github.com/joyent/node/blob/master/lib/util.js#L566 https://github.com/joyent/node/blob/master/lib/util.js}
 	*
 	* @param {function} ctor Constructor function which needs to inherit the
 	* prototype.

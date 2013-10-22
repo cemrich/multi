@@ -14,7 +14,10 @@ define(function(require, exports, module) {
 	var instance = null;
 
 	/**
+	* @inner
 	* @class
+	* @memberof module:client/multi
+	* @mixes EventDispatcher
 	*/
 	var Multi = function (options) {
 
@@ -25,9 +28,10 @@ define(function(require, exports, module) {
 	};
 
 	util.inherits(Multi, EventDispatcher);
-	
+
 	/**
 	 * @public
+	 * @fires module:client/multi~Multi#sessionJoined
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
 		console.log('joining session', sessionToken);
@@ -47,6 +51,7 @@ define(function(require, exports, module) {
 
 	/**
 	 * @public
+	 * @fires module:client/multi~Multi#sessionCreated
 	 */
 	Multi.prototype.createSession = function () {
 		console.log('creating new session');
@@ -64,7 +69,16 @@ define(function(require, exports, module) {
 	};
 
 	/**
+	 * @event module:client/multi~Multi#sessionCreated
+	 */
+
+	/**
+	 * @event module:client/multi~Multi#sessionJoined
+	 */
+
+	/**
 	 * @public
+	 * @returns {module:client/multi~Multi} the one and only Multi instance
 	 */
 	exports.init = function (options) {
 		if (instance === null) {
