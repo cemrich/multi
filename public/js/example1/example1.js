@@ -1,23 +1,33 @@
 
-requirejs(['../lib/multi', '/socket.io/socket.io.js'], function (multiModule, socketio) {
+requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], 
+		function (multiModule, socketio) {
 
-	console.log('Multi loaded:', multiModule);
-	
+
 	var multiOptions = {
 		io: socketio,
 		server: 'http://localhost/'
 	};
 
 	var multi = multiModule.init(multiOptions);
-	multi.createSession();
 
 	multi.on('sessionCreated', function (event) {
 		console.log('sessionCreated', event);
-		multi.joinSession(event.session.token);
+		$('.status').text('created session ' + event.session.token);
 	});
 
 	multi.on('sessionJoined', function (event) {
 		console.log('sessionJoined', event);
+		$('.status').text('joined session ' + event.session.token);
+	});
+
+	$('.session .new').click(function(event) {
+		$('.session').hide();
+		multi.createSession();
+	});
+	$('.session .join').click(function(event) {
+		var token = $('.session .token').val();
+		$('.session').hide();
+		multi.joinSession(token);
 	});
 
 });
