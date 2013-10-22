@@ -1,14 +1,12 @@
 /**
- * @module Session
- * @private
+ * @module server/session
  */
 
 var util = require('util');
 var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
- * @see module:Multi#event:newSession
- * @mixes module:Events.EventDispatcher
+ * @mixes EventDispatcher
  * @class
  * @protected
  */
@@ -30,10 +28,9 @@ var Session = function () {
 util.inherits(Session, EventDispatcher);
 
 /**
- * Adds the given player to this session. You will not need 
- * this because the framework handles all the player management.
- * @param player {module:Player~Player} player instance to add
- * @fires module:Session~Session#playerAdded
+ * Adds the given player to this session.
+ * @param player {module:server/player~Player} player instance to add
+ * @fires module:server/session~Session#playerAdded
  */
 Session.prototype.addPlayer = function (player) {
 	var session = this;
@@ -45,10 +42,9 @@ Session.prototype.addPlayer = function (player) {
 };
 
 /**
- * Removes the given player from this session. The framework will
- * remove all disconnected players by default.
- * @param player {module:Player~Player} player instance to remove
- * @fires module:Session~Session#playerRemoved
+ * Removes the given player from this session.
+ * @param player {module:server/player~Player} player instance to remove
+ * @fires module:server/session~Session#playerRemoved
  */
 Session.prototype.removePlayer = function (player) {
 	delete this.players[player.id];
@@ -66,7 +62,7 @@ var sessions = [];
 /**
  * Looks up the session with the given token.
  * @param token {number}              token of the session that should be returned
- * @returns {module:Session~Session}  session with the given token or null
+ * @returns {module:server/session~Session}  session with the given token or null
  */
 exports.getSession = function (token) {
 	for (var i in sessions) {
@@ -79,7 +75,7 @@ exports.getSession = function (token) {
 
 /**
  * Creates a new session.
- * @returns {module:Session~Session} newly created session
+ * @returns {module:server/session~Session} newly created session
  */
 exports.create = function() {
 	var session = new Session();
@@ -90,12 +86,12 @@ exports.create = function() {
 /**
  * Fired when a new player has been added to this session.
  * From now on you can safely communicate with this player.
- * @event module:Session~Session#playerAdded
- * @property {module:Player~Player} player  The newly added player.
+ * @event module:server/session~Session#playerAdded
+ * @property {module:server/player~Player} player  The newly added player.
  */
 
 /**
  * Fired when a new player has been removed from this session.
- * @event module:Session~Session#playerRemoved
- * @property {module:Player~Player} player  The removed player.
+ * @event module:server/session~Session#playerRemoved
+ * @property {module:server/player~Player} player  The removed player.
  */
