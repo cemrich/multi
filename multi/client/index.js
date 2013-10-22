@@ -7,8 +7,8 @@
 define(function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
-	var Player = require('player');
-	var Session = require('session');
+	var playerModule = require('player');
+	var sessionModule = require('session');
 	var util = require('util');
 
 	var instance = null;
@@ -25,6 +25,12 @@ define(function(require, exports, module) {
 		this.io = options.io;
 		this.server = options.server;
 
+		this.onSession = function (eventString, data, socket) {
+			var player = playerModule.fromPackedData(data.player, socket);
+			var session = sessionModule.fromPackedData(data.session, player);
+			var event = { session: session };
+			this.dispatchEvent(eventString, event);
+		};
 	};
 
 	util.inherits(Multi, EventDispatcher);
@@ -42,9 +48,7 @@ define(function(require, exports, module) {
 		socket.on('connect', function () {
 			socket.emit('joinSession', { token: sessionToken });
 			socket.on('sessionJoined', function (data) {
-				console.log('joined session successfully', data);
-				multi.dispatchEvent('sessionJoined', { token: sessionToken });
-				// return session, player
+				multi.onSession('sessionJoined', data, socket);
 			});
 		});
 	};
@@ -62,8 +66,7 @@ define(function(require, exports, module) {
 		socket.on('connect', function () {
 			socket.emit('createSession');
 			socket.on('sessionCreated', function (data) {
-				console.log('created session successfully', data);
-				multi.dispatchEvent('sessionCreated', { token: data.token });
+				multi.onSession('sessionCreated', data, socket);
 			});
 		});
 	};

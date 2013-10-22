@@ -13,7 +13,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js'], function (multiModule, so
 
 	multi.on('sessionCreated', function (event) {
 		console.log('sessionCreated', event);
-		multi.joinSession(event.token);
+		multi.joinSession(event.session.token);
 	});
 
 	multi.on('sessionJoined', function (event) {

@@ -38,6 +38,12 @@ var Player = function (socket) {
 /* class methods */
 util.inherits(Player, EventDispatcher);
 
+Player.prototype.pack = function () {
+	return { 
+		id: this.id 
+	};
+};
+
 /* event handler */
 
 /* exports */

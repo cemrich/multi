@@ -42,15 +42,15 @@ var Multi = function (app, server, options) {
 		// use existing session
 		socket.on('joinSession', function(event) {
 			var session = sessionModule.getSession(event.token);
+			socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
 			session.addPlayer(player);
-			socket.emit('sessionJoined', { token: session.token });
 		});
 		// create new session
 		socket.on('createSession', function(event) {
 			var session = sessionModule.create();
 			multi.dispatchEvent('sessionCreated', { session: session });
+			socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });
 			session.addPlayer(player);
-			socket.emit('sessionCreated', { token: session.token });
 		});
 	
 	});

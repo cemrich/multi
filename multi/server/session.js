@@ -27,6 +27,17 @@ var Session = function () {
 
 util.inherits(Session, EventDispatcher);
 
+Session.prototype.pack = function() {
+	var players = [];
+	for (var i in this.players) {
+		players.push(this.players[i].pack());
+	}
+	return {
+		token: this.token,
+		players: players
+	};
+};
+
 /**
  * Adds the given player to this session.
  * @param player {module:server/player~Player} player instance to add

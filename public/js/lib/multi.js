@@ -94,32 +94,6 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 
 	return exports.EventDispatcher;
  });
-
-define('player',['require','exports','module','../shared/eventDispatcher'],function(require, exports, module) {
-
-	var EventDispatcher = require('../shared/eventDispatcher');
-
-	exports.Player = function () {
-		
-	};
-
-	exports.Player.prototype = new EventDispatcher();
-	return exports.Player;
-
-});
-
-define('session',['require','exports','module','../shared/eventDispatcher'],function(require, exports, module) {
-
-	var EventDispatcher = require('../shared/eventDispatcher');
-
-	exports.Session = function () {
-		
-	};
-
-	exports.Session.prototype = new EventDispatcher();
-	return exports.Session;
-
-});
 /**
 * Collection of util functions.
 * @module client/util
@@ -150,6 +124,98 @@ define('util',['require','exports','module'],function(require, exports, module) 
 
 });
 /**
+ * @module client/player
+ * @private
+ */
+ 
+define('player',['require','exports','module','../shared/eventDispatcher','util'],function(require, exports, module) {
+
+	var EventDispatcher = require('../shared/eventDispatcher');
+	var util = require('util');
+
+	/**
+	* @inner
+	* @class
+	* @mixes EventDispatcher
+	* @memberof module:client/player
+	*/
+	var Player = function () {
+
+		EventDispatcher.call(this);
+		this.socket = null;
+
+	};
+
+	util.inherits(Player, EventDispatcher);
+
+	/**
+	* Unpacks a player object send over a socket connection.
+	* @returns {module:client/player~Player}
+	*/
+	exports.fromPackedData = function (data, socket) {
+		var player = new Player(socket);
+		for (var i in data) {
+			player[i] = data[i];
+		}
+		player.socket = socket || null;
+		return player;
+	};
+
+	return exports;
+
+});
+/**
+ * @module client/session
+ * @private
+ */
+
+define('session',['require','exports','module','../shared/eventDispatcher','./player','util'],function(require, exports, module) {
+
+	var EventDispatcher = require('../shared/eventDispatcher');
+	var playerModule = require('./player');
+	var util = require('util');
+
+	/**
+	* @inner
+	* @class
+	* @mixes EventDispatcher
+	* @memberof module:client/session
+	*/
+	var Session = function () {
+
+		EventDispatcher.call(this);
+		this.players = [];
+		this.myself = null;
+
+	};
+
+	util.inherits(Session, EventDispatcher);
+
+	/**
+	* Unpacks a session object send over a socket connection.
+	* @returns {module:client/session~Session}
+	*/
+	exports.fromPackedData = function (data, myself) {
+		var session = new Session();
+		for (var i in data) {
+			if (i === 'players') {
+				var players = [];
+				for (var j in data.players) {
+					players[j] = playerModule.fromPackedData(data.players[j]);
+					session.players = players;
+				}
+			} else {
+				session[i] = data[i];
+			}
+		}
+		session.myself = myself;
+		return session;
+	};
+
+	return exports;
+
+});
+/**
 * Entry point for the client side multi library for developing
 * multiscreen games.
 * @module client/multi
@@ -158,8 +224,8 @@ define('util',['require','exports','module'],function(require, exports, module) 
 define('index',['require','exports','module','../shared/eventDispatcher','player','session','util'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
-	var Player = require('player');
-	var Session = require('session');
+	var playerModule = require('player');
+	var sessionModule = require('session');
 	var util = require('util');
 
 	var instance = null;
@@ -176,6 +242,12 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 		this.io = options.io;
 		this.server = options.server;
 
+		this.onSession = function (eventString, data, socket) {
+			var player = playerModule.fromPackedData(data.player, socket);
+			var session = sessionModule.fromPackedData(data.session, player);
+			var event = { session: session };
+			this.dispatchEvent(eventString, event);
+		};
 	};
 
 	util.inherits(Multi, EventDispatcher);
@@ -193,9 +265,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 		socket.on('connect', function () {
 			socket.emit('joinSession', { token: sessionToken });
 			socket.on('sessionJoined', function (data) {
-				console.log('joined session successfully', data);
-				multi.dispatchEvent('sessionJoined', { token: sessionToken });
-				// return session, player
+				multi.onSession('sessionJoined', data, socket);
 			});
 		});
 	};
@@ -213,8 +283,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','player
 		socket.on('connect', function () {
 			socket.emit('createSession');
 			socket.on('sessionCreated', function (data) {
-				console.log('created session successfully', data);
-				multi.dispatchEvent('sessionCreated', { token: data.token });
+				multi.onSession('sessionCreated', data, socket);
 			});
 		});
 	};
