@@ -9,13 +9,19 @@
 var EventDispatcher = require('../shared/eventDispatcher');
 var sessionModule = require('./session');
 var playerModule = require('./player');
+var util = require('util');
+
+var instance = null;
 
 /**
- * Call this once to initialize the multi framework.
- * @public
- */
-function start(app, server, options) {
+* @class
+*/
+var Multi = function (app, server, options) {
 
+	EventDispatcher.call(this);
+	this.options = options;
+
+	var multi = this;
 	var io = require('socket.io').listen(server);
 	console.log('starting multi');
 
@@ -26,6 +32,7 @@ function start(app, server, options) {
 
 	// when a new player connection is coming in...
 	io.on('connection', function (socket) {
+
 		// create new player and wait
 		var player = playerModule.create(socket);
 
@@ -38,14 +45,27 @@ function start(app, server, options) {
 		// create new session
 		socket.on('createSession', function(event) {
 			var session = sessionModule.create();
+			multi.dispatchEvent('sessionCreated', { session: session });
 			session.addPlayer(player);
 			socket.emit('sessionCreated', { token: session.token });
 		});
+	
 	});
-}
 
-module.exports = {
-	start: start
 };
 
+util.inherits(Multi, EventDispatcher);
+
+/**
+ * Call this once to initialize the multi framework.
+ * @public
+ */
+exports.init = function (app, server, options) {
+	if (instance === null) {
+		instance = new Multi(app, server, options);
+		return instance;
+	} else {
+		throw 'only one call to init allowed';
+	}
+};
 

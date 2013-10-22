@@ -6,7 +6,8 @@ var express = require('express'),
 	app = express(), 
 	routes = require('./routes'), 
 	server = require('http').createServer(app), 
-	path = require('path');
+	path = require('path'),
+	multiModule = require('./multi/server');
 
 // all environments
 app.set('port', process.env.PORT || 80);
@@ -35,5 +36,8 @@ var options = {
 	gameUrlSuffix: '/',
 	gameViewSubdir: 'games/'
 };
-var multi = require('./multi/server');
-multi.start(app, server, options);
+
+var multi = multiModule.init(app, server, options);
+multi.on('sessionCreated', function (event) {
+	console.log('new session created!', event.session.token);
+});
