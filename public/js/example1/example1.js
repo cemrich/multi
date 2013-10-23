@@ -25,8 +25,14 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		for (var i in session.players) {
 			showPlayer(session.players[i]);
 		}
+
 		session.on('playerJoined', function (event) {
 			showPlayer(event.player);
+		});
+		session.on('destroyed', function () {
+			$('.session').text('destroyed');
+			$('.myself').text('');
+			$('.players').empty();
 		});
 	}
 

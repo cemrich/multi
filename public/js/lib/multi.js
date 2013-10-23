@@ -201,6 +201,11 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 			session.dispatchEvent('playerLeft', { player: player });
 			player.dispatchEvent('disconnected');
 		});
+
+		socket.on('disconnect', function (data) {
+			session.dispatchEvent('destroyed');
+			session.socket = null;
+		});
 	};
 
 	util.inherits(Session, EventDispatcher);
