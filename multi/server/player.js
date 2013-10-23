@@ -31,7 +31,7 @@ var Player = function (socket) {
 	EventDispatcher.call(this);
 
 	this.socket.on('disconnect', function(event) {
-		// player.onDisconnect(event);
+		player.dispatchEvent('disconnected');
 	});
 };
 

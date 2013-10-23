@@ -13,6 +13,9 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	function showPlayer(player) {
 		var p = $('<li></li>', {'class': player.id}).text(player.id);
 		$('.players').append(p);
+		player.on('disconnected', function (event) {
+			p.remove();
+		});
 	}
 
 	function handleSession(session, message) {

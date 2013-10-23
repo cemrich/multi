@@ -19,13 +19,22 @@ define(function(require, exports, module) {
 
 		EventDispatcher.call(this);
 		var session = this;
-		this.players = [];
+
+		this.players = {};
 		this.myself = myself;
 		this.socket = socket;
 
 		socket.on('playerJoined', function (data) {
 			var player = playerModule.fromPackedData(data);
+			session.players[player.id] = player;
 			session.dispatchEvent('playerJoined', { player: player });
+		});
+
+		socket.on('playerLeft', function (data) {
+			var player = session.players[data.playerId];
+			delete session.players[data.playerId];
+			session.dispatchEvent('playerLeft', { player: player });
+			player.dispatchEvent('disconnected');
 		});
 	};
 
@@ -40,11 +49,12 @@ define(function(require, exports, module) {
 		var session = new Session(myself, socket);
 		for (var i in data.session) {
 			if (i === 'players') {
-				var players = [];
+				var players = {};
 				for (var j in data.session.players) {
-					players[j] = playerModule.fromPackedData(data.session.players[j]);
-					session.players = players;
+					var player = playerModule.fromPackedData(data.session.players[j]);
+					players[player.id] = player;
 				}
+				session.players = players;
 			} else {
 				session[i] = data.session[i];
 			}

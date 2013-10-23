@@ -20,7 +20,7 @@ var Session = function (io) {
 	/**
 	 * @readonly
 	 */
-	this.players = [];
+	this.players = {};
 	this.io = io;
 
 	EventDispatcher.call(this);
@@ -48,8 +48,8 @@ Session.prototype.addPlayer = function (player) {
 	var session = this;
 	this.io.sockets.in(this.token).emit('playerJoined', player.pack());
 	player.socket.join(this.token);
-	this.players.push(player);
-	player.on('disconnect', function(event) {
+	this.players[player.id] = player;
+	player.on('disconnected', function(event) {
 		session.removePlayer(player);
 	});
 	this.dispatchEvent('playerAdded', { player: player });
@@ -62,9 +62,8 @@ Session.prototype.addPlayer = function (player) {
  */
 Session.prototype.removePlayer = function (player) {
 	delete this.players[player.id];
-	player.leaveSession();
-	this.sendPlayerListChange();
-	this.dispatchEvent('playerRemoved', { player: player });
+	this.dispatchEvent('playerLeft', { player: player });
+	this.io.sockets.in(this.token).emit('playerLeft', { playerId: player.id });
 };
 
 /* event handler */
