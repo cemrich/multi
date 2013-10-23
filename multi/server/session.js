@@ -64,13 +64,16 @@ Session.prototype.removePlayer = function (player) {
 	delete this.players[player.id];
 	this.dispatchEvent('playerLeft', { player: player });
 	this.io.sockets.in(this.token).emit('playerLeft', { playerId: player.id });
+	if (Object.keys(this.players).length === 0) {
+		this.dispatchEvent('destroyed');
+	}
 };
 
 /* event handler */
 
 
 /* module functions */
-var sessions = [];
+var sessions = {};
 
 /**
  * Looks up the session with the given token.
@@ -78,12 +81,7 @@ var sessions = [];
  * @returns {module:server/session~Session}  session with the given token or null
  */
 exports.getSession = function (token) {
-	for (var i in sessions) {
-		if (sessions[i].token == token) {
-			return sessions[i];
-		}
-	}
-	return null;
+	return sessions[token] || null;
 };
 
 /**
@@ -92,7 +90,11 @@ exports.getSession = function (token) {
  */
 exports.create = function(io) {
 	var session = new Session(io);
-	sessions.push(session);
+	sessions[session.token] = session;
+	session.on('destroyed', function() {
+		delete sessions[session.token];
+		console.log('session destroyed:', session.token);
+	});
 	return session;
 };
 
