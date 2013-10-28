@@ -3,6 +3,7 @@
  */
 
 var util = require('util');
+var token = require('./token');
 var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
@@ -16,7 +17,7 @@ var Session = function (io) {
 	 * @type {number}
 	 * @readonly
 	 */
-	this.token = Math.floor(Math.random() * 900) + 100;
+	this.token = token.numeric();
 	/**
 	 * @readonly
 	 */
