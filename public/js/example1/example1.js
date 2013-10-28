@@ -5,10 +5,14 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	var multiOptions = {
 		io: socketio,
-		server: 'http://localhost/'
+		server: 'http://tinelaptopsony/'
 	};
 
 	var multi = multiModule.init(multiOptions);
+	multi.on('joiningSessionStarted', function (event) {
+		$('.sessionstart').hide();
+	});
+	multi.autoJoinSession();
 
 	function showPlayer(player) {
 		var p = $('<li></li>', {'class': player.id}).text(player.id);
@@ -50,7 +54,6 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	});
 	$('.sessionstart .join').click(function(event) {
 		var token = $('.sessionstart .token').val();
-		$('.sessionstart').hide();
 		multi.joinSession(token);
 	});
 

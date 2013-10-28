@@ -33,12 +33,30 @@ define(function(require, exports, module) {
 
 	util.inherits(Multi, EventDispatcher);
 
+	function getSessionToken() {
+		var sessionToken = window.location.hash.substring(1);
+
+		if (sessionToken === undefined || sessionToken === '') {
+			return null;
+		} else {
+			return sessionToken;
+		}
+	}
+
+	Multi.prototype.autoJoinSession = function () {
+		var sessionToken = getSessionToken();
+		if (sessionToken !== null) {
+			this.joinSession(sessionToken);
+		}
+	};
+
 	/**
 	 * @public
 	 * @fires module:client/multi~Multi#sessionJoined
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
 		console.log('joining session', sessionToken);
+		this.dispatchEvent('joiningSessionStarted', { token: sessionToken });
 		var multi = this;
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
