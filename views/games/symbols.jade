@@ -1,0 +1,34 @@
+extends ../layout
+
+block content
+
+	h1 Symbols
+	p This is a demo for showing fun and easy session joining with symbols.
+
+	#intro
+		button.new New game
+		button.join Join existing game
+
+	#loading 
+		| loading...
+
+	#symbols
+		img.icon.inactive(src='../img/icons/circle.svg')
+		img.icon.inactive(src='../img/icons/cloud.svg')
+		img.icon.inactive(src='../img/icons/hand.svg')
+		img.icon.inactive(src='../img/icons/heart.svg')
+		img.icon.inactive(src='../img/icons/human.svg')
+		img.icon.inactive(src='../img/icons/lightning.svg')
+		img.icon.inactive(src='../img/icons/star.svg')
+		img.icon.inactive(src='../img/icons/flower.svg')
+		img.icon.inactive(src='../img/icons/house.svg')
+
+	#join
+		button.join Go!
+
+	#created
+		h2 You did it!
+		p You are now connected to the game.
+
+	link(rel='stylesheet', href='/css/symbols.css')
+	script(data-main='/js/symbols/symbols.js', src='/js/lib/require.js')

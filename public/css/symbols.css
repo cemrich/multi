@@ -1,0 +1,52 @@
+body {
+	font-family: Arial, sans-serif;
+	max-width: 400px;
+	margin: auto;
+	padding: 10px;
+}
+
+h1 {
+	text-align: center;
+}
+
+button {
+	width: 100%;
+	font-weight: bold;
+	text-transform: capitalize;
+	font-size: 130%;
+	padding: 3%;
+	background-color: rgb(0, 169, 235);
+	color: white;
+	border: none;
+	border: 1px solid white;
+}
+
+button:hover {
+	background-color: rgb(15, 114, 153);
+}
+
+button:focus {
+	outline: none;
+	border-color: rgb(15, 114, 153);
+}
+
+#loading, #symbols, #join, #created {
+	display: none;
+}
+
+.icon {
+	width: 29%;
+	height: 29%;
+	padding: 2%;
+}
+
+.icon.inactive > *,
+.icon.inactive g > * {
+	fill: #ddd;
+}
+
+.icon:hover {
+	width: 33%;
+	height: 33%;
+	padding: 0;
+}

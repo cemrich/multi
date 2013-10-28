@@ -17,7 +17,7 @@ var Session = function (io) {
 	 * @type {number}
 	 * @readonly
 	 */
-	this.token = token.numeric();
+	this.token = token.numeric(1, 4, 9, false, true);
 	/**
 	 * @readonly
 	 */

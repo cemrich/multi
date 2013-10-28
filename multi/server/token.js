@@ -20,28 +20,38 @@ function fixedLengthRandomInt(numDigits) {
 /**
  *
  */
-exports.numeric = function (minDigits, maxDigits, doubleDigits) {
-	minDigits = minDigits || 3;
-	maxDigits = maxDigits || 3;
+exports.numeric = function (minLength, maxLength, digitCount, doubleDigits, sorted) {
+	minLength = minLength || 3;
+	maxLength = maxLength || 3;
+	digitCount = digitCount || 10;
 	if (doubleDigits === undefined) {
 		doubleDigits = true;
 	}
-
-	if (minDigits > maxDigits) {
-		throw 'maxDigits has to be greater than or equal to minDigits';
+	if (sorted === undefined) {
+		sorted = false;
 	}
 
-	var numDigits = randomInt(minDigits, maxDigits);
-	var rand = 0;
+	if (minLength > maxLength) {
+		throw 'maxLength has to be greater than or equal to minLength';
+	}
+
+	var length = randomInt(minLength, maxLength);
+	var rand = '';
+	var i, pos;
+	var digits = '0123456789'.split('').slice(0, digitCount);
 	if (doubleDigits) {
-		rand = fixedLengthRandomInt(numDigits);
-	} else {
-		var numbers = [0,1,2,3,4,5,6,7,8,9];
-		for (var i = 0; i < numDigits; i++) {
-			var pos = randomInt(0, numbers.length-1);
-			var digit = numbers.splice(pos, 1);
-			rand += (digit * Math.pow(10, i));
+		for (i = 0; i < length; i++) {
+			pos = randomInt(0, digits.length-1);
+			rand += digits[pos];
 		}
+	} else {
+		for (i = 0; i < length; i++) {
+			pos = randomInt(0, digits.length-1);
+			rand += digits.splice(pos, 1);
+		}
+	}
+	if (sorted) {
+		rand = parseInt(rand.split('').sort().join(''), 10);
 	}
 	return rand;
 };
