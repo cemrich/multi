@@ -124,3 +124,15 @@ button:focus {
 	width: 30%;
 	float: left;
 }
+
+#new .players {
+	width: 100%;
+	height: 25px;
+	display: -webkit-box;
+}
+
+#new .players .player {
+	height: 100%;
+	background-color: red;
+	-webkit-box-flex: 1;
+}

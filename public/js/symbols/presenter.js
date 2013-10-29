@@ -2,6 +2,17 @@ define(function(require, exports, module) {
 
 	var multi = null;
 
+	function onPlayerConnected(event) {
+		var p = $('<div class="player"></div>');
+		var color = 'ffff' + (Math.random()*0xFFFFFF<<0).toString(16);
+		color = '#' + color.substring(color.length-6, color.length);
+		p.css('background-color', color);
+		$('#new .players').append(p);
+		event.player.on('disconnected', function (event) {
+			p.remove();
+		});
+	}
+
 	function onReadyClick(event) {
 		$('#new .manual').hide();
 		$('#new .symbols').show();
@@ -13,6 +24,7 @@ define(function(require, exports, module) {
 			var symbol = $('#new .symbols').children().get(token[i]);
 			$(symbol).attr('class', 'icon');
 		}
+		event.session.on('playerJoined', onPlayerConnected);
 		$('#new').show();
 		$('#loading').hide();
 		$('#new .symbols').css('pointer-events', 'none');
