@@ -304,6 +304,12 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 				multi.onSession('sessionJoined', data, socket);
 			});
 		});
+		socket.on('connect_failed', function () {
+			multi.dispatchEvent('joinSessionFailed', { reason: 'no connection' });
+		});
+		socket.on('joinSessionFailed', function () {
+			multi.dispatchEvent('joinSessionFailed', { reason: 'no such session', token: sessionToken });
+		});
 	};
 
 	/**
@@ -321,6 +327,9 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 			socket.on('sessionCreated', function (data) {
 				multi.onSession('sessionCreated', data, socket);
 			});
+		});
+		socket.on('connect_failed', function () {
+			multi.dispatchEvent('createSessionFailed', { reason: 'no connection' });
 		});
 	};
 

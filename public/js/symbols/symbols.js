@@ -29,6 +29,10 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		multi.createSession();
 	});
 
+	multi.on('joinSessionFailed', function(event) {
+		alert('Oh, crap - this game does not exist. Try again!');
+	});
+
 	multi.on('sessionJoined', function (event) {
 		$('#symbols').hide();
 		$('#join').hide();
