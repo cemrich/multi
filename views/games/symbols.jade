@@ -1,15 +1,7 @@
 extends ../layout
 
-block content
-
-	h1 Symbols
-
-	#intro
-		p This is a demo for showing fun and easy session joining with symbols.
-		button.new New game
-		button.join Join existing game
-
-	#symbols
+mixin symbols
+	.symbols
 		img.icon.inactive(src='../img/icons/circle.svg')
 		img.icon.inactive(src='../img/icons/cloud.svg')
 		img.icon.inactive(src='../img/icons/hand.svg')
@@ -20,12 +12,33 @@ block content
 		img.icon.inactive(src='../img/icons/flower.svg')
 		img.icon.inactive(src='../img/icons/house.svg')
 
+block content
+
+	h1 Symbols
+
+	#intro
+		p This is a demo for showing fun and easy session joining with symbols.
+		button.new New game
+		button.join Join existing game
+
+	#new
+		.manual
+			img.phone(src='../img/icons/phone.svg')
+			p
+				| You have started a new game! 
+				| Now grab your phone and navigate to 
+				a(href='http://tinelaptopsony/symbols') http://tinelaptopsony/symbols
+			button.ready I'm ready!
+		+symbols()
+
 	#join
+		p Select all the symbols you see on your big screen and click go!
+		+symbols()
 		button.join Go!
 
 	#created
+		img(src='../img/icons/star.svg')
 		h2 You did it!
-		p You are now connected to the game.
 
 	#loading
 		.inner

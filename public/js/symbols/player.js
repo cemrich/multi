@@ -16,7 +16,7 @@ define(function(require, exports, module) {
 
 	function onJoinSessionClick(event) {
 		var sessionCode = '';
-		$('.icon').each(function (i, ele) {
+		$('#join .icon').each(function (i, ele) {
 			var icon = $(ele);
 			var isActive = (icon.attr('data-active') === 'active');
 			if (isActive) {
@@ -34,7 +34,6 @@ define(function(require, exports, module) {
 	}
 
 	function onSessionJoined(event) {
-		$('#symbols').hide();
 		$('#join').hide();
 		$('#created').show();
 		$('#loading').hide();
@@ -45,9 +44,8 @@ define(function(require, exports, module) {
 		multi.on('joinSessionFailed', onJoinSessionFailed);
 		multi.on('sessionJoined', onSessionJoined);
 		$('#join .join').click(onJoinSessionClick);
-		$('.icon').click(onIconClick);
+		$('#join .icon').click(onIconClick);
 		$('#intro').hide();
-		$('#symbols').show();
 		$('#join').show();
 	}
 
