@@ -3,14 +3,11 @@ extends ../layout
 block content
 
 	h1 Symbols
-	p This is a demo for showing fun and easy session joining with symbols.
 
 	#intro
+		p This is a demo for showing fun and easy session joining with symbols.
 		button.new New game
 		button.join Join existing game
-
-	#loading 
-		| loading...
 
 	#symbols
 		img.icon.inactive(src='../img/icons/circle.svg')
@@ -29,6 +26,11 @@ block content
 	#created
 		h2 You did it!
 		p You are now connected to the game.
+
+	#loading
+		.inner
+			img.preloader(src='../img/icons/preloader.svg')
+			p loading
 
 	link(rel='stylesheet', href='/css/symbols.css')
 	script(data-main='/js/symbols/symbols.js', src='/js/lib/require.js')

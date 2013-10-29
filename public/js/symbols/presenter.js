@@ -10,7 +10,6 @@ define(function(require, exports, module) {
 		}
 		$('#loading').hide();
 		$('#symbols').css('pointer-events', 'none');
-		$('#symbols').show();
 	}
 
 	function go(multiInstance) {
@@ -18,6 +17,7 @@ define(function(require, exports, module) {
 		multi.on('sessionCreated', onSessionCreated);
 		$('#intro').hide();
 		$('#loading').show();
+		$('#symbols').show();
 		multi.createSession();
 	}
 

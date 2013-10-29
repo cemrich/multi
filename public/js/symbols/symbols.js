@@ -6,6 +6,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		server: 'http://tinelaptopsony/'
 	};
 	var multi = multiModule.init(multiOptions);
+	$('#loading').hide();
 
 	$('#intro .new').click(function(event) {
 		requirejs(['../symbols/presenter'], function (presenterModule) {

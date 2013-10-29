@@ -25,9 +25,11 @@ define(function(require, exports, module) {
 		});
 		sessionCode = parseInt(sessionCode);
 		multi.joinSession(sessionCode);
+		$('#loading').show();
 	}
 
 	function onJoinSessionFailed(event) {
+		$('#loading').hide();
 		alert('Oh, crap - this game does not exist. Try again!');
 	}
 
@@ -35,6 +37,7 @@ define(function(require, exports, module) {
 		$('#symbols').hide();
 		$('#join').hide();
 		$('#created').show();
+		$('#loading').hide();
 	}
 
 	function go(multiInstance) {
