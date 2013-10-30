@@ -39,7 +39,6 @@ define(function(require, exports, module) {
 		$('#loading').hide();
 
 		var me = event.session.myself;
-		$('body').css('background-color', me.attributes.color);
 		me.on('attributesChanged', function() {
 			$('body').css('background-color', me.attributes.color);
 		});
