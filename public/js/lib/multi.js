@@ -72,8 +72,8 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 
 	/**
 	 * Fires the given event and calls all its associated callbacks.
-	 * @param {string} key      event that should be triggered
-	 * @param {object} dataObj  any object containing more event 
+	 * @param {string} key           event that should be triggered
+	 * @param {object} [dataObj={}]  any object containing more event 
 	 * information you wish to add
 	 */
 	exports.EventDispatcher.prototype.dispatchEvent = function (key, dataObj) {
@@ -159,6 +159,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','util'
 			return this._attributes;
 		},
 		set: function (val) {
+			console.log('set attributes');
 			this._attributes = val;
 			this.dispatchEvent('attributesChangedLocally');
 		}
@@ -280,8 +281,16 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 */
 
 
+
+/**
+ * Here you can find some useful functions for working with colors.
+ * @module
+ */
 define('../shared/color',['require','exports','module'],function(require, exports, module) {
 
+	/**
+	 * @returns {string} a random color string using the format '#RRGGBB'
+	 */
 	exports.random = function () {
 		var color = 'ffff' + (Math.random()*0xFFFFFF<<0).toString(16);
 		color = '#' + color.slice(-6);

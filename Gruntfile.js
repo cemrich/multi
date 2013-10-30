@@ -14,10 +14,10 @@ module.exports = function(grunt) {
 		},
 
 		jshint: {
-			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js'],
+			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js'],
 			options: {
 				// ignore third party libs
-				ignores: ['node_modules', 'documentation', 'multi/debs/*'],
+				ignores: ['node_modules', 'documentation', 'multi/debs/*', 'tests/client/lib/*.js'],
 				// options here to override JSHint defaults
 				globals: {
 					jQuery: true,
@@ -46,6 +46,11 @@ module.exports = function(grunt) {
 			}
 		},
 
+		/* client side testing */
+		qunit: {
+			files: ['tests/client/**/*.html']
+		},
+
 		watch: {
 			/* test js files on file change */
 			all: {
@@ -66,6 +71,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-requirejs');
 
-	grunt.registerTask('test', ['jshint']);
+	grunt.registerTask('test', ['jshint', 'qunit']);
 	grunt.registerTask('default', ['test', 'jsdoc']);
 };
