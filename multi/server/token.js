@@ -1,9 +1,14 @@
 /**
+ * Collects some helper functions for generating
+ * random tokens that can be used for identifying
+ * things.
  * @module server/token
  */
 
  /**
- * @ return Ganzzahl zwischen min und max (inklusive).
+ * @param {integer} min  smallest allowed number (inclusive)
+ * @param {integer} max  biggest allowed number (inclusive)
+ * @return {integer}     number between min and max (inclusive).
  */
 function randomInt(min, max) {
 	var rand = Math.random() * (max - min + 1);
@@ -11,14 +16,15 @@ function randomInt(min, max) {
 	return rand;
 }
 
-function fixedLengthRandomInt(numDigits) {
-	var min = Math.pow(10, numDigits - 1);
-	var max = min * 10 - 1;
-	return randomInt(min, max);
-}
-
 /**
- *
+ * Generates a random integer.
+ * @param {integer} [minLength=3]     minimal number of digits
+ * @param {integer} [maxLength=3]     maximal number of digits
+ * @param {integer} [digitCount=10]    number of digits that should be used for 
+ generating the number. By default all 10 digits are used.
+ * @param {boolean} [doubleDigits=true]  when false, every digit of the random number
+ will be unique inside the number
+ * @returns {integer} random integer
  */
 exports.numeric = function (minLength, maxLength, digitCount, doubleDigits, sorted) {
 	minLength = minLength || 3;

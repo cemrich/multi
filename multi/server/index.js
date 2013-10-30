@@ -68,8 +68,14 @@ var Multi = function (app, server, options) {
 util.inherits(Multi, EventDispatcher);
 
 /**
+ * Fired, when a client requested to create a new session
+ * and the session has been created successfully.
+ * @param session {module:server/session~Session} the newly created session
  * @event module:server/multi~Multi#sessionCreated
  */
+
+
+/* module functions */
 
 /**
  * Call this once to initialize the multi framework.
@@ -85,4 +91,10 @@ exports.init = function (app, server, options) {
 	}
 };
 
+/**
+ * Loaded {@link module:shared/color|color module}
+ * for color helper functions.
+ * @public
+ * @type module:shared/color
+ */
 exports.color = color;

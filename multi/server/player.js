@@ -28,22 +28,39 @@ var Player = function (socket) {
 	 * @readonly
 	 */
 	this.id = socket.id;
-
+	/** 
+	 * Object with user attributes for this player.
+	 * All changes within this object will automatically
+	 * be synced to the client side. Make sure not to 
+	 * override the hole object but only its attributes.
+	 * @type {object}
+	 */
 	this.attributes = { };
 
 	EventDispatcher.call(this);
+	WatchJS.watch(this.attributes, onAttributesChange, 0, true);
 
-	WatchJS.watch(this.attributes, this.onAttributesChange.bind(this), 0, true);
+	/** 
+	 * Called when the user attributes have been changed.
+	 * @param {string} prop      property that has been changed
+	 * @param {string} action    what has been done to the property
+	 * @param          newvalue  new value of the changed property
+	 * @param          oldvalue  old value of the changed property
+	 */
+	function onAttributesChange(prop, action, newvalue, oldvalue) {
+		//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+		player.dispatchEvent('attributesChanged');
+	}
 
+	// socket disconnection
 	this.socket.on('disconnect', function(event) {
-		WatchJS.unwatch(player.attributes, player.onAttributesChange);
+		WatchJS.unwatch(player.attributes, onAttributesChange);
 		player.dispatchEvent('disconnected');
 	});
 
+	// a client has changed player attributes
 	this.socket.on('playerAttributesChanged', function(event) {
-		console.log('playerAttributesChanged', event.id);
 		if (event.id === player.id) {
-			console.log('its me!');
 			for (var i in event.attributes) {
 				player.attributes[i] = event.attributes[i];
 			}
@@ -54,19 +71,17 @@ var Player = function (socket) {
 /* class methods */
 util.inherits(Player, EventDispatcher);
 
-Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
-	//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-	this.dispatchEvent('attributesChanged');
-};
-
+/**
+ * Prepares this player for sending it via socket message
+ * while avoiding circular dependencies.
+ * @return {object} packed player object (without socket)
+ */
 Player.prototype.pack = function () {
 	return { 
 		id: this.id,
 		attributes: this.attributes
 	};
 };
-
-/* event handler */
 
 /* exports */
 /**

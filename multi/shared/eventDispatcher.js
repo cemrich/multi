@@ -71,8 +71,8 @@ define(function(require, exports, module) {
 
 	/**
 	 * Fires the given event and calls all its associated callbacks.
-	 * @param {string} key      event that should be triggered
-	 * @param {object} dataObj  any object containing more event 
+	 * @param {string} key           event that should be triggered
+	 * @param {object} [dataObj={}]  any object containing more event 
 	 * information you wish to add
 	 */
 	exports.EventDispatcher.prototype.dispatchEvent = function (key, dataObj) {

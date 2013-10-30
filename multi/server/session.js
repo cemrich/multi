@@ -7,30 +7,45 @@ var token = require('./token');
 var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
+ * A game session that connects multiple players.
  * @mixes EventDispatcher
  * @class
  * @protected
+ * @param {socket.io} io  ready to use and listening socket.io instance
  */
 var Session = function (io) {
 	var session = this;
 
 	/** 
-	 * unique session token (3 digits) 
+	 * unique token identifying this session
 	 * @type {number}
 	 * @readonly
 	 */
 	this.token = token.numeric(1, 4, 9, false, true);
 	/**
+	 * Dictionary of all players currently connected
+	 * to this session mapped on their ids.
+	 * @type {object}
 	 * @readonly
 	 */
 	this.players = {};
+
+	/**
+	 * Ready to use and listening socket.io instance
+	 * @type {socket.io}
+	 */
 	this.io = io;
 
 	EventDispatcher.call(this);
 
+	/**
+	 * Called when the user attributes of any player in this session 
+	 * had been changed. Relays this event to all players in this
+	 * session.
+	 */
 	this.onPlayerAttributesChanged = function (event) {
 		var player = event.currentTarget;
-		session.io.sockets.in(session.token).emit('playerAttributesChanged', 
+		session.sendToPlayers('playerAttributesChanged', 
 			{ id: player.id, attributes: player.attributes }
 		);
 	};
@@ -38,6 +53,22 @@ var Session = function (io) {
 
 util.inherits(Session, EventDispatcher);
 
+
+/**
+ * Relays a given event to all players currently connected
+ * to this session. 
+ * @param {string} eventName       name of the event
+ * @param {object} [eventData={}]  optional event data
+ */
+Session.prototype.sendToPlayers = function (eventName, eventData) {
+	this.io.sockets.in(this.token).emit(eventName, eventData);
+};
+
+/**
+ * Prepares this session and all its players for sending 
+ * it via socket message while avoiding circular dependencies.
+ * @return {object} packed session object including players
+ */
 Session.prototype.pack = function() {
 	var players = [];
 	for (var i in this.players) {
@@ -56,7 +87,7 @@ Session.prototype.pack = function() {
  */
 Session.prototype.addPlayer = function (player) {
 	var session = this;
-	this.io.sockets.in(this.token).emit('playerJoined', player.pack());
+	this.sendToPlayers('playerJoined', player.pack());
 	player.socket.join(this.token);
 	this.players[player.id] = player;
 	player.on('disconnected', function(event) {
@@ -75,13 +106,11 @@ Session.prototype.removePlayer = function (player) {
 	player.off('attributesChanged', this.onPlayerAttributesChanged);
 	delete this.players[player.id];
 	this.dispatchEvent('playerLeft', { player: player });
-	this.io.sockets.in(this.token).emit('playerLeft', { playerId: player.id });
+	this.sendToPlayers('playerLeft', { playerId: player.id });
 	if (Object.keys(this.players).length === 0) {
 		this.dispatchEvent('destroyed');
 	}
 };
-
-/* event handler */
 
 
 /* module functions */
@@ -121,4 +150,10 @@ exports.create = function(io) {
  * Fired when a new player has been removed from this session.
  * @event module:server/session~Session#playerRemoved
  * @property {module:server/player~Player} player  The removed player.
+ */
+ 
+/**
+ * Fired when this session is no longer valid. Don't use this
+ * session any longer after the event has been fired.
+ * @event module:server/session~Session#destroyed
  */

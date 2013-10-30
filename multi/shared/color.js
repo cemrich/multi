@@ -4,8 +4,16 @@
 */
 if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
+
+/**
+ * Here you can find some useful functions for working with colors.
+ * @module
+ */
 define(function(require, exports, module) {
 
+	/**
+	 * @returns {string} a random color string using the format '#RRGGBB'
+	 */
 	exports.random = function () {
 		var color = 'ffff' + (Math.random()*0xFFFFFF<<0).toString(16);
 		color = '#' + color.slice(-6);
