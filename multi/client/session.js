@@ -24,10 +24,21 @@ define(function(require, exports, module) {
 		this.myself = myself;
 		this.socket = socket;
 
+		function onAttributesChangedLocally(event) {
+			console.log('onAttributesChangedLocally', event);
+			var player = event.currentTarget;
+			socket.emit('playerAttributesChanged', 
+				{ id: player.id, attributes: player.attributes }
+			);
+		}
+
+		myself.on('attributesChangedLocally', onAttributesChangedLocally);
+
 		socket.on('playerJoined', function (data) {
 			var player = playerModule.fromPackedData(data);
 			session.players[player.id] = player;
 			session.dispatchEvent('playerJoined', { player: player });
+			player.on('attributesChangedLocally', onAttributesChangedLocally);
 		});
 
 		socket.on('playerLeft', function (data) {
@@ -47,7 +58,7 @@ define(function(require, exports, module) {
 			if (player === undefined) {
 				player = session.myself;
 			}
-			player.attributes = data.attributes;
+			player.updateAttributesFromServer(data.attributes);
 		});
 	};
 

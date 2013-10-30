@@ -1,6 +1,7 @@
 define(function(require, exports, module) {
 
 	var multi = null;
+	var session = null;
 
 	function onIconClick(event) {
 		var icon = $(event.currentTarget);
@@ -38,10 +39,18 @@ define(function(require, exports, module) {
 		$('#created').show();
 		$('#loading').hide();
 
-		var me = event.session.myself;
-		me.on('attributesChanged', function() {
-			$('body').css('background-color', me.attributes.color);
+		session = event.session;
+		session.myself.on('attributesChanged', function() {
+			$('body').css('background-color', session.myself.attributes.color);
 		});
+
+		$('html').click(changeColor);
+	}
+
+	function changeColor() {
+		console.log('change color');
+		var color = multi.color.random();
+		session.myself.attributes = { color: color };
 	}
 
 	function go(multiInstance) {

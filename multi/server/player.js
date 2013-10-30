@@ -39,6 +39,16 @@ var Player = function (socket) {
 		WatchJS.unwatch(player.attributes, player.onAttributesChange);
 		player.dispatchEvent('disconnected');
 	});
+
+	this.socket.on('playerAttributesChanged', function(event) {
+		console.log('playerAttributesChanged', event.id);
+		if (event.id === player.id) {
+			console.log('its me!');
+			for (var i in event.attributes) {
+				player.attributes[i] = event.attributes[i];
+			}
+		}
+	});
 };
 
 /* class methods */

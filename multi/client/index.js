@@ -8,6 +8,7 @@ define(function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
+	var color = require('../shared/color');
 	var util = require('util');
 
 	var instance = null;
@@ -21,6 +22,7 @@ define(function(require, exports, module) {
 	var Multi = function (options) {
 
 		EventDispatcher.call(this);
+		this.color = color;
 		this.io = options.io;
 		this.server = options.server;
 
@@ -116,5 +118,7 @@ define(function(require, exports, module) {
 			throw 'only one call to init allowed';
 		}
 	};
+
+	exports.color = color;
 
 });

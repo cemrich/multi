@@ -23,13 +23,20 @@ define(function(require, exports, module) {
 
 	util.inherits(Player, EventDispatcher);
 
+	Player.prototype.updateAttributesFromServer = function (val) {
+		console.log('updateAttributesFromServer');
+		this._attributes = val;
+		this.dispatchEvent('attributesChanged');
+	};
+
 	Object.defineProperty(Player.prototype, "attributes", {
 		get: function () { 
 			return this._attributes;
 		},
-		set: function (val) { 
+		set: function (val) {
+			console.log('set attributes');
 			this._attributes = val;
-			this.dispatchEvent('attributesChanged');
+			this.dispatchEvent('attributesChangedLocally');
 		}
 	});
 

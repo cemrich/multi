@@ -148,13 +148,19 @@ define('player',['require','exports','module','../shared/eventDispatcher','util'
 
 	util.inherits(Player, EventDispatcher);
 
+	Player.prototype.updateAttributesFromServer = function (val) {
+		console.log('updateAttributesFromServer');
+		this._attributes = val;
+		this.dispatchEvent('attributesChanged');
+	};
+
 	Object.defineProperty(Player.prototype, "attributes", {
 		get: function () { 
 			return this._attributes;
 		},
-		set: function (val) { 
+		set: function (val) {
 			this._attributes = val;
-			this.dispatchEvent('attributesChanged');
+			this.dispatchEvent('attributesChangedLocally');
 		}
 	});
 
@@ -199,10 +205,21 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		this.myself = myself;
 		this.socket = socket;
 
+		function onAttributesChangedLocally(event) {
+			console.log('onAttributesChangedLocally', event);
+			var player = event.currentTarget;
+			socket.emit('playerAttributesChanged', 
+				{ id: player.id, attributes: player.attributes }
+			);
+		}
+
+		myself.on('attributesChangedLocally', onAttributesChangedLocally);
+
 		socket.on('playerJoined', function (data) {
 			var player = playerModule.fromPackedData(data);
 			session.players[player.id] = player;
 			session.dispatchEvent('playerJoined', { player: player });
+			player.on('attributesChangedLocally', onAttributesChangedLocally);
 		});
 
 		socket.on('playerLeft', function (data) {
@@ -222,7 +239,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 			if (player === undefined) {
 				player = session.myself;
 			}
-			player.attributes = data.attributes;
+			player.updateAttributesFromServer(data.attributes);
 		});
 	};
 
@@ -253,16 +270,34 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	return exports;
 
 });
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+define('../shared/color',['require','exports','module'],function(require, exports, module) {
+
+	exports.random = function () {
+		var color = 'ffff' + (Math.random()*0xFFFFFF<<0).toString(16);
+		color = '#' + color.slice(-6);
+		return color;
+	};
+
+	return exports;
+
+ });
 /**
 * Entry point for the client side multi library for developing
 * multiscreen games.
 * @module client/multi
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher','session','util'],function(require, exports, module) {
+define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','util'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
+	var color = require('../shared/color');
 	var util = require('util');
 
 	var instance = null;
@@ -276,6 +311,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	var Multi = function (options) {
 
 		EventDispatcher.call(this);
+		this.color = color;
 		this.io = options.io;
 		this.server = options.server;
 
@@ -371,6 +407,8 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 			throw 'only one call to init allowed';
 		}
 	};
+
+	exports.color = color;
 
 });
 define(["index"], function(index) { return index; });

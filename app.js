@@ -40,6 +40,9 @@ var options = {
 function onPlayerAdded(event) {
 	console.log('new player created!', event.player.id);
 	event.player.attributes.color = multiModule.color.random();
+	setInterval(function () {
+		event.player.attributes.color = multiModule.color.random();
+	}, 3000);
 }
 
 function onSessionCreated(event) {
