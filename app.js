@@ -37,7 +37,18 @@ var options = {
 	gameViewSubdir: 'games/'
 };
 
-var multi = multiModule.init(app, server, options);
-multi.on('sessionCreated', function (event) {
+function onPlayerAdded(event) {
+	console.log('new player created!', event.player.id);
+	event.player.attributes.color = multiModule.color.random();
+	setInterval(function () {
+		event.player.attributes.color = multiModule.color.random();
+	}, 2000);
+}
+
+function onSessionCreated(event) {
 	console.log('new session created!', event.session.token);
-});
+	event.session.on('playerAdded', onPlayerAdded);
+}
+
+var multi = multiModule.init(app, server, options);
+multi.on('sessionCreated', onSessionCreated);

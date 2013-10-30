@@ -18,10 +18,20 @@ define(function(require, exports, module) {
 
 		EventDispatcher.call(this);
 		this.id = null;
-
+		this._attributes = {};
 	};
 
 	util.inherits(Player, EventDispatcher);
+
+	Object.defineProperty(Player.prototype, "attributes", {
+		get: function () { 
+			return this._attributes;
+		},
+		set: function (val) { 
+			this._attributes = val;
+			this.dispatchEvent('attributesChanged');
+		}
+	});
 
 	/**
 	* Unpacks a player object send over a socket connection.

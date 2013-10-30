@@ -3,6 +3,7 @@
  */
 
 var util = require('util');
+var WatchJS = require('../debs/watch');
 var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
@@ -28,9 +29,14 @@ var Player = function (socket) {
 	 */
 	this.id = socket.id;
 
+	this.attributes = { };
+
 	EventDispatcher.call(this);
 
+	WatchJS.watch(this.attributes, this.onAttributesChange.bind(this), 0, true);
+
 	this.socket.on('disconnect', function(event) {
+		WatchJS.unwatch(player.attributes, player.onAttributesChange);
 		player.dispatchEvent('disconnected');
 	});
 };
@@ -38,9 +44,15 @@ var Player = function (socket) {
 /* class methods */
 util.inherits(Player, EventDispatcher);
 
+Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
+	//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+	this.dispatchEvent('attributesChanged');
+};
+
 Player.prototype.pack = function () {
 	return { 
-		id: this.id 
+		id: this.id,
+		attributes: this.attributes
 	};
 };
 

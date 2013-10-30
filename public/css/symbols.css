@@ -133,6 +133,5 @@ button:focus {
 
 #new .players .player {
 	height: 100%;
-	background-color: red;
 	-webkit-box-flex: 1;
 }

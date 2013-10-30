@@ -17,7 +17,7 @@ module.exports = function(grunt) {
 			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js'],
 			options: {
 				// ignore third party libs
-				ignores: ['node_modules', 'documentation'],
+				ignores: ['node_modules', 'documentation', 'multi/debs/*'],
 				// options here to override JSHint defaults
 				globals: {
 					jQuery: true,

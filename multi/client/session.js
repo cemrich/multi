@@ -41,6 +41,14 @@ define(function(require, exports, module) {
 			session.dispatchEvent('destroyed');
 			session.socket = null;
 		});
+
+		socket.on('playerAttributesChanged', function (data) {
+			var player = session.players[data.id];
+			if (player === undefined) {
+				player = session.myself;
+			}
+			player.attributes = data.attributes;
+		});
 	};
 
 	util.inherits(Session, EventDispatcher);

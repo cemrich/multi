@@ -1,15 +1,16 @@
-define(function(require, exports, module) {	
+define(function(require, exports, module) {
 
 	var multi = null;
 
 	function onPlayerConnected(event) {
 		var p = $('<div class="player"></div>');
-		var color = 'ffff' + (Math.random()*0xFFFFFF<<0).toString(16);
-		color = '#' + color.substring(color.length-6, color.length);
-		p.css('background-color', color);
 		$('#new .players').append(p);
 		event.player.on('disconnected', function (event) {
 			p.remove();
+		});
+		event.player.on('attributesChanged', function () {
+			var color = event.player.attributes.color;
+			p.css('background-color', color);
 		});
 	}
 

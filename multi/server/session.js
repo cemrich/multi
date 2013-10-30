@@ -53,6 +53,12 @@ Session.prototype.addPlayer = function (player) {
 	player.on('disconnected', function(event) {
 		session.removePlayer(player);
 	});
+	player.on('attributesChanged', function (event) {
+		// TODO: remove on playerLeft (how?)
+		session.io.sockets.in(this.token).emit('playerAttributesChanged', 
+			{ id: player.id, attributes: player.attributes }
+		);
+	});
 	this.dispatchEvent('playerAdded', { player: player });
 };
 

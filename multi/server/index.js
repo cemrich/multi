@@ -9,6 +9,7 @@
 var EventDispatcher = require('../shared/eventDispatcher');
 var sessionModule = require('./session');
 var playerModule = require('./player');
+var color = require('../shared/color');
 var util = require('util');
 
 var instance = null;
@@ -84,3 +85,4 @@ exports.init = function (app, server, options) {
 	}
 };
 
+exports.color = color;
