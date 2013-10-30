@@ -236,10 +236,14 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 
 		socket.on('playerAttributesChanged', function (data) {
 			var player = session.players[data.id];
-			if (player === undefined) {
+			if (player === undefined && data.id === session.myself.id) {
 				player = session.myself;
 			}
-			player.updateAttributesFromServer(data.attributes);
+			if (player === undefined) {
+				console.error('player not found', data.id);
+			} else {
+				player.updateAttributesFromServer(data.attributes);
+			}
 		});
 	};
 

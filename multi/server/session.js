@@ -12,6 +12,8 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * @protected
  */
 var Session = function (io) {
+	var session = this;
+
 	/** 
 	 * unique session token (3 digits) 
 	 * @type {number}
@@ -25,6 +27,13 @@ var Session = function (io) {
 	this.io = io;
 
 	EventDispatcher.call(this);
+
+	this.onPlayerAttributesChanged = function (event) {
+		var player = event.currentTarget;
+		session.io.sockets.in(session.token).emit('playerAttributesChanged', 
+			{ id: player.id, attributes: player.attributes }
+		);
+	};
 };
 
 util.inherits(Session, EventDispatcher);
@@ -53,12 +62,7 @@ Session.prototype.addPlayer = function (player) {
 	player.on('disconnected', function(event) {
 		session.removePlayer(player);
 	});
-	player.on('attributesChanged', function (event) {
-		// TODO: remove on playerLeft (how?)
-		session.io.sockets.in(this.token).emit('playerAttributesChanged', 
-			{ id: player.id, attributes: player.attributes }
-		);
-	});
+	player.on('attributesChanged', this.onPlayerAttributesChanged);
 	this.dispatchEvent('playerAdded', { player: player });
 };
 
@@ -68,6 +72,7 @@ Session.prototype.addPlayer = function (player) {
  * @fires module:server/session~Session#playerRemoved
  */
 Session.prototype.removePlayer = function (player) {
+	player.off('attributesChanged', this.onPlayerAttributesChanged);
 	delete this.players[player.id];
 	this.dispatchEvent('playerLeft', { player: player });
 	this.io.sockets.in(this.token).emit('playerLeft', { playerId: player.id });
