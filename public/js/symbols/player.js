@@ -1,9 +1,11 @@
 define(function(require, exports, module) {
 
 	var multi = null;
+	var sound = null;
 	var session = null;
 
 	function onIconClick(event) {
+		sound.onSymbol();
 		var icon = $(event.currentTarget);
 		var isActive = (icon.attr('data-active') === 'active');
 		if (isActive) {
@@ -30,11 +32,14 @@ define(function(require, exports, module) {
 	}
 
 	function onJoinSessionFailed(event) {
+		sound.onPlayerDisconnect();
 		$('#loading').hide();
 		alert('Oh, crap - this game does not exist. Try again!');
 	}
 
 	function onSessionJoined(event) {
+		sound.onPlayerJoin();
+
 		$('#join').hide();
 		$('#created').show();
 		$('#loading').hide();
@@ -53,8 +58,9 @@ define(function(require, exports, module) {
 		session.myself.attributes = { color: color };
 	}
 
-	function go(multiInstance) {
+	function go(multiInstance, soundModule) {
 		multi = multiInstance;
+		sound = soundModule;
 		multi.on('joinSessionFailed', onJoinSessionFailed);
 		multi.on('sessionJoined', onSessionJoined);
 		$('#join .join').click(onJoinSessionClick);

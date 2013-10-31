@@ -1,11 +1,14 @@
 define(function(require, exports, module) {
 
 	var multi = null;
+	var sound = null;
 
 	function onPlayerConnected(event) {
+		sound.onPlayerJoin();
 		var p = $('<div class="player"></div>');
 		$('#new .players').append(p);
 		event.player.on('disconnected', function (event) {
+			sound.onPlayerDisconnect();
 			p.remove();
 		});
 		event.player.on('attributesChanged', function () {
@@ -31,8 +34,9 @@ define(function(require, exports, module) {
 		$('#new .symbols').css('pointer-events', 'none');
 	}
 
-	function go(multiInstance) {
+	function go(multiInstance, soundModule) {
 		multi = multiInstance;
+		sound = soundModule;
 		multi.on('sessionCreated', onSessionCreated);
 		$('#new .ready').click(onReadyClick);
 		$('#intro').hide();

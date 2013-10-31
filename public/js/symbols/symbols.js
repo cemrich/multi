@@ -1,5 +1,5 @@
-requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], 
-		function (multiModule, socketio) {
+requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], 
+		function (sound, multiModule, socketio) {
 
 	var multiOptions = {
 		io: socketio,
@@ -7,16 +7,21 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	};
 	var multi = multiModule.init(multiOptions);
 	$('#loading').hide();
+	sound.init();
+
+	$('button').click(function (event) {
+		sound.onButton();
+	});
 
 	$('#intro .new').click(function(event) {
 		requirejs(['../symbols/presenter'], function (presenterModule) {
-			presenterModule.go(multi);
+			presenterModule.go(multi, sound);
 		});
 	});
 
 	$('#intro .join').click(function (event) {
 		requirejs(['../symbols/player'], function (playerModule) {
-			playerModule.go(multi);
+			playerModule.go(multi, sound);
 		});
 	});
 
