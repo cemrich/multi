@@ -25,7 +25,6 @@ define(function(require, exports, module) {
 		this.socket = socket;
 
 		function onAttributesChangedLocally(event) {
-			console.log('onAttributesChangedLocally', event);
 			var player = event.currentTarget;
 			socket.emit('playerAttributesChanged', 
 				{ id: player.id, attributes: player.attributes }

@@ -53,9 +53,8 @@ define(function(require, exports, module) {
 	}
 
 	function changeColor() {
-		console.log('change color');
 		var color = multi.color.random();
-		session.myself.attributes = { color: color };
+		session.myself.attributes.color = color;
 	}
 
 	function go(multiInstance, soundModule) {

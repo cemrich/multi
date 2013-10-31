@@ -6,6 +6,7 @@
 define(function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
+	var WatchJS = require('../debs/watch');
 	var util = require('util');
 
 	/**
@@ -15,30 +16,37 @@ define(function(require, exports, module) {
 	* @memberof module:client/player
 	*/
 	var Player = function () {
+		var player = this;
 
 		EventDispatcher.call(this);
 		this.id = null;
-		this._attributes = {};
+		this.attributes = { color: null };
+
+		/** 
+		 * Called when the user attributes have been changed.
+		 * @param {string} prop      property that has been changed
+		 * @param {string} action    what has been done to the property
+		 * @param          newvalue  new value of the changed property
+		 * @param          oldvalue  old value of the changed property
+		 */
+		function onAttributesChange(prop, action, newvalue, oldvalue) {
+			// console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+			player.dispatchEvent('attributesChangedLocally');
+		}
+
+		WatchJS.watch(this.attributes, onAttributesChange, 0, true);
 	};
 
 	util.inherits(Player, EventDispatcher);
 
 	Player.prototype.updateAttributesFromServer = function (val) {
-		console.log('updateAttributesFromServer');
-		this._attributes = val;
-		this.dispatchEvent('attributesChanged');
-	};
-
-	Object.defineProperty(Player.prototype, "attributes", {
-		get: function () { 
-			return this._attributes;
-		},
-		set: function (val) {
-			console.log('set attributes');
-			this._attributes = val;
-			this.dispatchEvent('attributesChangedLocally');
+		WatchJS.noMore = true;
+		for (var i in val) {
+			this.attributes[i] = val[i];
 		}
-	});
+		this.dispatchEvent('attributesChanged');
+		WatchJS.noMore = false;
+	};
 
 	/**
 	* Unpacks a player object send over a socket connection.
@@ -47,7 +55,13 @@ define(function(require, exports, module) {
 	exports.fromPackedData = function (data) {
 		var player = new Player();
 		for (var i in data) {
-			player[i] = data[i];
+			if (i === 'attributes') {
+				for (var j in data[i]) {
+					player.attributes[j] = data[i][j];
+				}
+			} else {
+				player[i] = data[i];
+			}
 		}
 		return player;
 	};
