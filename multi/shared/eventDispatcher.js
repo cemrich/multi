@@ -39,14 +39,19 @@ define(function(require, exports, module) {
 	 * Removes a callback function from the given event.
 	 * @param {string}                                      key
 	 *  event that should trigger the callback
-	 * @param {EventDispatcher.eventCallback} func
-	 *  callback that should be removed
+	 * @param {EventDispatcher.eventCallback} [func]
+	 *  callback that should be removed. If none provided all callbacks 
+	 *  will be removed.
 	 */
 	exports.EventDispatcher.prototype.off = function (key, func) {
 		if (this.events.hasOwnProperty(key)) {
-			for (var i in this.events[key]) {
-				if (this.events[key][i] === func) {
-					this.events[key].splice(i, 1);
+			if (func === undefined) {
+				delete this.events[key];
+			} else {
+				for (var i in this.events[key]) {
+					if (this.events[key][i] === func) {
+						this.events[key].splice(i, 1);
+					}
 				}
 			}
 		}
