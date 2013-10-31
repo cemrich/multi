@@ -119,6 +119,17 @@ define(function(require, exports, module) {
 		}
 	};
 
+	exports.getInstance = function () {
+		if (instance === null) {
+			var options = {
+				io: require('http://localhost/socket.io/socket.io.js'),
+				server: 'http://localhost/'
+			};
+			instance = new Multi(options);
+		}
+		return instance;
+	};
+
 	exports.color = color;
 
 });

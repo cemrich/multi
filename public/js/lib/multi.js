@@ -40,14 +40,19 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 	 * Removes a callback function from the given event.
 	 * @param {string}                                      key
 	 *  event that should trigger the callback
-	 * @param {EventDispatcher.eventCallback} func
-	 *  callback that should be removed
+	 * @param {EventDispatcher.eventCallback} [func]
+	 *  callback that should be removed. If none provided all callbacks 
+	 *  will be removed.
 	 */
 	exports.EventDispatcher.prototype.off = function (key, func) {
 		if (this.events.hasOwnProperty(key)) {
-			for (var i in this.events[key]) {
-				if (this.events[key][i] === func) {
-					this.events[key].splice(i, 1);
+			if (func === undefined) {
+				delete this.events[key];
+			} else {
+				for (var i in this.events[key]) {
+					if (this.events[key][i] === func) {
+						this.events[key].splice(i, 1);
+					}
 				}
 			}
 		}
@@ -306,7 +311,7 @@ define('../shared/color',['require','exports','module'],function(require, export
 * @module client/multi
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','util'],function(require, exports, module) {
+define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','util','http://localhost/socket.io/socket.io.js'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
@@ -419,6 +424,17 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		} else {
 			throw 'only one call to init allowed';
 		}
+	};
+
+	exports.getInstance = function () {
+		if (instance === null) {
+			var options = {
+				io: require('http://localhost/socket.io/socket.io.js'),
+				server: 'http://localhost/'
+			};
+			instance = new Multi(options);
+		}
+		return instance;
 	};
 
 	exports.color = color;
