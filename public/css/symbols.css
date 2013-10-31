@@ -78,12 +78,19 @@ button:focus {
 .preloader {
 	width: 50px;
 	margin: auto;
-	-webkit-animation-name: rotate;
-	-webkit-animation-duration: 1.5s;
-	-webkit-animation-iteration-count: infinite;
-	-webkit-animation-timing-function: linear;
+	-webkit-animation: rotate 1.5s infinite linear;
+	-moz-animation: rotate 1.5s infinite linear;
+	animation: rotate 1.5s infinite linear;
 }
 
+@keyframes rotate {
+	0% 		{ transform: rotate(0deg) }
+	100% 	{ transform: rotate(360deg) }
+}
+@-moz-keyframes rotate {
+	0% 		{ -moz-transform: rotate(0deg) }
+	100% 	{ -moz-transform: rotate(360deg) }
+}
 @-webkit-keyframes rotate {
 	0% 		{ -webkit-transform: rotate(0deg) }
 	100% 	{ -webkit-transform: rotate(360deg) }
@@ -129,9 +136,13 @@ button:focus {
 	width: 100%;
 	height: 25px;
 	display: -webkit-box;
+	display: -moz-box;
+	display: box;
 }
 
 #new .players .player {
 	height: 100%;
 	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
 }
