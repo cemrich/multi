@@ -311,7 +311,7 @@ define('../shared/color',['require','exports','module'],function(require, export
 * @module client/multi
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','util','http://localhost/socket.io/socket.io.js'],function(require, exports, module) {
+define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','util'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
@@ -424,17 +424,6 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		} else {
 			throw 'only one call to init allowed';
 		}
-	};
-
-	exports.getInstance = function () {
-		if (instance === null) {
-			var options = {
-				io: require('http://localhost/socket.io/socket.io.js'),
-				server: 'http://localhost/'
-			};
-			instance = new Multi(options);
-		}
-		return instance;
 	};
 
 	exports.color = color;

@@ -5,13 +5,11 @@ requirejs.config({
 
 requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiModule, socketio) {
 
-	function getMultiInstance() {
 		var multiOptions = {
 			io: socketio,
 			server: 'http://localhost/'
 		};
-		return multiModule.init(multiOptions);
-	}
+		var multi = multiModule.init(multiOptions);
 
 	test("test multi setup", function() {
 		ok(multiModule, "multiModule is defined");
@@ -19,7 +17,6 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 	});
 
 	test("test initialization", function () {
-		var multi = getMultiInstance();
 		ok(multi, "instance created successfully");
 		raises(function () {
 			getMultiInstance();
@@ -28,7 +25,6 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 
 	asyncTest("test session creation", function () {
 		expect(3);
-		var multi = multiModule.getInstance();
 		multi.on("sessionCreated", function (event) {
 			ok(event.session, "session can be created");
 			ok(event.session.token, "session has a token");
@@ -41,7 +37,6 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 
 	asyncTest("test connection to existing session", function () {
 		expect(5);
-		var multi = multiModule.getInstance();
 		multi.on("sessionCreated", function (event) {
 			var createdSession = event.session;
 			var joinedSession = null;
