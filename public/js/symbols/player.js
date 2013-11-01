@@ -26,7 +26,6 @@ define(function(require, exports, module) {
 				sessionCode += i.toString();
 			}
 		});
-		sessionCode = parseInt(sessionCode);
 		multi.joinSession(sessionCode);
 		$('#loading').show();
 	}

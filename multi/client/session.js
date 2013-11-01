@@ -23,6 +23,12 @@ define(function(require, exports, module) {
 		this.players = {};
 		this.myself = myself;
 		this.socket = socket;
+		/** 
+		 * unique token identifying this session
+		 * @type {string}
+		 * @readonly
+		 */
+		this.token = null;
 
 		function onAttributesChangedLocally(event) {
 			var player = event.currentTarget;

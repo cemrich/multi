@@ -34,18 +34,9 @@ var Session = function (io, options) {
 		}
 	}
 
-	/*
-	*	options = {
-	*		token: {
-	*			func: 'numeric',
-	*			args: [3, 5]
-	*		}
-	*	};
-	*/
-
 	/** 
 	 * unique token identifying this session
-	 * @type {number}
+	 * @type {string}
 	 * @readonly
 	 */
 	this.token = tokenFunction.apply(this, tokenFunctionArgs);
