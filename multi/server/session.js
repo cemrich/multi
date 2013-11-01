@@ -8,8 +8,8 @@ var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
  * @typedef {Object} SessionOptions
- * @property {string} token.func  name of a function inside the {@link module:server/token} module that should generate the session token
- * @property {Array}  token.args   argument array for the token generation function
+ * @property {string} [token.func='numeric']  name of a function inside the {@link module:server/token} module that should generate the session token
+ * @property {Array}  [token.args=[]]   argument array for the token generation function
  */
 
 /**

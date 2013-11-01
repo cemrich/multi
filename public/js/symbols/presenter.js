@@ -43,13 +43,7 @@ define(function(require, exports, module) {
 		$('#loading').show();
 		window.scrollTo(0, 1);
 
-		var sessionOptions = {
-			token: {
-				func: 'symbolPattern',
-				args: [7, 7]
-			}
-		};
-		multi.createSession(sessionOptions);
+		multi.createSession();
 	}
 
 	exports.go = go;

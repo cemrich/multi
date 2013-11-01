@@ -3,7 +3,13 @@ requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-
 
 	var multiOptions = {
 		io: socketio,
-		server: 'http://tinelaptopsony/'
+		server: 'http://tinelaptopsony/',
+		session: {
+			token: {
+				func: 'symbolPattern',
+				args: [7, 7]
+			}
+		}
 	};
 	var multi = multiModule.init(multiOptions);
 	$('#loading').hide();

@@ -660,6 +660,12 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		this.players = {};
 		this.myself = myself;
 		this.socket = socket;
+		/** 
+		 * unique token identifying this session
+		 * @type {string}
+		 * @readonly
+		 */
+		this.token = null;
 
 		function onAttributesChangedLocally(event) {
 			var player = event.currentTarget;
@@ -770,10 +776,18 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	var instance = null;
 
 	/**
+	* @typedef {Object} module:client/multi~MultiOptions
+	* @property {socketio}        io        ready to use socket.io module
+	* @property                   server    full url of a running socket.io server
+	* @property {SessionOptions}  [session] default options for session creation
+	*/
+
+	/**
 	* @inner
 	* @class
 	* @memberof module:client/multi
 	* @mixes EventDispatcher
+	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  
 	*/
 	var Multi = function (options) {
 
@@ -781,6 +795,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		this.color = color;
 		this.io = options.io;
 		this.server = options.server;
+		this.sessionOptions = options.session;
 
 		this.onSession = function (eventString, data, socket) {
 			var session = sessionModule.fromPackedData(data, socket);
@@ -835,11 +850,14 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 
 	/**
 	 * @public
-	 * @param {SessionOptions} options  to tweak the new sessions behaviour
+	 * @param {SessionOptions} [options]  to tweak this new sessions behaviour
 	 * @fires module:client/multi~Multi#sessionCreated
 	 */
 	Multi.prototype.createSession = function (options) {
 		console.log('creating new session');
+
+		options = options || this.sessionOptions;
+
 		var multi = this;
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
@@ -865,6 +883,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 
 	/**
 	 * @public
+	 * @param {module:client/multi~MultiOptions} options to tweak this modules behaviour  
 	 * @returns {module:client/multi~Multi} the one and only Multi instance
 	 */
 	exports.init = function (options) {

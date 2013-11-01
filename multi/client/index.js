@@ -14,10 +14,18 @@ define(function(require, exports, module) {
 	var instance = null;
 
 	/**
+	* @typedef {Object} module:client/multi~MultiOptions
+	* @property {socketio}        io        ready to use socket.io module
+	* @property                   server    full url of a running socket.io server
+	* @property {SessionOptions}  [session] default options for session creation
+	*/
+
+	/**
 	* @inner
 	* @class
 	* @memberof module:client/multi
 	* @mixes EventDispatcher
+	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  
 	*/
 	var Multi = function (options) {
 
@@ -25,6 +33,7 @@ define(function(require, exports, module) {
 		this.color = color;
 		this.io = options.io;
 		this.server = options.server;
+		this.sessionOptions = options.session;
 
 		this.onSession = function (eventString, data, socket) {
 			var session = sessionModule.fromPackedData(data, socket);
@@ -79,11 +88,14 @@ define(function(require, exports, module) {
 
 	/**
 	 * @public
-	 * @param {SessionOptions} options  to tweak the new sessions behaviour
+	 * @param {SessionOptions} [options]  to tweak this new sessions behaviour
 	 * @fires module:client/multi~Multi#sessionCreated
 	 */
 	Multi.prototype.createSession = function (options) {
 		console.log('creating new session');
+
+		options = options || this.sessionOptions;
+
 		var multi = this;
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
@@ -109,6 +121,7 @@ define(function(require, exports, module) {
 
 	/**
 	 * @public
+	 * @param {module:client/multi~MultiOptions} options to tweak this modules behaviour  
 	 * @returns {module:client/multi~Multi} the one and only Multi instance
 	 */
 	exports.init = function (options) {
