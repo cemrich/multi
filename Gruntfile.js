@@ -54,8 +54,11 @@ module.exports = function(grunt) {
 		watch: {
 			// test js files on file change
 			all: {
-				files: ['<%= jshint.files %>'],
-				tasks: ['jshint']
+				files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js'],
+				tasks: ['jshint'],
+				options: {
+					spawn: false
+				}
 			},
 			// build and test client lib on file change
 			client: {
@@ -90,6 +93,11 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-qunit');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-requirejs');
+
+	// on watch events configure jshint to only run on changed file
+	grunt.event.on('watch', function(action, filepath) {
+		grunt.config('jshint.files', filepath);
+	});
 
 	function filterQunitResult(error, result, code) {
 		if (error) {
