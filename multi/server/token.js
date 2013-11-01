@@ -78,3 +78,14 @@ exports.symbolPattern = function (minSymbols, maxSymbols, symbolCount) {
 	symbolCount = symbolCount || 9;
 	return exports.numeric(minSymbols, maxSymbols, symbolCount, false, true);
 };
+
+/**
+ * Simply returns the given token string. Useful only when only one
+ * session with a known token should exist, p.e. when running multi 
+ * as a terminal application.
+ * @param {string} value  the token you want to be returned
+ * @return {string} the token you passed in
+ */
+exports.staticToken = function (value) {
+	return value || '';
+};
