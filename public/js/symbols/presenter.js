@@ -42,7 +42,14 @@ define(function(require, exports, module) {
 		$('#intro').hide();
 		$('#loading').show();
 		window.scrollTo(0, 1);
-		multi.createSession();
+
+		var sessionOptions = {
+			token: {
+				func: 'symbolPattern',
+				args: [7, 7]
+			}
+		};
+		multi.createSession(sessionOptions);
 	}
 
 	exports.go = go;

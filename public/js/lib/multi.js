@@ -835,16 +835,17 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 
 	/**
 	 * @public
+	 * @param {SessionOptions} options  to tweak the new sessions behaviour
 	 * @fires module:client/multi~Multi#sessionCreated
 	 */
-	Multi.prototype.createSession = function () {
+	Multi.prototype.createSession = function (options) {
 		console.log('creating new session');
 		var multi = this;
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {
-			socket.emit('createSession');
+			socket.emit('createSession', { options: options });
 			socket.on('sessionCreated', function (data) {
 				multi.onSession('sessionCreated', data, socket);
 			});

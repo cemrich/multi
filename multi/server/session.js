@@ -7,21 +7,49 @@ var token = require('./token');
 var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
+ * @typedef {Object} SessionOptions
+ * @property {string} token.func  name of a function inside the {@link module:server/token} module that should generate the session token
+ * @property {Array}  token.args   argument array for the token generation function
+ */
+
+/**
  * A game session that connects multiple players.
  * @mixes EventDispatcher
  * @class
  * @protected
  * @param {socket.io} io  ready to use and listening socket.io instance
+ * @param {SessionOptions} options to tweak this sessions behaviour
+
  */
-var Session = function (io) {
+var Session = function (io, options) {
 	var session = this;
+
+	var tokenFunction = token.numeric;
+	var tokenFunctionArgs = [];
+
+	if (options !== undefined) {
+		if (options.token !== undefined) {
+			tokenFunction = token[options.token.func] || tokenFunction;
+			tokenFunctionArgs = options.token.args || tokenFunctionArgs;
+		}
+	}
+
+	/*
+	*	options = {
+	*		token: {
+	*			func: 'numeric',
+	*			args: [3, 5]
+	*		}
+	*	};
+	*/
 
 	/** 
 	 * unique token identifying this session
 	 * @type {number}
 	 * @readonly
 	 */
-	this.token = token.numeric(1, 4, 9, false, true);
+	this.token = tokenFunction.apply(this, tokenFunctionArgs);
+
 	/**
 	 * Dictionary of all players currently connected
 	 * to this session mapped on their ids.
@@ -127,10 +155,12 @@ exports.getSession = function (token) {
 
 /**
  * Creates a new session.
+ * @param {socket.io}      io       ready to use and listening socket.io instance
+ * @param {SessionOptions} options  to tweak the new sessions behaviour
  * @returns {module:server/session~Session} newly created session
  */
-exports.create = function(io) {
-	var session = new Session(io);
+exports.create = function(io, options) {
+	var session = new Session(io, options);
 	sessions[session.token] = session;
 	session.on('destroyed', function() {
 		delete sessions[session.token];

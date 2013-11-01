@@ -61,3 +61,20 @@ exports.numeric = function (minLength, maxLength, digitCount, doubleDigits, sort
 	}
 	return rand;
 };
+
+/**
+ * Generates a random integer which can be used for authentication 
+ * via symbol pattern field (each symbol one digit, only unique digits).
+ * @param {integer} [minSymbols=1]   minimal number of digits
+ * @param {integer} [maxSymbols=4]   maximal number of digits
+ * @param {integer} [symbolCount=9]  number of digits that should be used for 
+ generating the number. By default all 9 digits are used for using it with a 
+ 3x3 symbol field.
+ * @returns {integer} random integer
+ */
+exports.symbolPattern = function (minSymbols, maxSymbols, symbolCount) {
+	minSymbols = minSymbols || 1;
+	maxSymbols = maxSymbols || 4;
+	symbolCount = symbolCount || 9;
+	return exports.numeric(minSymbols, maxSymbols, symbolCount, false, true);
+};
