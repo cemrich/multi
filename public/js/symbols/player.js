@@ -36,6 +36,20 @@ define(function(require, exports, module) {
 		alert('Oh, crap - this game does not exist. Try again!');
 	}
 
+	function onUpClick() {
+		session.myself.message('move', { direction: 'up' });
+	}
+	function onDownClick() {
+		session.myself.message('move', { direction: 'down' });
+	}
+
+	function onStart() {
+		sound.onStart();
+		$('#created').hide();
+		$('#controls').show();
+		$('html').off('click', changeColor);
+	}
+
 	function onSessionJoined(joinedSession) {
 		session = joinedSession;
 		sound.onPlayerJoin();
@@ -51,7 +65,7 @@ define(function(require, exports, module) {
 		session.on('destroyed', function () {
 			alert('Opps - you have no connection. Try a reload when your connection returns.');
 		});
-		session.on('start', sound.onStart);
+		session.on('start', onStart);
 
 		$('html').click(changeColor);
 	}
@@ -71,6 +85,8 @@ define(function(require, exports, module) {
 		sound = soundModule;
 		$('#join .join').click(onJoinSessionClick);
 		$('#join .icon').click(onIconClick);
+		$('#controls .up').click(onUpClick);
+		$('#controls .down').click(onDownClick);
 		$('#created .start').click(onStartGameClick);
 		$('#intro').hide();
 		$('#join').show();

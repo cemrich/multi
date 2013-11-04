@@ -614,6 +614,19 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		WatchJS.noMore = false;
 	};
 
+	Player.prototype.dispatchMessageFromServer = function(type, data) {
+		this.dispatchEvent(type, { type: type, data: data } );
+	};
+
+	/**
+	* Sends the given message to all other instances of this player.
+	* @param {string} type    type of message that should be send
+	* @param {object} [data]  message data that should be send
+	*/
+	Player.prototype.message = function (type, data) {
+		this.dispatchEvent('messageSendLocally', { type: type, data: data } );
+	};
+
 	/**
 	* Unpacks a player object send over a socket connection.
 	* @returns {module:client/player~Player}
@@ -667,6 +680,13 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		 */
 		this.token = null;
 
+		function onMessageSendLocally(event) {
+			var player = event.currentTarget;
+			socket.emit('playerMessage', 
+				{ id: player.id, type: event.type, data: event.data }
+			);
+		}
+
 		function onAttributesChangedLocally(event) {
 			var player = event.currentTarget;
 			socket.emit('playerAttributesChanged', 
@@ -674,13 +694,26 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 			);
 		}
 
+		function getPlayer(id) {
+			var player = session.players[id];
+			if (player === undefined && id === session.myself.id) {
+				player = session.myself;
+			}
+			if (player === undefined) {
+				console.error('player not found', id);
+			}
+			return player;
+		}
+
 		myself.on('attributesChangedLocally', onAttributesChangedLocally);
+		myself.on('messageSendLocally', onMessageSendLocally);
 
 		socket.on('playerJoined', function (data) {
 			var player = playerModule.fromPackedData(data);
 			session.players[player.id] = player;
 			session.dispatchEvent('playerJoined', { player: player });
 			player.on('attributesChangedLocally', onAttributesChangedLocally);
+			player.on('messageSendLocally', onMessageSendLocally);
 		});
 
 		socket.on('playerLeft', function (data) {
@@ -696,19 +729,20 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		});
 
 		socket.on('playerAttributesChanged', function (data) {
-			var player = session.players[data.id];
-			if (player === undefined && data.id === session.myself.id) {
-				player = session.myself;
-			}
-			if (player === undefined) {
-				console.error('player not found', data.id);
-			} else {
+			var player = getPlayer(data.id);
+			if (player !== undefined) {
 				player.updateAttributesFromServer(data.attributes);
 			}
 		});
 
-		socket.on('message', function (data) {
+		socket.on('sessionMessage', function (data) {
 			session.dispatchEvent(data.type, data);
+		});
+		socket.on('playerMessage', function (data) {
+			var player = getPlayer(data.id);
+			if (player !== undefined) {
+				player.dispatchMessageFromServer(data.type, data.data);
+			}
 		});
 	};
 
@@ -720,7 +754,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	* @param {object} [data]  message data that should be send
 	*/
 	Session.prototype.message = function (type, data) {
-		this.socket.emit('message', { type: type, data: data }); 
+		this.socket.emit('sessionMessage', { type: type, data: data }); 
 	};
 
 	/**

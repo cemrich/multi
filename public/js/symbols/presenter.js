@@ -1,5 +1,6 @@
 define(function(require, exports, module) {
 
+	var gameModule = require('./game');
 	var multi = null;
 	var sound = null;
 
@@ -23,6 +24,7 @@ define(function(require, exports, module) {
 	}
 
 	function onSessionCreated(session) {
+		var game = new gameModule.Game(session, sound);
 		var token = session.token.toString();
 		for (var i = 0; i < token.length; i++) {
 			var symbol = $('#new .symbols').children().get(token[i]);
@@ -33,7 +35,11 @@ define(function(require, exports, module) {
 		session.on('destroyed', function () {
 			alert('Opps - you have no connection. Try a reload when your connection returns.');
 		});
-		session.on('start', sound.onStart);
+		session.on('start', function () {
+			$('#new').hide();
+			$('#field').show();
+			game.start();
+		});
 
 		$('#new').show();
 		$('#loading').hide();

@@ -69,8 +69,14 @@ var Player = function (socket) {
 
 	// the corresponding session sends us a message
 	// this should be mirrored to the other session instances
-	this.socket.on('message', function (event) {
-		player.dispatchEvent('message', event);
+	this.socket.on('sessionMessage', function (event) {
+		player.dispatchEvent('sessionMessage', event);
+	});
+
+	// this player sends us a message
+	// this should be mirrored to the other player instances
+	this.socket.on('playerMessage', function (event) {
+		player.dispatchEvent('playerMessage', event);
 	});
 };
 

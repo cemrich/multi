@@ -1,6 +1,7 @@
 html {
 	padding: 0;
 	margin: 0;
+	height: 100%;
 }
 
 body {
@@ -10,6 +11,8 @@ body {
 	padding: 10px;
 	text-align: center;
 	position: relative;
+	height: 100%;
+	width: 100%;
 }
 
 h1 {
@@ -56,7 +59,7 @@ button:focus {
 	border-color: rgb(15, 114, 153);
 }
 
-#new, #join, #created, #new .symbols {
+#new, #join, #created, #controls, #field, #new .symbols {
 	display: none;
 }
 
@@ -113,6 +116,11 @@ button:focus {
 	padding: 0;
 }
 
+#field {
+	width: 100%;
+	height: 100%;
+}
+
 #new .manual {
 	display: inline-block; 
 	vertical-align: middle;
@@ -145,4 +153,12 @@ button:focus {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
+}
+
+.head {
+	width: 1em;
+	height: 1em;
+	position: absolute;
+	top: 50%;
+	left: 50%;
 }

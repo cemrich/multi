@@ -40,13 +40,13 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 			var joinedSession = null;
 			multi.joinSession(createdSession.token).then(function (session) {
 				joinedSession = session;
+				createdSession.on('playerJoined', function (event) {
+					ok(createdSession.players[joinedSession.myself.id], "new player added to created session");
+				});
 				ok(joinedSession, "session can be joined");
 				ok(joinedSession.myself, "session has own player added");
 				equal(joinedSession.token, createdSession.token, "session tokens are equal");ok(joinedSession.players[createdSession.myself.id], "old player added to new session");
 				start();
-			});
-			createdSession.on('playerJoined', function (event) {
-				ok(createdSession.players[joinedSession.myself.id], "new player added to created session");
 			});
 		});
 	});
@@ -72,6 +72,31 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 				});
 
 				session.message('ping');
+			});
+		});
+	});
+
+	asyncTest("test mirroring player messages", function () {
+		expect(4);
+
+		multi.createSession().then(function (session) {
+			var data = { test: 42, foo: 'bar' };
+			var createdSession = session;
+
+			multi.joinSession(createdSession.token).then(function (session) {
+				session.myself.on('pong', function (event) {
+					ok(true, "pong message received");
+					equal(event.type, "pong", "message type is correct");
+					deepEqual(event.data, data, "message data is correct");
+					start();
+				});
+				createdSession.on('playerJoined', function () {
+					createdSession.players[session.myself.id].on('ping', function (event) {
+						ok(true, "ping message received");
+						createdSession.players[session.myself.id].message('pong', data);
+					});
+					session.myself.message('ping');
+				});
 			});
 		});
 	});

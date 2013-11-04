@@ -79,9 +79,13 @@ var Session = function (io, options) {
 
 util.inherits(Session, EventDispatcher);
 
-Session.prototype.onPlayerMessage = function (event) {
-	this.sendToPlayers('message', { type: event.type, data: event.data });
+Session.prototype.onSessionMessage = function (event) {
+	this.sendToPlayers('sessionMessage', { type: event.type, data: event.data });
 	this.dispatchEvent(event.type, { type: event.type, data: event.data });
+};
+
+Session.prototype.onPlayerMessage = function (event) {
+	this.sendToPlayers('playerMessage', { id: event.id, type: event.type, data: event.data });
 };
 
 /**
@@ -124,7 +128,8 @@ Session.prototype.addPlayer = function (player) {
 		session.removePlayer(player);
 	});
 	player.on('attributesChanged', this.onPlayerAttributesChanged);
-	player.on('message', this.onPlayerMessage.bind(this));
+	player.on('sessionMessage', this.onSessionMessage.bind(this));
+	player.on('playerMessage', this.onPlayerMessage.bind(this));
 	this.dispatchEvent('playerAdded', { player: player });
 };
 

@@ -48,6 +48,19 @@ define(function(require, exports, module) {
 		WatchJS.noMore = false;
 	};
 
+	Player.prototype.dispatchMessageFromServer = function(type, data) {
+		this.dispatchEvent(type, { type: type, data: data } );
+	};
+
+	/**
+	* Sends the given message to all other instances of this player.
+	* @param {string} type    type of message that should be send
+	* @param {object} [data]  message data that should be send
+	*/
+	Player.prototype.message = function (type, data) {
+		this.dispatchEvent('messageSendLocally', { type: type, data: data } );
+	};
+
 	/**
 	* Unpacks a player object send over a socket connection.
 	* @returns {module:client/player~Player}
