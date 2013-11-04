@@ -2,6 +2,7 @@
 requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], 
 		function (multiModule, socketio) {
 
+	require(['../lib/jquery.qrcode.min']);
 
 	var multiOptions = {
 		io: socketio,
@@ -27,6 +28,11 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		for (var i in session.players) {
 			showPlayer(session.players[i]);
 		}
+
+		var path = window.location.protocol + '//' + window.location.host +
+			window.location.pathname + '#' + session.token;
+		$('#qr').qrcode(path);
+		$('#qr .text').text(path).attr('href', path);
 
 		session.on('playerJoined', function (event) {
 			showPlayer(event.player);
