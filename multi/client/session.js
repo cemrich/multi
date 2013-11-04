@@ -69,9 +69,22 @@ define(function(require, exports, module) {
 				player.updateAttributesFromServer(data.attributes);
 			}
 		});
+
+		socket.on('message', function (data) {
+			session.dispatchEvent(data.type, data);
+		});
 	};
 
 	util.inherits(Session, EventDispatcher);
+
+	/**
+	* Sends the given message to all other instances of this session.
+	* @param {string} type    type of message that should be send
+	* @param {object} [data]  message data that should be send
+	*/
+	Session.prototype.message = function (type, data) {
+		this.socket.emit('message', { type: type, data: data }); 
+	};
 
 	/**
 	* Unpacks a session object send over a socket connection.

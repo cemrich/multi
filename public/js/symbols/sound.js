@@ -24,6 +24,7 @@ define(['exports', '../lib/audio', '../lib/jsfx', '../lib/jsfxlib'], function (e
 	exports.onSymbol = function() { play('beat'); };
 	exports.onPlayerJoin = function() { play('ring'); };
 	exports.onPlayerDisconnect = function() { play('lost'); };
+	exports.onStart = function() { play('beat'); };
 
 	return exports;
 });

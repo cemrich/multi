@@ -35,7 +35,7 @@ button {
 	background-color: rgb(0, 169, 235);
 	color: white;
 	border: none;
-	border: 1px solid white;
+	border: 1px solid rgba(0,0,0,0);
 }
 
 button:after {

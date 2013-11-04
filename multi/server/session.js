@@ -79,6 +79,9 @@ var Session = function (io, options) {
 
 util.inherits(Session, EventDispatcher);
 
+Session.prototype.onPlayerMessage = function (event) {
+	this.sendToPlayers('message', { type: event.type, data: event.data });
+};
 
 /**
  * Relays a given event to all players currently connected
@@ -120,6 +123,7 @@ Session.prototype.addPlayer = function (player) {
 		session.removePlayer(player);
 	});
 	player.on('attributesChanged', this.onPlayerAttributesChanged);
+	player.on('message', this.onPlayerMessage.bind(this));
 	this.dispatchEvent('playerAdded', { player: player });
 };
 

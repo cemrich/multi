@@ -33,6 +33,7 @@ define(function(require, exports, module) {
 		session.on('destroyed', function () {
 			alert('Opps - you have no connection. Try a reload when your connection returns.');
 		});
+		session.on('start', sound.onStart);
 
 		$('#new').show();
 		$('#loading').hide();

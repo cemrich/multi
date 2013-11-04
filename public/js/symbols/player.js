@@ -51,8 +51,14 @@ define(function(require, exports, module) {
 		session.on('destroyed', function () {
 			alert('Opps - you have no connection. Try a reload when your connection returns.');
 		});
+		session.on('start', sound.onStart);
 
 		$('html').click(changeColor);
+	}
+
+	function onStartGameClick(event) {
+		event.stopPropagation();
+		session.message('start');
 	}
 
 	function changeColor() {
@@ -65,6 +71,7 @@ define(function(require, exports, module) {
 		sound = soundModule;
 		$('#join .join').click(onJoinSessionClick);
 		$('#join .icon').click(onIconClick);
+		$('#created .start').click(onStartGameClick);
 		$('#intro').hide();
 		$('#join').show();
 	}

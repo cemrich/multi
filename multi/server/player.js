@@ -66,6 +66,12 @@ var Player = function (socket) {
 			}
 		}
 	});
+
+	// the corresponding session sends us a message
+	// this should be mirrored to the other session instances
+	this.socket.on('message', function (event) {
+		player.dispatchEvent('message', event);
+	});
 };
 
 /* class methods */
