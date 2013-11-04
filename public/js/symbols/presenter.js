@@ -28,7 +28,12 @@ define(function(require, exports, module) {
 			var symbol = $('#new .symbols').children().get(token[i]);
 			$(symbol).attr('class', 'icon');
 		}
+
 		session.on('playerJoined', onPlayerConnected);
+		session.on('destroyed', function () {
+			alert('Opps - you have no connection. Try a reload when your connection returns.');
+		});
+
 		$('#new').show();
 		$('#loading').hide();
 		$('#new .symbols').css('pointer-events', 'none');

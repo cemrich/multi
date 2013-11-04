@@ -44,8 +44,12 @@ define(function(require, exports, module) {
 		$('#created').show();
 		$('#loading').hide();
 
-		session.myself.on('attributesChanged', function() {
+		session.myself.on('attributesChanged', function () {
 			$('body').css('background-color', session.myself.attributes.color);
+		});
+
+		session.on('destroyed', function () {
+			alert('Opps - you have no connection. Try a reload when your connection returns.');
 		});
 
 		$('html').click(changeColor);
