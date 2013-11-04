@@ -5,9 +5,10 @@ requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-
 		io: socketio,
 		server: 'http://tinelaptopsony/',
 		session: {
+			scriptName: 'games/symbols',
 			token: {
 				func: 'symbolPattern',
-				args: [7, 7]
+				args: [1, 4]
 			}
 		}
 	};

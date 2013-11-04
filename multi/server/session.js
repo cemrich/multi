@@ -8,6 +8,9 @@ var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
  * @typedef {Object} SessionOptions
+ * @property {string} [scriptName] name of server side script file that should
+ *  be executed when a new session is created. This module must provide a Game
+ *  constructor that takes a session as only argument.
  * @property {string} [token.func='numeric']  name of a function inside the {@link module:server/token} module that should generate the session token
  * @property {Array}  [token.args=[]]   argument array for the token generation function
  */
@@ -68,6 +71,10 @@ var Session = function (io, options) {
 			{ id: player.id, attributes: player.attributes }
 		);
 	};
+
+	if (options !== undefined && options.scriptName !== undefined) {
+		var game = new require('../../' + options.scriptName).Game(this);
+	}
 };
 
 util.inherits(Session, EventDispatcher);
