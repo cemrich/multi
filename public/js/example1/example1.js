@@ -9,10 +9,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	};
 
 	var multi = multiModule.init(multiOptions);
-	multi.on('joiningSessionStarted', function (event) {
-		$('.sessionstart').hide();
-	});
-	multi.autoJoinSession();
+	multi.autoJoinSession().then(onSessionJoined);
 
 	function showPlayer(player) {
 		var p = $('<li></li>', {'class': player.id}).text(player.id);
@@ -23,6 +20,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	}
 
 	function handleSession(session, message) {
+		console.log('handle session');
 		$('.session').text(message + ' session ' + session.token);
 		$('.myself').text(session.myself.id);
 
@@ -40,21 +38,29 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		});
 	}
 
-	multi.on('sessionCreated', function (event) {
-		handleSession(event.session, 'created');
-	});
+	function onSessionJoined(session) {
+		$('.sessionstart').hide();
+		handleSession(session, 'joined');
+	}
 
-	multi.on('sessionJoined', function (event) {
-		handleSession(event.session, 'joined');
-	});
+	function onSessionCreated(session) {
+		handleSession(session, 'created');
+	}
+
+	function onError(error) {
+		$('.sessionstart').show();
+		console.error(error);
+	}
 
 	$('.sessionstart .new').click(function(event) {
 		$('.sessionstart').hide();
-		multi.createSession();
+		multi.createSession().then(onSessionCreated, onError).done();
 	});
+
 	$('.sessionstart .join').click(function(event) {
+		$('.sessionstart').hide();
 		var token = $('.sessionstart .token').val();
-		multi.joinSession(token);
+		multi.joinSession(token).then(onSessionJoined, onError).done();
 	});
 
 });

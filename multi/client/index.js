@@ -9,6 +9,7 @@ define(function(require, exports, module) {
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
 	var color = require('../shared/color');
+	var Q = require('../debs/q');
 	var util = require('util');
 
 	var instance = null;
@@ -56,40 +57,49 @@ define(function(require, exports, module) {
 
 	Multi.prototype.autoJoinSession = function () {
 		var sessionToken = getSessionToken();
-		if (sessionToken !== null) {
-			this.joinSession(sessionToken);
+		if (sessionToken === null) {
+			var deferred = Q.defer();
+			var error = new Error('autoJoinSessionFailed because no token was found');
+			deferred.reject(error);
+			return deferred.promise;
+		} else {
+			return this.joinSession(sessionToken);
 		}
 	};
 
 	/**
 	 * @public
-	 * @fires module:client/multi~Multi#sessionJoined
+	 * @return promise
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
 		console.log('joining session', sessionToken);
-		this.dispatchEvent('joiningSessionStarted', { token: sessionToken });
+
 		var multi = this;
+		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {
 			socket.emit('joinSession', { token: sessionToken });
 			socket.on('sessionJoined', function (data) {
-				multi.onSession('sessionJoined', data, socket);
+				var session = sessionModule.fromPackedData(data, socket);
+				deferred.resolve(session);
 			});
 		});
 		socket.on('connect_failed', function () {
-			multi.dispatchEvent('joinSessionFailed', { reason: 'no connection' });
+			// TODO: custom error types
+			deferred.reject(new Error('joinSessionFailed because there is no connection'));
 		});
 		socket.on('joinSessionFailed', function () {
-			multi.dispatchEvent('joinSessionFailed', { reason: 'no such session', token: sessionToken });
+			deferred.reject(new Error('joinSessionFailed because there is no such session'));
 		});
+		return deferred.promise;
 	};
 
 	/**
 	 * @public
 	 * @param {SessionOptions} [options]  to tweak this new sessions behaviour
-	 * @fires module:client/multi~Multi#sessionCreated
+	 * @return promise
 	 */
 	Multi.prototype.createSession = function (options) {
 		console.log('creating new session');
@@ -97,27 +107,22 @@ define(function(require, exports, module) {
 		options = options || this.sessionOptions;
 
 		var multi = this;
+		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {
 			socket.emit('createSession', { options: options });
 			socket.on('sessionCreated', function (data) {
-				multi.onSession('sessionCreated', data, socket);
+				var session = sessionModule.fromPackedData(data, socket);
+				deferred.resolve(session);
 			});
 		});
 		socket.on('connect_failed', function () {
-			multi.dispatchEvent('createSessionFailed', { reason: 'no connection' });
+			deferred.reject(new Error('connection failed'));
 		});
+		return deferred.promise;
 	};
-
-	/**
-	 * @event module:client/multi~Multi#sessionCreated
-	 */
-
-	/**
-	 * @event module:client/multi~Multi#sessionJoined
-	 */
 
 	/**
 	 * @public

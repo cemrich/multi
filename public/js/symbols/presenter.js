@@ -22,13 +22,13 @@ define(function(require, exports, module) {
 		$('#new .symbols').show();
 	}
 
-	function onSessionCreated(event) {
-		var token = event.session.token.toString();
+	function onSessionCreated(session) {
+		var token = session.token.toString();
 		for (var i = 0; i < token.length; i++) {
 			var symbol = $('#new .symbols').children().get(token[i]);
 			$(symbol).attr('class', 'icon');
 		}
-		event.session.on('playerJoined', onPlayerConnected);
+		session.on('playerJoined', onPlayerConnected);
 		$('#new').show();
 		$('#loading').hide();
 		$('#new .symbols').css('pointer-events', 'none');
@@ -43,7 +43,7 @@ define(function(require, exports, module) {
 		$('#loading').show();
 		window.scrollTo(0, 1);
 
-		multi.createSession();
+		multi.createSession().then(onSessionCreated).done();
 	}
 
 	exports.go = go;

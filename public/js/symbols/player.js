@@ -26,24 +26,24 @@ define(function(require, exports, module) {
 				sessionCode += i.toString();
 			}
 		});
-		multi.joinSession(sessionCode);
+		multi.joinSession(sessionCode).then(onSessionJoined, onJoinSessionFailed).done();
 		$('#loading').show();
 	}
 
-	function onJoinSessionFailed(event) {
+	function onJoinSessionFailed(error) {
 		sound.onPlayerDisconnect();
 		$('#loading').hide();
 		alert('Oh, crap - this game does not exist. Try again!');
 	}
 
-	function onSessionJoined(event) {
+	function onSessionJoined(joinedSession) {
+		session = joinedSession;
 		sound.onPlayerJoin();
 
 		$('#join').hide();
 		$('#created').show();
 		$('#loading').hide();
 
-		session = event.session;
 		session.myself.on('attributesChanged', function() {
 			$('body').css('background-color', session.myself.attributes.color);
 		});
@@ -59,8 +59,6 @@ define(function(require, exports, module) {
 	function go(multiInstance, soundModule) {
 		multi = multiInstance;
 		sound = soundModule;
-		multi.on('joinSessionFailed', onJoinSessionFailed);
-		multi.on('sessionJoined', onSessionJoined);
 		$('#join .join').click(onJoinSessionClick);
 		$('#join .icon').click(onIconClick);
 		$('#intro').hide();
