@@ -8,5 +8,8 @@ exports.Game = function (session) {
 	}
 
 	session.on('playerAdded', onPlayerAdded);
+	session.on('start', function (event) {
+		console.log('session start event dispatched');
+	});
 
 };

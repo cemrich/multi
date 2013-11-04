@@ -81,6 +81,7 @@ util.inherits(Session, EventDispatcher);
 
 Session.prototype.onPlayerMessage = function (event) {
 	this.sendToPlayers('message', { type: event.type, data: event.data });
+	this.dispatchEvent(event.type, { type: event.type, data: event.data });
 };
 
 /**
