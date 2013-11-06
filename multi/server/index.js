@@ -36,6 +36,9 @@ var Multi = function (app, server, options) {
 	app.get(options.gameUrlSuffix + 'symbols', function(req, res) {
 		res.render(options.gameViewSubdir + 'symbols');
 	});
+	app.get(options.gameUrlSuffix + 'snake', function(req, res) {
+		res.render(options.gameViewSubdir + 'terminalControllerSnake');
+	});
 
 	// when a new player connection is coming in...
 	io.on('connection', function (socket) {
