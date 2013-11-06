@@ -586,6 +586,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 
 		EventDispatcher.call(this);
 		this.id = null;
+		this.role = 'player';
 		this.attributes = { color: null };
 
 		/** 

@@ -20,6 +20,7 @@ define(function(require, exports, module) {
 
 		EventDispatcher.call(this);
 		this.id = null;
+		this.role = 'player';
 		this.attributes = { color: null };
 
 		/** 

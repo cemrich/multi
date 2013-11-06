@@ -28,6 +28,12 @@ var Player = function (socket) {
 	 * @readonly
 	 */
 	this.id = socket.id;
+	/**
+	 * Roles that is fulfilled by this
+	 * player. Either 'presenter' or 'player'.
+	 * @type {string}
+	 */
+	this.role = 'player';
 	/** 
 	 * Object with user attributes for this player.
 	 * All changes within this object will automatically
@@ -91,6 +97,7 @@ util.inherits(Player, EventDispatcher);
 Player.prototype.pack = function () {
 	return { 
 		id: this.id,
+		role: this.role,
 		attributes: this.attributes
 	};
 };

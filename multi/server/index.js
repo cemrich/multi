@@ -49,6 +49,7 @@ var Multi = function (app, server, options) {
 			if (session === null) {
 				socket.emit('joinSessionFailed', { token: event.token });
 			} else {
+				player.role = 'player';
 				socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
 				session.addPlayer(player);
 			}
@@ -57,6 +58,7 @@ var Multi = function (app, server, options) {
 		socket.on('createSession', function(event) {
 			var session = sessionModule.create(io, event.options);
 			multi.dispatchEvent('sessionCreated', { session: session });
+			player.role = 'presenter';
 			socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });
 			session.addPlayer(player);
 		});

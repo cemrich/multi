@@ -34,7 +34,7 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 	});
 
 	asyncTest("test connection to existing session", function () {
-		expect(5);
+		expect(7);
 		multi.createSession().then(function (session) {
 			var createdSession = session;
 			var joinedSession = null;
@@ -42,9 +42,11 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 				joinedSession = session;
 				createdSession.on('playerJoined', function (event) {
 					ok(createdSession.players[joinedSession.myself.id], "new player added to created session");
+					equal(createdSession.myself.role, "presenter", "first player has a presenter role");
 				});
 				ok(joinedSession, "session can be joined");
 				ok(joinedSession.myself, "session has own player added");
+				equal(joinedSession.myself.role, "player", "joined player has a player role");
 				equal(joinedSession.token, createdSession.token, "session tokens are equal");ok(joinedSession.players[createdSession.myself.id], "old player added to new session");
 				start();
 			});
