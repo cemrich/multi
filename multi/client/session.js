@@ -51,8 +51,7 @@ define(function(require, exports, module) {
 
 		// unpack players
 		for (var i in sessionData.players) {
-			var player = playerModule.fromPackedData(sessionData.players[i]);
-			this.players[player.id] = player;
+			addPlayer(sessionData.players[i]);
 		}
 		delete sessionData.players;
 
@@ -89,15 +88,19 @@ define(function(require, exports, module) {
 			return player;
 		}
 
-		myself.on('attributesChangedLocally', onAttributesChangedLocally);
-		myself.on('messageSendLocally', onMessageSendLocally);
-
-		socket.on('playerJoined', function (data) {
-			var player = playerModule.fromPackedData(data);
+		function addPlayer(playerData) {
+			var player = playerModule.fromPackedData(playerData);
 			session.players[player.id] = player;
 			session.dispatchEvent('playerJoined', { player: player });
 			player.on('attributesChangedLocally', onAttributesChangedLocally);
 			player.on('messageSendLocally', onMessageSendLocally);
+		}
+
+		myself.on('attributesChangedLocally', onAttributesChangedLocally);
+		myself.on('messageSendLocally', onMessageSendLocally);
+
+		socket.on('playerJoined', function (data) {
+			addPlayer(data);
 		});
 
 		socket.on('playerLeft', function (data) {
@@ -139,6 +142,10 @@ define(function(require, exports, module) {
 	*/
 	Session.prototype.message = function (type, data) {
 		this.socket.emit('sessionMessage', { type: type, data: data }); 
+	};
+
+	Session.prototype.disconnectMyself = function () {
+		this.socket.socket.disconnect();
 	};
 
 	/**

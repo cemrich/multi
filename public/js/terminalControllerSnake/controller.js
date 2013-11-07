@@ -19,7 +19,8 @@ define(function (require, exports, module) {
 
 		function onExitClick(event) {
 			// with one player bored the game is over
-			// TODO: maybe something like session.destroy() or player.disconnect()?
+			// TODO: nicer syntax like session.myself.disconnect()
+			session.disconnectMyself();
 		}
 
 		function onFinished() {
