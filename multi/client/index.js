@@ -72,7 +72,7 @@ define(function(require, exports, module) {
 	 * @return promise
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
-		console.log('joining session', sessionToken);
+		// console.log('joining session', sessionToken);
 
 		var multi = this;
 		var deferred = Q.defer();
@@ -102,7 +102,7 @@ define(function(require, exports, module) {
 	 * @return promise
 	 */
 	Multi.prototype.createSession = function (options) {
-		console.log('creating new session');
+		// console.log('creating new session');
 
 		options = options || this.sessionOptions;
 

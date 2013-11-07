@@ -44,11 +44,9 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		// I was not able to connect as controller
 		// assuming I want to create a new session
 		// TODO: autoJoinElseCreate could be moved to lib
-		// TODO: remove console output
 		multi.createSession().then(onSessionCreated, onSessionCreationFailed).done();
 	}
 
 	// TODO: look into this "Unhandled rejection reasons (should be empty)" warning by Q
-	// TODO: remove console output
 	multi.autoJoinSession().then(onSessionJoined, onAutoJoinFailed).done();
 });
