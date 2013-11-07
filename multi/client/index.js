@@ -69,7 +69,10 @@ define(function(require, exports, module) {
 	};
 
 	Multi.prototype.autoJoinElseCreateSession = function () {
-		return this.autoJoinSession().fail(this.createSession);
+		var that = this;
+		return this.autoJoinSession().fail(function () {
+			return that.createSession();
+		});
 	};
 
 	/**
