@@ -9,26 +9,60 @@ define(function(require, exports, module) {
 	var playerModule = require('./player');
 	var util = require('util');
 
+
+	/* 
+	* internal module functions
+	*/
+
+	function getJoinSesionUrl(token) {
+		var url = window.location.protocol + '//' + window.location.host;
+		if (window.location.port !== '' && window.location.port !== '80') {
+			url += ":" + window.location.port;
+		}
+		url += window.location.pathname + '#' + token;
+		return url;
+	}
+
+
+	/* 
+	* session class functions
+	*/
+
 	/**
 	* @inner
 	* @class
 	* @mixes EventDispatcher
 	* @memberof module:client/session
 	*/
-	var Session = function (myself, socket) {
+	var Session = function (myself, socket, sessionData) {
 
 		EventDispatcher.call(this);
 		var session = this;
 
-		this.players = {};
 		this.myself = myself;
 		this.socket = socket;
+		this.players = {};
 		/** 
 		 * unique token identifying this session
 		 * @type {string}
 		 * @readonly
 		 */
 		this.token = null;
+
+		// unpack players
+		for (var i in sessionData.players) {
+			var player = playerModule.fromPackedData(sessionData.players[i]);
+			this.players[player.id] = player;
+		}
+		delete sessionData.players;
+
+		// unpack session attributes
+		for (i in sessionData) {
+			this[i] = sessionData[i];
+		}
+
+		// calculate attributes
+		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
 		function onMessageSendLocally(event) {
 			var player = event.currentTarget;
@@ -113,19 +147,7 @@ define(function(require, exports, module) {
 	*/
 	exports.fromPackedData = function (data, socket) {
 		var myself = playerModule.fromPackedData(data.player);
-		var session = new Session(myself, socket);
-		for (var i in data.session) {
-			if (i === 'players') {
-				var players = {};
-				for (var j in data.session.players) {
-					var player = playerModule.fromPackedData(data.session.players[j]);
-					players[player.id] = player;
-				}
-				session.players = players;
-			} else {
-				session[i] = data.session[i];
-			}
-		}
+		var session = new Session(myself, socket, data.session);
 		return session;
 	};
 

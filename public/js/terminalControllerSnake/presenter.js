@@ -32,10 +32,9 @@ define(function (require, exports, module) {
 			startGame();
 		}
 
-		// TODO: move URL to lib
-		var controllerUrl = window.location.href + '#' + session.token;
-		$('#presenter-waiting .controllerUrl').text(controllerUrl);
-		$('#presenter-waiting .controllerUrl').attr('href', controllerUrl);
+		// show url to join this session
+		$('#presenter-waiting .controllerUrl').text(session.joinSessionUrl);
+		$('#presenter-waiting .controllerUrl').attr('href', session.joinSessionUrl);
 		showSection('#presenter-waiting');
 
 		// waiting for our player
