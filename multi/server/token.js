@@ -57,7 +57,7 @@ exports.numeric = function (minLength, maxLength, digitCount, doubleDigits, sort
 		}
 	}
 	if (sorted) {
-		rand = rand.split('').sort().join(''), 10;
+		rand = rand.split('').sort().join('');
 	}
 	return rand;
 };
