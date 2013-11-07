@@ -26,8 +26,16 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		console.error(error);
 	}
 
+	function onSessionDestroyed() {
+		// something went wrong - my session does not longer exist
+		alert('Disconneced! I\'ll try to reload.');
+		window.location.reload();
+	}
+
 	function onSession(session) {
 		// I've created or joined a session
+		session.once('destroyed', onSessionDestroyed);
+
 		var roleModule;
 		if (session.myself.role === 'presenter') {
 			roleModule = './presenter';
