@@ -19,8 +19,7 @@ define(function (require, exports, module) {
 
 		function onExitClick(event) {
 			// with one player bored the game is over
-			// TODO: nicer syntax like session.myself.disconnect()
-			session.disconnectMyself();
+			window.close();
 		}
 
 		function onFinished() {
@@ -30,6 +29,14 @@ define(function (require, exports, module) {
 			$('#controller-finished .exit').one('click', onExitClick);
 		}
 
+		function onBelowMinPlayerNeeded() {
+			// we don't have enough players any longer
+			// means our presenter has disconnected - quit
+			// TODO: nicer syntax like session.myself.disconnect()
+			session.disconnectMyself();
+		}
+
+		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 		startGame();
 	}
 

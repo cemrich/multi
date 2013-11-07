@@ -13,6 +13,8 @@ var EventDispatcher = require('../shared/eventDispatcher');
  *  constructor that takes a session as only argument.
  * @property {string} [token.func='numeric']  name of a function inside the {@link module:server/token} module that should generate the session token
  * @property {Array}  [token.args=[]]   argument array for the token generation function
+ * @property {integer}[minPlayerNeeded=1] minimum number of players needed for this session
+ * @property {integer}[maxPlayerNeeded=10] maximum number of players needed for this session
  */
 
 /**
@@ -22,18 +24,21 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * @protected
  * @param {socket.io} io  ready to use and listening socket.io instance
  * @param {SessionOptions} options to tweak this sessions behaviour
-
  */
 var Session = function (io, options) {
 	var session = this;
 
 	var tokenFunction = token.numeric;
 	var tokenFunctionArgs = [];
+	this.minPlayerNeeded = 1;
 
 	if (options !== undefined) {
 		if (options.token !== undefined) {
 			tokenFunction = token[options.token.func] || tokenFunction;
 			tokenFunctionArgs = options.token.args || tokenFunctionArgs;
+		}
+		if (options.minPlayerNeeded !== undefined && options.minPlayerNeeded > 0) {
+			this.minPlayerNeeded = options.minPlayerNeeded;
 		}
 	}
 
@@ -110,8 +115,16 @@ Session.prototype.pack = function() {
 	}
 	return {
 		token: this.token,
-		players: players
+		players: players,
+		minPlayerNeeded: this.minPlayerNeeded
 	};
+};
+
+/**
+ * @return {integer} number of currently connected players
+ */
+Session.prototype.getPlayerCount = function () {
+	return Object.keys(this.players).length;
 };
 
 /**
@@ -131,6 +144,9 @@ Session.prototype.addPlayer = function (player) {
 	player.on('sessionMessage', this.onSessionMessage.bind(this));
 	player.on('playerMessage', this.onPlayerMessage.bind(this));
 	this.dispatchEvent('playerAdded', { player: player });
+	if (this.getPlayerCount() === this.minPlayerNeeded) {
+		this.dispatchEvent('aboveMinPlayerNeeded');
+	}
 };
 
 /**
@@ -143,7 +159,10 @@ Session.prototype.removePlayer = function (player) {
 	delete this.players[player.id];
 	this.dispatchEvent('playerLeft', { player: player });
 	this.sendToPlayers('playerLeft', { playerId: player.id });
-	if (Object.keys(this.players).length === 0) {
+	if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
+		this.dispatchEvent('belowMinPlayerNeeded');
+	}
+	if (this.getPlayerCount() === 0) {
 		this.dispatchEvent('destroyed');
 	}
 };

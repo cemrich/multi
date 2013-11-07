@@ -25,11 +25,14 @@ define(function (require, exports, module) {
 			session.once('again', onAgain);
 		}
 
-		function onPlayerJoined(event) {
-			// the one and only player joined
-			// we can start the game now
-			// TODO: implement some mechanism that allows to specify the number of allowed player per session
+		function onAboveMinPlayerNeeded() {
+			// we have all players we need and can start the game now
 			startGame();
+		}
+
+		function onBelowMinPlayerNeeded() {
+			// we don't have enough players any longer
+			showSection('#presenter-waiting');
 		}
 
 		// show url to join this session
@@ -38,7 +41,8 @@ define(function (require, exports, module) {
 		showSection('#presenter-waiting');
 
 		// waiting for our player
-		session.once('playerJoined', onPlayerJoined);
+		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
+		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 
 	}
 

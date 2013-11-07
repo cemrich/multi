@@ -10,7 +10,10 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	// is this possible with promises, too?
 	var multiOptions = {
 		io: socketio,
-		server: 'http://tinelaptopsony/'
+		server: 'http://tinelaptopsony/',
+		session: {
+			minPlayerNeeded: 2
+		}
 	};
 	var session = null;
 	var multi = multiModule.init(multiOptions);
@@ -28,14 +31,13 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	function onSessionDestroyed() {
 		// something went wrong - my session does not longer exist
-		alert('Disconneced! I\'ll try to reload.');
-		window.location.reload();
+		showSection();
+		alert('Ooops. The connection dropped. Try to reload.');
 	}
 
 	function onSession(session) {
 		// I've created or joined a session
 		session.once('destroyed', onSessionDestroyed);
-
 		var roleModule;
 		if (session.myself.role === 'presenter') {
 			roleModule = './presenter';

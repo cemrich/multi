@@ -699,16 +699,18 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		 * @readonly
 		 */
 		this.token = null;
+		this.minPlayerNeeded = null;
 
-		// unpack players
-		for (var i in sessionData.players) {
-			addPlayer(sessionData.players[i]);
-		}
+		var packedPlayers = sessionData.players;
 		delete sessionData.players;
 
 		// unpack session attributes
-		for (i in sessionData) {
+		for (var i in sessionData) {
 			this[i] = sessionData[i];
+		}
+		// unpack players
+		for (i in packedPlayers) {
+			addPlayer(packedPlayers[i]);
 		}
 
 		// calculate attributes
@@ -745,6 +747,10 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 			session.dispatchEvent('playerJoined', { player: player });
 			player.on('attributesChangedLocally', onAttributesChangedLocally);
 			player.on('messageSendLocally', onMessageSendLocally);
+
+			if (session.getPlayerCount() === session.minPlayerNeeded) {
+				session.dispatchEvent('aboveMinPlayerNeeded');
+			}
 		}
 
 		myself.on('attributesChangedLocally', onAttributesChangedLocally);
@@ -759,6 +765,10 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 			delete session.players[data.playerId];
 			session.dispatchEvent('playerLeft', { player: player });
 			player.dispatchEvent('disconnected');
+
+			if (session.getPlayerCount() === (session.minPlayerNeeded-1)) {
+				session.dispatchEvent('belowMinPlayerNeeded');
+			}
 		});
 
 		socket.on('disconnect', function (data) {
@@ -785,6 +795,13 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	};
 
 	util.inherits(Session, EventDispatcher);
+
+	/**
+	 * @return {integer} number of currently connected players including myself
+	 */
+	Session.prototype.getPlayerCount = function () {
+		return Object.keys(this.players).length + 1;
+	};
 
 	/**
 	* Sends the given message to all other instances of this session.
@@ -2844,7 +2861,10 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	};
 
 	Multi.prototype.autoJoinElseCreateSession = function () {
-		return this.autoJoinSession().fail(this.createSession);
+		var that = this;
+		return this.autoJoinSession().fail(function () {
+			return that.createSession();
+		});
 	};
 
 	/**
