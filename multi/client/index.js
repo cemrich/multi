@@ -67,6 +67,10 @@ define(function(require, exports, module) {
 		}
 	};
 
+	Multi.prototype.autoJoinElseCreateSession = function () {
+		return this.autoJoinSession().fail(this.createSession);
+	};
+
 	/**
 	 * @public
 	 * @return promise

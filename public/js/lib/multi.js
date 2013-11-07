@@ -2835,6 +2835,10 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		}
 	};
 
+	Multi.prototype.autoJoinElseCreateSession = function () {
+		return this.autoJoinSession().fail(this.createSession);
+	};
+
 	/**
 	 * @public
 	 * @return promise

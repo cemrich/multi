@@ -21,32 +21,24 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		$(section).show();
 	}
 
-	function onSessionCreated(session) {
-		// I'm connected as presenter now
-		requirejs(['./presenter'], function (presenterModule) {
-			presenterModule.start(session, showSection);
-		});
-	}
-
-	function onSessionCreationFailed(error) {
+	function onSessionFailed(error) {
 		// I can neither create nor join a session - bad thing
 		console.error(error);
 	}
 
-	function onSessionJoined(session) {
-		// I'm connected as controller now
-		requirejs(['./controller'], function (controllerModule) {
-			controllerModule.start(session, showSection);
+	function onSession(session) {
+		// I've created or joined a session
+		var roleModule;
+		if (session.myself.role === 'presenter') {
+			roleModule = './presenter';
+		} else {
+			roleModule = './controller';
+		}
+		requirejs([roleModule], function (roleModule) {
+			roleModule.start(session, showSection);
 		});
 	}
 
-	function onAutoJoinFailed(error) {
-		// I was not able to connect as controller
-		// assuming I want to create a new session
-		// TODO: autoJoinElseCreate could be moved to lib
-		multi.createSession().then(onSessionCreated, onSessionCreationFailed).done();
-	}
-
 	// TODO: look into this "Unhandled rejection reasons (should be empty)" warning by Q
-	multi.autoJoinSession().then(onSessionJoined, onAutoJoinFailed).done();
+	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
 });
