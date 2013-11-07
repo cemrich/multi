@@ -40,15 +40,22 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 			var joinedSession = null;
 			multi.joinSession(createdSession.token).then(function (session) {
 				joinedSession = session;
-				createdSession.on('playerJoined', function (event) {
-					ok(createdSession.players[joinedSession.myself.id], "new player added to created session");
-					equal(createdSession.myself.role, "presenter", "first player has a presenter role");
-				});
 				ok(joinedSession, "session can be joined");
 				ok(joinedSession.myself, "session has own player added");
 				equal(joinedSession.myself.role, "player", "joined player has a player role");
 				equal(joinedSession.token, createdSession.token, "session tokens are equal");ok(joinedSession.players[createdSession.myself.id], "old player added to new session");
-				start();
+
+				function checkNewPlayer() {
+					ok(createdSession.players[joinedSession.myself.id], "new player added to created session");
+					equal(createdSession.myself.role, "presenter", "first player has a presenter role");
+					start();
+				}
+
+				if (Object.keys(createdSession.players).length === 1) {
+					checkNewPlayer();
+				} else {
+					createdSession.on('playerJoined', checkNewPlayer);
+				}
 			});
 		});
 	});
@@ -92,13 +99,20 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 					deepEqual(event.data, data, "message data is correct");
 					start();
 				});
-				createdSession.on('playerJoined', function () {
+
+				function startPing() {
 					createdSession.players[session.myself.id].on('ping', function (event) {
 						ok(true, "ping message received");
 						createdSession.players[session.myself.id].message('pong', data);
 					});
 					session.myself.message('ping');
-				});
+				}
+
+				if (Object.keys(createdSession.players).length === 1) {
+					startPing();
+				} else {
+					createdSession.on('playerJoined', startPing);
+				}
 			});
 		});
 	});
