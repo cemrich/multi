@@ -9,8 +9,9 @@ define(function(require, exports, module) {
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
 	var color = require('../shared/color');
-	var Q = require('../debs/q');
 	var util = require('util');
+	var Q = require('../debs/q');
+	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;
 

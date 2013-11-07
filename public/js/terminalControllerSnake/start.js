@@ -39,6 +39,5 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		});
 	}
 
-	// TODO: look into this "Unhandled rejection reasons (should be empty)" warning by Q
 	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
 });

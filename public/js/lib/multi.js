@@ -2772,13 +2772,14 @@ return Q;
 * @module client/multi
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../debs/q','util'],function(require, exports, module) {
+define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','util','../debs/q'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
 	var color = require('../shared/color');
-	var Q = require('../debs/q');
 	var util = require('util');
+	var Q = require('../debs/q');
+	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;
 
