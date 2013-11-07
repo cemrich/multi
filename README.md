@@ -1,5 +1,9 @@
 ## Multi ##
 
+### Requirements ###
+- node.js (>= 0.8)
+- NPM package manager (apt-get install npm)
+
 ### How it works ###
 Before starting run `npm install` in your terminal.
 
