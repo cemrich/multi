@@ -29,7 +29,7 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 
 		var conroller = session.getPlayerArray()[0];
 		conroller.on('attributesChanged', function () {
-			game.snake.direction = conroller.attributes.direction;
+			game.snake.setDirection(conroller.attributes.direction);
 		});
 	};
 

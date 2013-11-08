@@ -16,8 +16,13 @@ define(function () {
 		this.head = null;
 		this.tail = new jaws.SpriteList();
 		this.direction = 1;
+		this.newDirection = 1;
 		this.expired = 0;
 		this.fps = 1/2 * 1000; // speed in fps * 1000
+	};
+
+	Snake.prototype.setDirection = function (direction) {
+		this.newDirection = direction;
 	};
 
 	Snake.prototype.setup = function () {
@@ -43,6 +48,10 @@ define(function () {
 
 	// which direction?
 	Snake.prototype.updateDirection = function () {
+		var oppositeDir = (this.newDirection + 2) % 4;
+		if (this.direction !== oppositeDir) {
+			this.direction = this.newDirection;
+		}
 		switch (this.direction) {
 			case 0: // up
 				this.head.y -= this.tileSize;
