@@ -147,5 +147,7 @@ define(function(require, exports, module) {
 	};
 
 	exports.color = color;
+	exports.EventDispatcher = EventDispatcher;
+	exports.util = util;
 
 });

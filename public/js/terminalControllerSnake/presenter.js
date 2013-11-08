@@ -2,13 +2,17 @@
 Screen of the snake game that shows all the action.
 */
 
-define(function (require, exports, module) {
+define(['./game'], function (gameModule) {
 
-	exports.start = function (session, showSection) {
+	function start(session, showSection) {
+
+		var game;
 
 		function startGame() {
-			showSection('#presenter-game');
-			setTimeout(onGameFinished, 2000);
+			game = new gameModule.Game(session, showSection);
+			game.on('stop', onGameFinished);
+			game.start();
+			setTimeout(game.stop.bind(game), 2000);
 		}
 
 		function onAgain() {
@@ -32,6 +36,8 @@ define(function (require, exports, module) {
 
 		function onBelowMinPlayerNeeded() {
 			// we don't have enough players any longer
+			game.off('stop', onGameFinished);
+			game.stop();
 			showSection('#presenter-waiting');
 		}
 
@@ -45,5 +51,9 @@ define(function (require, exports, module) {
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 
 	}
+
+	return {
+		start: start
+	};
 
 });

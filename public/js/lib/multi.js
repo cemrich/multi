@@ -2939,6 +2939,8 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	};
 
 	exports.color = color;
+	exports.EventDispatcher = EventDispatcher;
+	exports.util = util;
 
 });
 define(["index"], function(index) { return index; });
