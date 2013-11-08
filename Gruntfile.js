@@ -14,10 +14,10 @@ module.exports = function(grunt) {
 		},
 
 		jshint: {
-			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js'],
+			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js', 'public/js/**/*.js'],
 			options: {
 				// ignore third party libs
-				ignores: ['node_modules', 'documentation', 'multi/debs/*', 'tests/client/lib/*.js'],
+				ignores: ['node_modules', 'documentation', 'multi/debs/*', 'tests/client/lib/*.js', 'public/js/lib/*'],
 				// options here to override JSHint defaults
 				globals: {
 					jQuery: true,
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
 		watch: {
 			// test js files on file change
 			all: {
-				files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js'],
+				files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js', 'public/js/**/*.js'],
 				tasks: ['jshint'],
 				options: {
 					spawn: false

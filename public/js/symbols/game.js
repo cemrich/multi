@@ -28,7 +28,7 @@ define(function(require, exports, module) {
 		this.start = function () {
 			sound.onStart();
 			buildPlayers();
-		}
+		};
 	};
 
 });

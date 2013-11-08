@@ -38,6 +38,7 @@ define(function (require, exports, module) {
 
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 		startGame();
-	}
+
+	};
 
 });
