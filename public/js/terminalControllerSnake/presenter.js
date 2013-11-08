@@ -2,14 +2,14 @@
 Screen of the snake game that shows all the action.
 */
 
-define(['./game'], function (gameModule) {
+define(['./game'], function (Game) {
 
 	function start(session, showSection) {
 
 		var game;
 
 		function startGame() {
-			game = new gameModule.Game(session, showSection);
+			game = new Game(session, showSection);
 			game.on('stop', onGameFinished);
 			game.start();
 			setTimeout(game.stop.bind(game), 2000);
@@ -49,7 +49,6 @@ define(['./game'], function (gameModule) {
 		// waiting for our player
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
-
 	}
 
 	return {
