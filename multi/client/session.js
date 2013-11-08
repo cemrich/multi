@@ -152,6 +152,16 @@ define(function(require, exports, module) {
 		return Object.keys(this.players).length + 1;
 	};
 
+	// TODO: document
+	// TODO: this feels wrong as no specific order is guaranteed maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
+	Session.prototype.getPlayerArray = function () {
+		var playerArray = [];
+		for(var i in this.players) {
+			playerArray.push(this.players[i]);
+		}
+		return playerArray;
+	};
+
 	/**
 	* Sends the given message to all other instances of this session.
 	* @param {string} type    type of message that should be send

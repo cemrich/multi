@@ -21,11 +21,16 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 
 		multi.EventDispatcher.call(this);
 
+		var game = this;
 		this.snake = new Snake(jaws, TILE_SIZE, width, height);
 		this.session = session;
 		this.showSection = showSection;
 		this.interval = null;
 
+		var conroller = session.getPlayerArray()[0];
+		conroller.on('attributesChanged', function () {
+			game.snake.direction = conroller.attributes.direction;
+		});
 	};
 
 	multi.util.inherits(Game, multi.EventDispatcher);

@@ -586,7 +586,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		EventDispatcher.call(this);
 		this.id = null;
 		this.role = 'player';
-		this.attributes = { color: null };
+		this.attributes = {};
 
 		/** 
 		 * Called when the user attributes have been changed.
@@ -800,6 +800,17 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	 */
 	Session.prototype.getPlayerCount = function () {
 		return Object.keys(this.players).length + 1;
+	};
+
+	// TODO: document
+	// TODO: this feels wrong as no specific order is guaranteed
+	// maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
+	Session.prototype.getPlayerArray = function () {
+		var playerArray = [];
+		for(var i in this.players) {
+			playerArray.push(this.players[i]);
+		}
+		return playerArray;
 	};
 
 	/**

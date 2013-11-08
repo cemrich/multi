@@ -8,6 +8,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	// TODO: allow some of the callbacks to be passed through options
 	// is this possible with promises, too?
+	// TODO: disallow client connects when a certain player number is exceeded
 	var multiOptions = {
 		io: socketio,
 		server: 'http://tinelaptopsony/',

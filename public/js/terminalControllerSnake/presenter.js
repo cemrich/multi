@@ -12,7 +12,6 @@ define(['./game'], function (Game) {
 			game = new Game(session, showSection);
 			game.on('stop', onGameFinished);
 			game.start();
-			setTimeout(game.stop.bind(game), 2000);
 		}
 
 		function onAgain() {

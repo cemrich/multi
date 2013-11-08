@@ -1,8 +1,66 @@
-body {
+html, body {
 	margin: 0;
 	padding: 0;
+	width: 100%;
+	height: 100%;
 }
 
 .section {
 	display: none;
+}
+
+#controller {
+	pointer-events: none;
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	.marker {
+		width: 100px;
+		height: 100px;
+		margin-left: -50px;
+		margin-top: -50px;
+		background-color: rgba(0, 167, 190, 0.25);
+		display: none;
+		position: absolute;
+		top: 0;
+		left: 0;
+		border-radius: 51px;
+		border: 2px solid rgb(56, 160, 218);
+	}
+	.down {
+		border-style: dashed;
+	}
+	.down:before {
+		content: '';
+		display: block;
+		width: 18px;
+		height: 18px;
+		background-color: rgba(255, 255, 255, 0.75);
+		border: 2px dotted rgb(56, 160, 218);
+		border-radius: 10px;
+		margin-left: -10px;
+		margin-top: -10px;
+		position: relative;
+		transition: all 0.2s ease-in;
+		transition-property: top, left;
+		top: 50px;
+		left: 50px;
+	}
+	.dir0 .down:before {
+		left: 50px;
+		top: 0;
+	}
+	.dir1 .down:before {
+		left: 100px;
+		top: 50px;
+	}
+	.dir2 .down:before {
+		left: 50px;
+		top: 100px;
+	}
+	.dir3 .down:before {
+		left: 0;
+		top: 50px;
+	}
 }
