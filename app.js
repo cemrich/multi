@@ -1,11 +1,13 @@
+/* global process, __dirname */
+
 /*
  * Module dependencies.
  */
 
-var express = require('express'), 
-	app = express(), 
-	routes = require('./routes'), 
-	server = require('http').createServer(app), 
+var express = require('express'),
+	app = express(),
+	routes = require('./routes'),
+	server = require('http').createServer(app),
 	path = require('path'),
 	multiModule = require('./multi/server');
 
@@ -21,7 +23,7 @@ app.use(require('less-middleware')({ src: __dirname + '/public' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
-if ('development' == app.get('env')) {
+if ('development' === app.get('env')) {
   app.use(express.errorHandler());
 }
 

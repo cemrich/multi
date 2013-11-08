@@ -1,6 +1,6 @@
 #!/usr/local/bin/node
 
-var testrunner = require("qunit");
+var testrunner = require('qunit');
 var log = {
 	// log assertions overview
 	assertions: false,
@@ -22,8 +22,8 @@ var log = {
 };
 
 testrunner.run({
-	deps: {path: "multi/server", namespace: "multi"},
-	code: "multi/server/index.js",
-	tests: "tests/server/multi.js",
+	deps: {path: 'multi/server', namespace: 'multi'},
+	code: 'multi/server/index.js',
+	tests: 'tests/server/multi.js',
 	log: log
 }, null);

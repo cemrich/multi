@@ -15,7 +15,6 @@ define(function(require, exports, module) {
 	* @param {function} superCtor Constructor function to inherit prototype from.
 	*/
 	exports.inherits = function(ctor, superCtor) {
-		ctor.super_ = superCtor;
 		ctor.prototype = Object.create(superCtor.prototype, {
 			constructor: {
 				value: ctor,

@@ -1,3 +1,5 @@
+/* global test, ok, raises, asyncTest, expect, start, QUnit, equal, deepEqual */
+
 requirejs.config({
 	baseUrl: '../../public/js/lib/'
 });
@@ -11,45 +13,45 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 	};
 	var multi = multiModule.init(multiOptions);
 
-	test("test multi setup", function() {
-		ok(multiModule, "multiModule is defined");
-		ok(multiModule.color, "multiModule.color is defined");
+	test('test multi setup', function() {
+		ok(multiModule, 'multiModule is defined');
+		ok(multiModule.color, 'multiModule.color is defined');
 	});
 
-	test("test initialization", function () {
-		ok(multi, "instance created successfully");
+	test('test initialization', function () {
+		ok(multi, 'instance created successfully');
 		raises(function () {
 			multi.init({});
-		}, "only one call to init allowed", "creation of second instance throws error");
+		}, 'only one call to init allowed', 'creation of second instance throws error');
 	});
 
-	asyncTest("test session creation", function () {
+	asyncTest('test session creation', function () {
 		expect(3);
 		multi.createSession().then(function (session) {
-			ok(session, "session can be created");
-			ok(session.token, "session has a token");
-			ok(session.myself, "session has own player added");
+			ok(session, 'session can be created');
+			ok(session.token, 'session has a token');
+			ok(session.myself, 'session has own player added');
 			start();
 		});
 	});
 
-	asyncTest("test connection to existing session", function () {
+	asyncTest('test connection to existing session', function () {
 		expect(9);
 		multi.createSession().then(function (session) {
 			var createdSession = session;
 			var joinedSession = null;
 			multi.joinSession(createdSession.token).then(function (session) {
 				joinedSession = session;
-				ok(joinedSession, "session can be joined");
-				ok(joinedSession.myself, "session has own player added");
-				equal(joinedSession.myself.role, "player", "joined player has a player role");
-				equal(joinedSession.token, createdSession.token, "session tokens are equal");ok(joinedSession.players[createdSession.myself.id], "old player added to new session");
+				ok(joinedSession, 'session can be joined');
+				ok(joinedSession.myself, 'session has own player added');
+				equal(joinedSession.myself.role, 'player', 'joined player has a player role');
+				equal(joinedSession.token, createdSession.token, 'session tokens are equal');ok(joinedSession.players[createdSession.myself.id], 'old player added to new session');
 
 				function checkNewPlayer() {
-					ok(createdSession.players[joinedSession.myself.id], "new player added to created session");
-					equal(createdSession.myself.role, "presenter", "first player has a presenter role");
-					equal(createdSession.getPlayerCount(), 2, "getPlayerCount of created session should be two");
-					equal(joinedSession.getPlayerCount(), 2, "getPlayerCount of joined session should be two");
+					ok(createdSession.players[joinedSession.myself.id], 'new player added to created session');
+					equal(createdSession.myself.role, 'presenter', 'first player has a presenter role');
+					equal(createdSession.getPlayerCount(), 2, 'getPlayerCount of created session should be two');
+					equal(joinedSession.getPlayerCount(), 2, 'getPlayerCount of joined session should be two');
 					start();
 				}
 
@@ -62,7 +64,7 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 		});
 	});
 
-	asyncTest("test mirroring session messages", function () {
+	asyncTest('test mirroring session messages', function () {
 		expect(4);
 
 		multi.createSession().then(function (session) {
@@ -72,13 +74,13 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 			multi.joinSession(createdSession.token).then(function (session) {
 
 				createdSession.on('ping', function (event) {
-					ok(true, "ping message received");
+					ok(true, 'ping message received');
 					createdSession.message('pong', data);
 				});
 				session.on('pong', function (event) {
-					ok(true, "pong message received");
-					equal(event.type, "pong", "message type is correct");
-					deepEqual(event.data, data, "message data is correct");
+					ok(true, 'pong message received');
+					equal(event.type, 'pong', 'message type is correct');
+					deepEqual(event.data, data, 'message data is correct');
 					start();
 				});
 
@@ -87,7 +89,7 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 		});
 	});
 
-	asyncTest("test mirroring player messages", function () {
+	asyncTest('test mirroring player messages', function () {
 		expect(4);
 
 		multi.createSession().then(function (session) {
@@ -96,15 +98,15 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 
 			multi.joinSession(createdSession.token).then(function (session) {
 				session.myself.on('pong', function (event) {
-					ok(true, "pong message received");
-					equal(event.type, "pong", "message type is correct");
-					deepEqual(event.data, data, "message data is correct");
+					ok(true, 'pong message received');
+					equal(event.type, 'pong', 'message type is correct');
+					deepEqual(event.data, data, 'message data is correct');
 					start();
 				});
 
 				function startPing() {
 					createdSession.players[session.myself.id].on('ping', function (event) {
-						ok(true, "ping message received");
+						ok(true, 'ping message received');
 						createdSession.players[session.myself.id].message('pong', data);
 					});
 					session.myself.message('ping');

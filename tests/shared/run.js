@@ -1,6 +1,6 @@
 #!/usr/local/bin/node
 
-var testrunner = require("qunit");
+var testrunner = require('qunit');
 var log = {
 	// log assertions overview
 	assertions: false,
@@ -22,8 +22,8 @@ var log = {
 };
 
 testrunner.run({
-	deps: {path: "multi/shared/eventDispatcher", namespace: "EventDispatcher"},
-	code: "multi/shared/eventDispatcher.js",
-	tests: "tests/shared/eventDispatcher.js",
+	deps: {path: 'multi/shared/eventDispatcher', namespace: 'EventDispatcher'},
+	code: 'multi/shared/eventDispatcher.js',
+	tests: 'tests/shared/eventDispatcher.js',
 	log: log
 }, null);

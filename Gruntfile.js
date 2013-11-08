@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 
 		jsdoc : {
 			multi : {
-				src: ['multi/**/*.js', 'README.md'], 
+				src: ['multi/**/*.js', 'README.md'],
 				options: {
 					destination: './documentation/'
 				}
@@ -20,11 +20,28 @@ module.exports = function(grunt) {
 				ignores: ['node_modules', 'documentation', 'multi/debs/*', 'tests/client/lib/*.js', 'public/js/lib/*'],
 				// options here to override JSHint defaults
 				globals: {
-					jQuery: true,
-					console: true,
 					module: true,
-					document: true
-				}
+					define: true,
+					require: true,
+					requirejs: true
+				},
+				camelcase: true,
+				curly: true,
+				eqeqeq: true,
+				newcap: true,
+				noarg: true,
+				noempty: true,
+				nonew: true,
+				quotmark: true,
+				undef: true,
+				unused: 'vars',
+				trailing: true,
+				maxparams: 5,
+				maxdepth: 4,
+
+				browser: true,
+				devel: true,
+				jquery: true
 			}
 		},
 
@@ -103,7 +120,7 @@ module.exports = function(grunt) {
 		if (error) {
 			grunt.log.error(error);
 		} else {
-			if (result.toString().indexOf("Error") !== -1) {
+			if (result.toString().indexOf('Error') !== -1) {
 				grunt.log.write(result + '\n');
 				throw 'Something above threw an error \u2191';
 			} else {
@@ -125,7 +142,7 @@ module.exports = function(grunt) {
 			// notify grunt that the async task has finished
 			done();
 		}
-		var child = grunt.util.spawn(options, finishCallback);
+		grunt.util.spawn(options, finishCallback);
 	});
 
 	// shared lib testing
@@ -141,7 +158,7 @@ module.exports = function(grunt) {
 			// notify grunt that the async task has finished
 			done();
 		}
-		var child = grunt.util.spawn(options, finishCallback);
+		grunt.util.spawn(options, finishCallback);
 	});
 
 	grunt.registerTask('qunitAll', ['qunit', 'qunitServer', 'qunitShared']);

@@ -17,7 +17,7 @@ define(function(require, exports, module) {
 	function getJoinSesionUrl(token) {
 		var url = window.location.protocol + '//' + window.location.host;
 		if (window.location.port !== '' && window.location.port !== '80') {
-			url += ":" + window.location.port;
+			url += ':' + window.location.port;
 		}
 		url += window.location.pathname + '#' + token;
 		return url;
@@ -67,14 +67,14 @@ define(function(require, exports, module) {
 
 		function onMessageSendLocally(event) {
 			var player = event.currentTarget;
-			socket.emit('playerMessage', 
+			socket.emit('playerMessage',
 				{ id: player.id, type: event.type, data: event.data }
 			);
 		}
 
 		function onAttributesChangedLocally(event) {
 			var player = event.currentTarget;
-			socket.emit('playerAttributesChanged', 
+			socket.emit('playerAttributesChanged',
 				{ id: player.id, attributes: player.attributes }
 			);
 		}
@@ -158,7 +158,7 @@ define(function(require, exports, module) {
 	* @param {object} [data]  message data that should be send
 	*/
 	Session.prototype.message = function (type, data) {
-		this.socket.emit('sessionMessage', { type: type, data: data }); 
+		this.socket.emit('sessionMessage', { type: type, data: data });
 	};
 
 	Session.prototype.disconnectMyself = function () {

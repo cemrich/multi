@@ -15,7 +15,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 			minPlayerNeeded: 2
 		}
 	};
-	var session = null;
+
 	var multi = multiModule.init(multiOptions);
 
 	function showSection(section) {

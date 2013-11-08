@@ -1,5 +1,5 @@
 
-requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], 
+requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'],
 		function (multiModule, socketio) {
 
 	require(['../lib/jquery.qrcode.min']);

@@ -1,4 +1,4 @@
-requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], 
+requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'],
 		function (sound, multiModule, socketio) {
 
 	var multiOptions = {

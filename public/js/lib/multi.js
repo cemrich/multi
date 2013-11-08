@@ -552,7 +552,6 @@ define('util',['require','exports','module'],function(require, exports, module) 
 	* @param {function} superCtor Constructor function to inherit prototype from.
 	*/
 	exports.inherits = function(ctor, superCtor) {
-		ctor.super_ = superCtor;
 		ctor.prototype = Object.create(superCtor.prototype, {
 			constructor: {
 				value: ctor,
@@ -668,7 +667,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	function getJoinSesionUrl(token) {
 		var url = window.location.protocol + '//' + window.location.host;
 		if (window.location.port !== '' && window.location.port !== '80') {
-			url += ":" + window.location.port;
+			url += ':' + window.location.port;
 		}
 		url += window.location.pathname + '#' + token;
 		return url;
@@ -718,14 +717,14 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 
 		function onMessageSendLocally(event) {
 			var player = event.currentTarget;
-			socket.emit('playerMessage', 
+			socket.emit('playerMessage',
 				{ id: player.id, type: event.type, data: event.data }
 			);
 		}
 
 		function onAttributesChangedLocally(event) {
 			var player = event.currentTarget;
-			socket.emit('playerAttributesChanged', 
+			socket.emit('playerAttributesChanged',
 				{ id: player.id, attributes: player.attributes }
 			);
 		}
@@ -809,7 +808,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	* @param {object} [data]  message data that should be send
 	*/
 	Session.prototype.message = function (type, data) {
-		this.socket.emit('sessionMessage', { type: type, data: data }); 
+		this.socket.emit('sessionMessage', { type: type, data: data });
 	};
 
 	Session.prototype.disconnectMyself = function () {
@@ -2874,7 +2873,6 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	Multi.prototype.joinSession = function (sessionToken) {
 		// console.log('joining session', sessionToken);
 
-		var multi = this;
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
@@ -2906,7 +2904,6 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 
 		options = options || this.sessionOptions;
 
-		var multi = this;
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true

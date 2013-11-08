@@ -1,3 +1,5 @@
+/* global exports */
+
 /**
  * @module server/session
  */
@@ -72,13 +74,14 @@ var Session = function (io, options) {
 	 */
 	this.onPlayerAttributesChanged = function (event) {
 		var player = event.currentTarget;
-		session.sendToPlayers('playerAttributesChanged', 
+		session.sendToPlayers('playerAttributesChanged',
 			{ id: player.id, attributes: player.attributes }
 		);
 	};
 
 	if (options !== undefined && options.scriptName !== undefined) {
-		var game = new require('../../' + options.scriptName).Game(this);
+		var gameModule = require('../../' + options.scriptName);
+		gameModule.Game(this);
 	}
 };
 

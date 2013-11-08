@@ -1,3 +1,5 @@
+/* global exports */
+
 /**
  * @module server/player
  */
@@ -95,7 +97,7 @@ util.inherits(Player, EventDispatcher);
  * @return {object} packed player object (without socket)
  */
 Player.prototype.pack = function () {
-	return { 
+	return {
 		id: this.id,
 		role: this.role,
 		attributes: this.attributes

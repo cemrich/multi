@@ -1,3 +1,5 @@
+/* global exports */
+
 /**
 * Entry point for the server side multi library for developing
 * multiscreen games.

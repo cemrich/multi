@@ -82,7 +82,6 @@ define(function(require, exports, module) {
 	Multi.prototype.joinSession = function (sessionToken) {
 		// console.log('joining session', sessionToken);
 
-		var multi = this;
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
@@ -114,7 +113,6 @@ define(function(require, exports, module) {
 
 		options = options || this.sessionOptions;
 
-		var multi = this;
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true

@@ -2,8 +2,6 @@ define(function(require, exports, module) {
 
 	exports.Game = function (session, sound) {
 
-		var witdh = window.innerWidth;
-		var height = window.innerHeight;
 		var field = $('#field');
 
 		function buildPlayer(player) {

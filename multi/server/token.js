@@ -1,3 +1,5 @@
+/* global exports */
+
 /**
  * Collects some helper functions for generating
  * random tokens that can be used for identifying
