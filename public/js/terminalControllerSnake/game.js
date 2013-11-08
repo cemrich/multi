@@ -27,9 +27,9 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 		this.showSection = showSection;
 		this.interval = null;
 
-		var conroller = session.getPlayerArray()[0];
-		conroller.on('attributesChanged', function () {
-			game.snake.setDirection(conroller.attributes.direction);
+		var controller = session.getPlayerArray()[0];
+		controller.on('attributesChanged', function () {
+			game.snake.setDirection(controller.attributes.direction);
 		});
 	};
 
