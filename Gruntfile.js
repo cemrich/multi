@@ -14,34 +14,12 @@ module.exports = function(grunt) {
 		},
 
 		jshint: {
-			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js', 'public/js/**/*.js'],
+			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js', 'public/js/**/*.js', '.jshintrc'],
 			options: {
 				// ignore third party libs
 				ignores: ['node_modules', 'documentation', 'multi/debs/*', 'tests/client/lib/*.js', 'public/js/lib/*'],
-				// options here to override JSHint defaults
-				globals: {
-					module: true,
-					define: true,
-					require: true,
-					requirejs: true
-				},
-				camelcase: true,
-				curly: true,
-				eqeqeq: true,
-				newcap: true,
-				noarg: true,
-				noempty: true,
-				nonew: true,
-				quotmark: true,
-				undef: true,
-				unused: 'vars',
-				trailing: true,
-				maxparams: 5,
-				maxdepth: 4,
-
-				browser: true,
-				devel: true,
-				jquery: true
+				// loading jshintrc config file
+				jshintrc: '.jshintrc',
 			}
 		},
 

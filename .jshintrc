@@ -1,0 +1,27 @@
+{
+	"camelcase": true,
+	"curly": true,
+	"eqeqeq": true,
+	"newcap": true,
+	"noarg": true,
+	"noempty": true,
+	"nonew": true,
+	"quotmark": true,
+	"undef": true,
+	"unused": "vars",
+	"trailing": true,
+	"maxparams": 5,
+	"maxdepth": 4,
+
+	"browser": true,
+	"devel": true,
+	"jquery": true,
+
+	"globals": {
+		"jQuery": true,
+		"module": true,
+		"define": true,
+		"require": true,
+		"requirejs": true
+	}
+}
