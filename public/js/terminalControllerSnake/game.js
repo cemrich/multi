@@ -44,6 +44,9 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 	// jaws gametick callback for game logic
 	Game.prototype.update = function() {
 		this.snake.update();
+		if (this.snake.isDead()) {
+			this.stop();
+		}
 	};
 
 	// jaws draw callback

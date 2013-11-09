@@ -35,6 +35,7 @@ define(function () {
 		this.headAnim = snakeAnim.slice(1, 3);
 		this.head = new this.jaws.Sprite({ x: 20, y: 20, anchor: "center" });
 		this.head.setImage(this.headAnim.next());
+		this.head.isFree = false;
 		this.tail.push(this.head);
 		var prev = this.head;
 		for (var i = 0; i < 10; i++) {
@@ -48,6 +49,7 @@ define(function () {
 
 	// which direction?
 	Snake.prototype.updateDirection = function () {
+		this.head.isFree = true;
 		var oppositeDir = (this.newDirection + 2) % 4;
 		if (this.direction !== oppositeDir) {
 			this.direction = this.newDirection;
@@ -117,6 +119,12 @@ define(function () {
 			this.expired = 0;
 			this.tick();
 		}
+	};
+
+	// is the snake biting itself?
+	Snake.prototype.isDead = function () {
+		var collisions = this.jaws.collideOneWithMany(this.head, this.tail);
+		return collisions.length > 0 && this.head.isFree;
 	};
 
 	Snake.prototype.draw = function () {
