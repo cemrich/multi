@@ -5,6 +5,9 @@ The snake object
 
 define(function () {
 
+	var START_X = 0;
+	var START_Y = 0;
+
 	var Snake = function (jaws, tileSize, fieldWidth, fieldHeight) {
 		this.tileSize = tileSize;
 		this.halfTileSize = tileSize/2;
@@ -27,19 +30,21 @@ define(function () {
 
 	Snake.prototype.setup = function () {
 		var snakeAnim = new this.jaws.Animation({
-			sprite_sheet: "../../img/snake.png",
+			sprite_sheet: '../../img/snake.png',
 			frame_size: [20, 20],
 			frame_duration: 500});
 
+		var x = START_X + this.halfTileSize;
+		var y = START_Y + this.halfTileSize;
 		this.tailAnim = snakeAnim.slice(0, 1);
 		this.headAnim = snakeAnim.slice(1, 3);
-		this.head = new this.jaws.Sprite({ x: 20, y: 20, anchor: "center" });
+		this.head = new this.jaws.Sprite({ x: x, y: y, anchor: 'center' });
 		this.head.setImage(this.headAnim.next());
 		this.head.isFree = false;
 		this.tail.push(this.head);
 		var prev = this.head;
 		for (var i = 0; i < 10; i++) {
-			var tailElement = new this.jaws.Sprite({ x: 20, y: 20, anchor: "center" });
+			var tailElement = new this.jaws.Sprite({ x: x, y: y, anchor: 'center' });
 			tailElement.setImage(this.tailAnim.next());
 			tailElement.prev = prev;
 			prev = tailElement;

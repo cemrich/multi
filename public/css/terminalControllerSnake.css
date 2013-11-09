@@ -12,6 +12,7 @@ body {
   height: 100%;
   font-family: 'Consolas', 'Monaco', sans-serif;
   text-align: center;
+  overflow: hidden;
 }
 h1 {
   font-family: 'Monofett', 'Consolas', 'Monaco', sans-serif;
@@ -32,6 +33,9 @@ button {
 }
 button:hover {
   background: #2385bc;
+}
+canvas {
+  float: left;
 }
 .section {
   display: none;
