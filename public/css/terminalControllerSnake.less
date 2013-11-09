@@ -1,12 +1,57 @@
+@blue: rgb(56, 160, 218);
+
+@font-face {
+	font-family: 'Monofett';
+	font-style: normal;
+	font-weight: 800;
+	src: local('Monofett'), 
+		url(../fonts/monofett.woff) format('woff'),
+		url(../fonts/monofett.ttf) format('truetype');
+}
+
 html, body {
 	margin: 0;
 	padding: 0;
 	width: 100%;
 	height: 100%;
+	font-family: 'Consolas', 'Monaco', sans-serif;
+	text-align: center;
+}
+
+h1 {
+	font-family: 'Monofett', 'Consolas', 'Monaco', sans-serif;
+	font-size: 400%;
+	line-height: 75%;
+	color: darken(@blue, 10%);
+}
+
+button {
+	width: 100%;
+	background: @blue;
+	color: white;
+	font-weight: bold;
+	border: none;
+	padding: 10px;
+	margin: 5px 0;
+	text-transform: uppercase;
+	font-size: 120%;
+	&:hover {
+		background: darken(@blue, 10%);
+	}
 }
 
 .section {
 	display: none;
+}
+
+#presenter-waiting {
+	.controllerUrl {
+		color: darken(@blue, 10%);
+		font-size: 130%;
+		&:hover {
+			color: darken(@blue, 20%);
+		}
+	}
 }
 
 #controller {
@@ -15,6 +60,12 @@ html, body {
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
+	* {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none; /* Webkit */
+		-moz-user-select: none;    /* Firefox */
+		user-select: none;  
+	}
 	.marker {
 		width: 100px;
 		height: 100px;
@@ -26,7 +77,7 @@ html, body {
 		top: 0;
 		left: 0;
 		border-radius: 51px;
-		border: 2px solid rgb(56, 160, 218);
+		border: 2px solid @blue;
 	}
 	.down {
 		border-style: dashed;
@@ -37,7 +88,7 @@ html, body {
 		width: 18px;
 		height: 18px;
 		background-color: rgba(255, 255, 255, 0.75);
-		border: 2px dotted rgb(56, 160, 218);
+		border: 2px dotted @blue;
 		border-radius: 10px;
 		margin-left: -10px;
 		margin-top: -10px;
