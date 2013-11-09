@@ -74,7 +74,7 @@ define(function () {
 		// PUBLIC
 
 		this.start = function () {
-			eventEmitter.on('touchstart', onDown);
+			eventEmitter.on('touchstart mousedown', onDown);
 		};
 
 		this.stop = function () {
