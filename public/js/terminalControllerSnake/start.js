@@ -25,15 +25,19 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		$(section).show();
 	}
 
+	function showError(message) {
+		showSection('#error');
+		$('#error .message').text(message);
+	}
+
 	function onSessionFailed(error) {
 		// I can neither create nor join a session - bad thing
-		console.error(error);
+		showError('Cannot connect to server. Please try it later.');
 	}
 
 	function onSessionDestroyed() {
 		// something went wrong - my session does not longer exist
-		showSection();
-		alert('Ooops. The connection dropped. Try to reload.');
+		showError('Ooops. The connection dropped. Try to reload or to create a new game.');
 	}
 
 	function onSession(session) {
