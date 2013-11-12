@@ -49,6 +49,24 @@ canvas {
 	display: none;
 }
 
+#preloader .dot {
+	position: relative;
+	font-size: 80%;
+	-webkit-animation: DOTS 0.9s infinite ease-out;
+	&:nth-child(2) {
+		-webkit-animation-delay: 0.3s;
+	}
+	&:nth-child(3) {
+		-webkit-animation-delay: 0.6s;
+	}
+}
+@-webkit-keyframes DOTS {
+  0%   { top: 0; }
+  20%  { top: 2px; }
+  40%  { top: 0; }
+  100% { top: 0; }
+}
+
 #presenter-waiting {
 	.controllerUrl {
 		color: darken(@blue, 10%);
