@@ -33,7 +33,6 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	function onSessionFailed(error) {
 		// autojoining or creating a session failed
-		console.log(error);
 		if (error instanceof multiModule.SessionFullError) {
 			showError('This game has enough player already. Please try again later.');
 		} else if (error instanceof multiModule.NoConnectionError) {

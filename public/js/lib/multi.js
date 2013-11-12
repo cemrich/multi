@@ -665,7 +665,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	*/
 
 	function getJoinSesionUrl(token) {
-		var url = window.location.protocol + '//' + window.location.host;
+		var url = window.location.host;
 		if (window.location.port !== '' && window.location.port !== '80') {
 			url += ':' + window.location.port;
 		}
@@ -2907,11 +2907,9 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 				if (error instanceof NoSessionTokenFoundError) {
 					that.createSession().then(
 						function (session) {
-							console.log('resolve');
 							deferred.resolve(session);
 						},
 						function (error) {
-							console.log(error);
 							deferred.reject(error);
 						});
 				} else {

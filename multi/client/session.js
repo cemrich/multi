@@ -15,7 +15,7 @@ define(function(require, exports, module) {
 	*/
 
 	function getJoinSesionUrl(token) {
-		var url = window.location.protocol + '//' + window.location.host;
+		var url = window.location.host;
 		if (window.location.port !== '' && window.location.port !== '80') {
 			url += ':' + window.location.port;
 		}
