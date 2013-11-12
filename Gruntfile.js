@@ -36,7 +36,9 @@ module.exports = function(grunt) {
 					wrap: {
 						end: 'define(["index"], function(index) { return index; });'
 					},
-					optimize: 'none'
+					optimize: 'none',
+					generateSourceMaps : true,
+					preserveLicenseComments : false
 				}
 			}
 		},
