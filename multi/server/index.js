@@ -52,13 +52,13 @@ var Multi = function (app, server, options) {
 		socket.on('joinSession', function(event) {
 			var session = sessionModule.getSession(event.token);
 			if (session === null) {
-				socket.emit('joinSessionFailed', { 
+				socket.emit('joinSessionFailed', {
 						token: event.token,
 						reason: 'sessionNotFound'
 					});
 			} else {
 				if (session.isFull()) {
-					socket.emit('joinSessionFailed', { 
+					socket.emit('joinSessionFailed', {
 						token: event.token,
 						reason: 'sessionFull'
 					});

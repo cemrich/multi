@@ -15,6 +15,30 @@ define(function(require, exports, module) {
 
 	var instance = null;
 
+
+	// custom error types
+
+	var NoSuchSessionError = function () {
+		Error.call(this, 'the requested session does not exist');
+	};
+	util.inherits(NoSuchSessionError, Error);
+
+	var SessionFullError = function () {
+		Error.call('the requested session is full');
+	};
+	util.inherits(SessionFullError, Error);
+
+	var NoConnectionError = function () {
+		Error.call(this, 'no connection to server');
+	};
+	util.inherits(NoConnectionError, Error);
+
+	var NoSessionTokenFoundError = function () {
+		Error.call(this, 'no session token found in url');
+	};
+	util.inherits(NoSessionTokenFoundError, Error);
+
+
 	/**
 	* @typedef {Object} module:client/multi~MultiOptions
 	* @property {socketio}        io        ready to use socket.io module
@@ -60,7 +84,7 @@ define(function(require, exports, module) {
 		var sessionToken = getSessionToken();
 		if (sessionToken === null) {
 			var deferred = Q.defer();
-			var error = new Error('autoJoinSessionFailed because no token was found');
+			var error = new NoSessionTokenFoundError();
 			deferred.reject(error);
 			return deferred.promise;
 		} else {
@@ -70,9 +94,28 @@ define(function(require, exports, module) {
 
 	Multi.prototype.autoJoinElseCreateSession = function () {
 		var that = this;
-		return this.autoJoinSession().fail(function () {
-			return that.createSession();
-		});
+		var deferred = Q.defer();
+
+		// TODO: this does work but it stinks!
+		// ask someone how to actually code this in a clean way
+		this.autoJoinSession().then(
+			function (session) {
+				deferred.resolve(session);
+			},
+			function (error) {
+				if (error instanceof NoSessionTokenFoundError) {
+					that.createSession().then(
+						function (session) {
+							deferred.resolve(session);
+						},
+						function (error) {
+							deferred.reject(error);
+						});
+				} else {
+					deferred.reject(error);
+				}
+			});
+		return deferred.promise;
 	};
 
 	/**
@@ -94,15 +137,14 @@ define(function(require, exports, module) {
 			});
 		});
 		socket.on('connect_failed', function () {
-			// TODO: custom error types
-			deferred.reject(new Error('joinSessionFailed because there is no connection'));
+			deferred.reject(new NoConnectionError());
 		});
 		socket.on('joinSessionFailed', function (data) {
 			var error;
 			if (data.reason === 'sessionNotFound') {
-				error = new Error('joinSessionFailed because there is no such session');
+				error = new NoSuchSessionError();
 			} else if (data.reason === 'sessionFull') {
-				error = new Error('joinSessionFailed because the session is full');
+				error = new SessionFullError();
 			}
 			deferred.reject(error);
 		});
@@ -131,7 +173,7 @@ define(function(require, exports, module) {
 			});
 		});
 		socket.on('connect_failed', function () {
-			deferred.reject(new Error('connection failed'));
+			deferred.reject(new NoConnectionError());
 		});
 		return deferred.promise;
 	};
@@ -149,6 +191,10 @@ define(function(require, exports, module) {
 			throw 'only one call to init allowed';
 		}
 	};
+
+	exports.NoSuchSessionError = NoSuchSessionError;
+	exports.SessionFullError = SessionFullError;
+	exports.NoConnectionError = NoConnectionError;
 
 	exports.color = color;
 	exports.EventDispatcher = EventDispatcher;

@@ -32,8 +32,17 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	}
 
 	function onSessionFailed(error) {
-		// I can neither create nor join a session - bad thing
-		showError('Cannot connect to server. Please try it later.');
+		// autojoining or creating a session failed
+		console.log(error);
+		if (error instanceof multiModule.SessionFullError) {
+			showError('This game has enough player already. Please try again later.');
+		} else if (error instanceof multiModule.NoConnectionError) {
+			showError('There is no server connection. Please try again later.');
+		} else if (error instanceof multiModule.NoSuchSessionError) {
+			showError('This game does not exist. Make sure your URL is correct.');
+		} else {
+			showError('Something went terribly wrong. Please try again.');
+		}
 	}
 
 	function onSessionDestroyed() {
