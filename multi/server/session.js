@@ -16,7 +16,7 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * @property {string} [token.func='numeric']  name of a function inside the {@link module:server/token} module that should generate the session token
  * @property {Array}  [token.args=[]]   argument array for the token generation function
  * @property {integer}[minPlayerNeeded=1] minimum number of players needed for this session
- * @property {integer}[maxPlayerNeeded=10] maximum number of players needed for this session
+ * @property {integer}[maxPlayerAllowed=10] maximum number of players allowed for this session. Every addition player won't be allowed to join the session.
  */
 
 /**
@@ -33,6 +33,7 @@ var Session = function (io, options) {
 	var tokenFunction = token.numeric;
 	var tokenFunctionArgs = [];
 	this.minPlayerNeeded = 1;
+	this.maxPlayerAllowed = 10;
 
 	if (options !== undefined) {
 		if (options.token !== undefined) {
@@ -41,6 +42,9 @@ var Session = function (io, options) {
 		}
 		if (options.minPlayerNeeded !== undefined && options.minPlayerNeeded > 0) {
 			this.minPlayerNeeded = options.minPlayerNeeded;
+		}
+		if (options.maxPlayerAllowed !== undefined && options.maxPlayerAllowed >= this.minPlayerNeeded) {
+			this.maxPlayerAllowed = options.maxPlayerAllowed;
 		}
 	}
 
@@ -119,7 +123,8 @@ Session.prototype.pack = function() {
 	return {
 		token: this.token,
 		players: players,
-		minPlayerNeeded: this.minPlayerNeeded
+		minPlayerNeeded: this.minPlayerNeeded,
+		maxPlayerAllowed: this.maxPlayerAllowed
 	};
 };
 
@@ -128,6 +133,10 @@ Session.prototype.pack = function() {
  */
 Session.prototype.getPlayerCount = function () {
 	return Object.keys(this.players).length;
+};
+
+Session.prototype.isFull = function () {
+	return this.getPlayerCount() >= this.maxPlayerAllowed;
 };
 
 /**

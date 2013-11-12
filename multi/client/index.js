@@ -97,8 +97,14 @@ define(function(require, exports, module) {
 			// TODO: custom error types
 			deferred.reject(new Error('joinSessionFailed because there is no connection'));
 		});
-		socket.on('joinSessionFailed', function () {
-			deferred.reject(new Error('joinSessionFailed because there is no such session'));
+		socket.on('joinSessionFailed', function (data) {
+			var error;
+			if (data.reason === 'sessionNotFound') {
+				error = new Error('joinSessionFailed because there is no such session');
+			} else if (data.reason === 'sessionFull') {
+				error = new Error('joinSessionFailed because the session is full');
+			}
+			deferred.reject(error);
 		});
 		return deferred.promise;
 	};

@@ -52,11 +52,21 @@ var Multi = function (app, server, options) {
 		socket.on('joinSession', function(event) {
 			var session = sessionModule.getSession(event.token);
 			if (session === null) {
-				socket.emit('joinSessionFailed', { token: event.token });
+				socket.emit('joinSessionFailed', { 
+						token: event.token,
+						reason: 'sessionNotFound'
+					});
 			} else {
-				player.role = 'player';
-				socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
-				session.addPlayer(player);
+				if (session.isFull()) {
+					socket.emit('joinSessionFailed', { 
+						token: event.token,
+						reason: 'sessionFull'
+					});
+				} else {
+					player.role = 'player';
+					socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
+					session.addPlayer(player);
+				}
 			}
 		});
 		// create new session

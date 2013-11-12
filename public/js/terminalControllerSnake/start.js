@@ -13,7 +13,8 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		io: socketio,
 		server: 'http://tinelaptopsony/',
 		session: {
-			minPlayerNeeded: 2
+			minPlayerNeeded: 2,
+			maxPlayerAllowed: 2
 		}
 	};
 

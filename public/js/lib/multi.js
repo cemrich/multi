@@ -803,8 +803,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	};
 
 	// TODO: document
-	// TODO: this feels wrong as no specific order is guaranteed
-	// maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
+	// TODO: this feels wrong as no specific order is guaranteed maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
 	Session.prototype.getPlayerArray = function () {
 		var playerArray = [];
 		for(var i in this.players) {
@@ -2899,8 +2898,14 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 			// TODO: custom error types
 			deferred.reject(new Error('joinSessionFailed because there is no connection'));
 		});
-		socket.on('joinSessionFailed', function () {
-			deferred.reject(new Error('joinSessionFailed because there is no such session'));
+		socket.on('joinSessionFailed', function (data) {
+			var error;
+			if (data.reason === 'sessionNotFound') {
+				error = new Error('joinSessionFailed because there is no such session');
+			} else if (data.reason === 'sessionFull') {
+				error = new Error('joinSessionFailed because the session is full');
+			}
+			deferred.reject(error);
 		});
 		return deferred.promise;
 	};
