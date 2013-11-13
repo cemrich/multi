@@ -14,7 +14,11 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		server: 'http://tinelaptopsony/',
 		session: {
 			minPlayerNeeded: 2,
-			maxPlayerAllowed: 2
+			maxPlayerAllowed: 2,
+			token: {
+				func: 'staticToken',
+				args: ['myOnlySession']
+			}
 		}
 	};
 
