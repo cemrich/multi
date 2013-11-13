@@ -65,11 +65,11 @@ canvas {
     top: 0;
   }
 }
-#presenter-waiting .controllerUrl {
+#waiting .controllerUrl {
   color: #2385bc;
   font-size: 130%;
 }
-#presenter-waiting .controllerUrl:hover {
+#waiting .controllerUrl:hover {
   color: #1b6791;
 }
 #controller {

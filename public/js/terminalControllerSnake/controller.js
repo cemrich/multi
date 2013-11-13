@@ -33,9 +33,9 @@ define(['./joystick'], function (Joystick) {
 		function onFinished() {
 			// game is finished
 			joystick.stop();
-			showSection('#controller-finished');
-			$('#controller-finished .again').one('click', onAgainClick);
-			$('#controller-finished .exit').one('click', onExitClick);
+			showSection('#finished');
+			$('#finished .again').one('click', onAgainClick);
+			$('#finished .exit').one('click', onExitClick);
 		}
 
 		function onBelowMinPlayerNeeded() {

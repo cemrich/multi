@@ -63,7 +63,7 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 
 	// (re) start this game
 	Game.prototype.start = function () {
-		this.showSection('#presenter-game');
+		this.showSection('#game');
 		jaws.assets.add('../../img/snake.png');
 		jaws.init();
 		jaws.assets.loadAll({onfinish: this.onAssetsLoaded.bind(this)});

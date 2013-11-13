@@ -21,7 +21,7 @@ define(['./game'], function (Game) {
 
 		function onGameFinished() {
 			// assuming the game is finished here
-			showSection('#presenter-finished');
+			showSection('#finished');
 			// TODO: refactor session message to get leaner code
 			// and use broadcast OR emit
 			session.message('finished');
@@ -37,14 +37,14 @@ define(['./game'], function (Game) {
 			// we don't have enough players any longer
 			game.off('stop', onGameFinished);
 			game.stop();
-			showSection('#presenter-waiting');
+			showSection('#waiting');
 		}
 
 		// show url to join this session
 		var url = window.location.host + '/snake';
-		$('#presenter-waiting .controllerUrl').text(url);
-		$('#presenter-waiting .controllerUrl').attr('href', 'http://' + url);
-		showSection('#presenter-waiting');
+		$('#waiting .controllerUrl').text(url);
+		$('#waiting .controllerUrl').attr('href', 'http://' + url);
+		showSection('#waiting');
 
 		// waiting for our player
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
