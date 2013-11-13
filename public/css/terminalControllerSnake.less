@@ -26,6 +26,13 @@ h1 {
 	color: darken(@blue, 10%);
 }
 
+a {
+	color: darken(@blue, 10%);
+	&:hover {
+		color: darken(@blue, 20%);
+	}
+}
+
 button {
 	width: 100%;
 	background: @blue;
@@ -69,11 +76,14 @@ canvas {
 
 #waiting {
 	.controllerUrl {
-		color: darken(@blue, 10%);
 		font-size: 130%;
-		&:hover {
-			color: darken(@blue, 20%);
-		}
+	}
+	.credits {
+		list-style: none;
+		color: grey;
+		font-size: 80%;
+		margin-top: 100px;
+		padding: 0;
 	}
 }
 

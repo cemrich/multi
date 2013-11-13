@@ -20,6 +20,12 @@ h1 {
   line-height: 75%;
   color: #2385bc;
 }
+a {
+  color: #2385bc;
+}
+a:hover {
+  color: #1b6791;
+}
 button {
   width: 100%;
   background: #38a0da;
@@ -66,11 +72,14 @@ canvas {
   }
 }
 #waiting .controllerUrl {
-  color: #2385bc;
   font-size: 130%;
 }
-#waiting .controllerUrl:hover {
-  color: #1b6791;
+#waiting .credits {
+  list-style: none;
+  color: grey;
+  font-size: 80%;
+  margin-top: 100px;
+  padding: 0;
 }
 #controller {
   pointer-events: none;
