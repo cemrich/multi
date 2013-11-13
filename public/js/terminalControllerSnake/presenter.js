@@ -2,7 +2,7 @@
 Screen of the snake game that shows all the action.
 */
 
-define(['./game'], function (Game) {
+define(['./game', './sound'], function (Game, sound) {
 
 	function start(session, showSection) {
 
@@ -16,11 +16,13 @@ define(['./game'], function (Game) {
 
 		function onAgain() {
 			// player wants to play again
+			sound.onStartGame();
 			startGame();
 		}
 
 		function onGameFinished() {
 			// assuming the game is finished here
+			sound.onGameOver();
 			showSection('#finished');
 			// TODO: refactor session message to get leaner code
 			// and use broadcast OR emit
@@ -35,6 +37,7 @@ define(['./game'], function (Game) {
 
 		function onBelowMinPlayerNeeded() {
 			// we don't have enough players any longer
+			sound.onDisconnect();
 			game.off('stop', onGameFinished);
 			game.stop();
 			showSection('#waiting');

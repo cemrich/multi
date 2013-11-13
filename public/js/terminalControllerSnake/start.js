@@ -6,7 +6,7 @@ One screen as controller, one sreen as presenter.
 */
 // TODO: add possibility to destroy a session when presenter disconnects
 
-requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], function (multiModule, socketio) {
+requirejs(['../lib/multi', '/socket.io/socket.io.js', './sound', '../lib/jquery-2.0.0.min'], function (multiModule, socketio, sound) {
 
 	var SESSION_TOKEN = 'myOnlySession';
 
@@ -37,6 +37,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	}
 
 	function showError(message) {
+		sound.onError();
 		showSection('#error');
 		$('#error .message').text(message);
 	}
@@ -56,6 +57,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	function onSessionDestroyed() {
 		// something went wrong - my session does not longer exist
+		sound.onDisconnect();
 		showError('Ooops. The connection dropped. Try to reload.');
 	}
 

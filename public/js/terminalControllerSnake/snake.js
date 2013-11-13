@@ -3,7 +3,7 @@
 The snake object
 */
 
-define(function () {
+define(['./sound'], function (sound) {
 
 	var START_X = 0;
 	var START_Y = 0;
@@ -59,6 +59,7 @@ define(function () {
 	};
 
 	Snake.prototype.eatPoints = function (number) {
+		sound.onPoint();
 		this.segmetsToAdd += number;
 		this.fps *= Math.pow(0.9, number);
 	};
@@ -128,6 +129,7 @@ define(function () {
 	// called once per snake tick
 	// so snakes can have different speed values
 	Snake.prototype.tick = function () {
+		sound.onSnakeMove();
 		this.moveTail();
 		this.updateDirection();
 		this.checkBoundaries();
