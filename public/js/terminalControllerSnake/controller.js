@@ -2,7 +2,7 @@
 Dumb game controller for the snake.
 */
 
-define(['./joystick'], function (Joystick) {
+define(['./joystick', './sound'], function (Joystick, sound) {
 
 	function start(session, showSection) {
 
@@ -10,6 +10,7 @@ define(['./joystick'], function (Joystick) {
 
 		function onDirectionChange(direction) {
 			$('#marker').attr('class', 'dir' + direction);
+			sound.onJoystickDirectionChange();
 			session.myself.attributes.direction = direction;
 		}
 
