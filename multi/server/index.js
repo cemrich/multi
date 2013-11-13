@@ -22,25 +22,13 @@ var instance = null;
 * @mixes EventDispatcher
 * @fires module:server/multi~Multi#sessionCreated
 */
-var Multi = function (app, server, options) {
+var Multi = function (app, server) {
 
 	EventDispatcher.call(this);
-	this.options = options;
 
 	var multi = this;
 	var io = require('socket.io').listen(server);
 	console.log('starting multi');
-
-	// adding route for first game
-	app.get(options.gameUrlSuffix + 'example1', function(req, res) {
-		res.render(options.gameViewSubdir + 'example1');
-	});
-	app.get(options.gameUrlSuffix + 'symbols', function(req, res) {
-		res.render(options.gameViewSubdir + 'symbols');
-	});
-	app.get(options.gameUrlSuffix + 'snake', function(req, res) {
-		res.render(options.gameViewSubdir + 'terminalControllerSnake');
-	});
 
 	// when a new player connection is coming in...
 	io.on('connection', function (socket) {
@@ -99,9 +87,9 @@ util.inherits(Multi, EventDispatcher);
  * @public
  * @returns {module:server/multi~Multi} the one and only Multi instance
  */
-exports.init = function (app, server, options) {
+exports.init = function (app, server) {
 	if (instance === null) {
-		instance = new Multi(app, server, options);
+		instance = new Multi(app, server);
 		return instance;
 	} else {
 		throw 'only one call to init allowed';

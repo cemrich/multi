@@ -27,18 +27,18 @@ if ('development' === app.get('env')) {
   app.use(express.errorHandler());
 }
 
+// routes
 app.get('/', routes.index);
+// game routes
+app.get('/example1', routes.example1);
+app.get('/symbols', routes.symbols);
+app.get('/snake', routes.terminalControllerSnake);
 
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
 });
 
 // initialize multi
-var options = {
-	gameUrlSuffix: '/',
-	gameViewSubdir: 'games/'
-};
-
 function onPlayerAdded(event) {
 	console.log('new player created!', event.player.id);
 }
@@ -48,5 +48,5 @@ function onSessionCreated(event) {
 	event.session.on('playerAdded', onPlayerAdded);
 }
 
-var multi = multiModule.init(app, server, options);
+var multi = multiModule.init(app, server);
 multi.on('sessionCreated', onSessionCreated);
