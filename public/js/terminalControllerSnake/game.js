@@ -5,7 +5,7 @@
 The actual game (screen)
 */
 
-define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
+define(['../lib/multi', './snake', './points',  '../lib/jaws'], function (multi, Snake, Points) {
 
 	// some one time setup calculation
 	var TILE_SIZE = 22;
@@ -23,6 +23,7 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 
 		var game = this;
 		this.snake = new Snake(jaws, TILE_SIZE, width, height);
+		this.points = new Points(jaws, TILE_SIZE, width, height);
 		this.session = session;
 		this.showSection = showSection;
 		this.interval = null;
@@ -38,6 +39,7 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 	// jaws setup callback
 	Game.prototype.setup = function() {
 		this.snake.setup();
+		this.points.setup();
 		this.dispatchEvent('start');
 	};
 
@@ -47,11 +49,13 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 		if (this.snake.isDead()) {
 			this.stop();
 		}
+		this.points.update();
 	};
 
 	// jaws draw callback
 	Game.prototype.draw = function() {
 		jaws.clear();
+		this.points.draw();
 		this.snake.draw();
 	};
 
@@ -66,7 +70,7 @@ define(['../lib/multi', './snake', '../lib/jaws'], function (multi, Snake) {
 		this.showSection('#game');
 		jaws.assets.add('../../img/snake.png');
 		jaws.init();
-		jaws.assets.loadAll({onfinish: this.onAssetsLoaded.bind(this)});
+		jaws.assets.loadAll({onload: this.onAssetsLoaded.bind(this)});
 	};
 
 	// stop all game action hard
