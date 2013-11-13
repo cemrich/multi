@@ -9,6 +9,7 @@ define(['./game', './sound'], function (Game, sound) {
 		var game;
 
 		function startGame() {
+			sound.onStartGame();
 			game = new Game(session, showSection);
 			game.on('stop', onGameFinished);
 			game.start();
@@ -16,7 +17,6 @@ define(['./game', './sound'], function (Game, sound) {
 
 		function onAgain() {
 			// player wants to play again
-			sound.onStartGame();
 			startGame();
 		}
 

@@ -5,7 +5,7 @@
 The actual game (screen)
 */
 
-define(['../lib/multi', './snake', './points',  '../lib/jaws'], function (multi, Snake, Points) {
+define(['../lib/multi', './snake', './points', '../lib/jaws'], function (multi, Snake, Points) {
 
 	// some one time setup calculation
 	var TILE_SIZE = 22;
