@@ -41,8 +41,9 @@ define(['./game'], function (Game) {
 		}
 
 		// show url to join this session
-		$('#presenter-waiting .controllerUrl').text(session.joinSessionUrl);
-		$('#presenter-waiting .controllerUrl').attr('href', session.joinSessionUrl);
+		var url = window.location.host + '/snake';
+		$('#presenter-waiting .controllerUrl').text(url);
+		$('#presenter-waiting .controllerUrl').attr('href', 'http://' + url);
 		showSection('#presenter-waiting');
 
 		// waiting for our player

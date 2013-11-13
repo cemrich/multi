@@ -21,6 +21,9 @@ exports.symbols = function(req, res) {
 	res.render('games/symbols');
 };
 
-exports.terminalControllerSnake = function(req, res) {
-	res.render('games/terminalControllerSnake');
+exports.terminalControllerSnakePlayer = function(req, res) {
+	res.render('games/terminalControllerSnakePlayer');
+};
+exports.terminalControllerSnakePresenter = function(req, res) {
+	res.render('games/terminalControllerSnakePresenter');
 };

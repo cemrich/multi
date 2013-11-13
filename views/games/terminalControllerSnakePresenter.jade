@@ -1,0 +1,19 @@
+extends terminalControllerSnakeLayout
+
+
+block content
+
+	script role = 'presenter'
+
+	#presenter-waiting.section
+		h1 Game created!
+		p 
+			| Grab your smartphone and visit 
+			br
+			a.controllerUrl
+
+	#presenter-game.section
+		canvas
+
+	#presenter-finished.section
+		h1 Game Over

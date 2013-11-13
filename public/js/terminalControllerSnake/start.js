@@ -6,9 +6,10 @@ One screen as controller, one sreen as presenter.
 
 requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], function (multiModule, socketio) {
 
+	var SESSION_TOKEN = 'myOnlySession';
+
 	// TODO: allow some of the callbacks to be passed through options
 	// is this possible with promises, too?
-	// TODO: disallow client connects when a certain player number is exceeded
 	var multiOptions = {
 		io: socketio,
 		server: 'http://tinelaptopsony/',
@@ -16,8 +17,11 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 			minPlayerNeeded: 2,
 			maxPlayerAllowed: 2,
 			token: {
+				// static token because we only need a single session
+				// TODO: make sure you cannot create a session
+				// that does already exits!
 				func: 'staticToken',
-				args: ['myOnlySession']
+				args: [SESSION_TOKEN]
 			}
 		}
 	};
@@ -50,22 +54,23 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	function onSessionDestroyed() {
 		// something went wrong - my session does not longer exist
-		showError('Ooops. The connection dropped. Try to reload or to create a new game.');
+		showError('Ooops. The connection dropped. Try to reload.');
 	}
 
 	function onSession(session) {
 		// I've created or joined a session
 		session.once('destroyed', onSessionDestroyed);
-		var roleModule;
-		if (session.myself.role === 'presenter') {
-			roleModule = './presenter';
-		} else {
-			roleModule = './controller';
-		}
+		var roleModule = './' + role;
 		requirejs([roleModule], function (roleModule) {
 			roleModule.start(session, showSection);
 		});
 	}
 
-	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
+	// create the session or join it
+	// the role variable has been set inside the views
+	if (role === 'presenter') {
+		multi.createSession().then(onSession, onSessionFailed).done();
+	} else {
+		multi.joinSession(SESSION_TOKEN).then(onSession, onSessionFailed).done();
+	}
 });
