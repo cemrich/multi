@@ -15,9 +15,20 @@ define(function () {
 		this.points = new jaws.SpriteList();
 	};
 
+	Points.prototype.handleCollision = function (snake) {
+		var collisions = this.jaws.collideOneWithMany(snake.head, this.points);
+		if (collisions.length > 0) {
+			snake.eatPoints(collisions.length);
+		}
+		for (var i in collisions) {
+			this.points.remove(collisions[i]);
+			this.addNew();
+		};
+	};
+
 	Points.prototype.addNew = function () {
-		var x = 80 + this.halfTileSize;
-		var y = 80 + this.halfTileSize;
+		var x = Math.floor(Math.random() * (this.fieldWidth/this.tileSize)) * this.tileSize + this.halfTileSize;
+		var y = Math.floor(Math.random() * (this.fieldHeight/this.tileSize)) * this.tileSize + this.halfTileSize;
 		var sprite = new this.jaws.Sprite({ x: x, y: y, anchor: 'center' });
 		sprite.setImage(this.anim.next());
 		this.points.push(sprite);

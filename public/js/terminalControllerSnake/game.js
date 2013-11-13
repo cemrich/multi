@@ -45,11 +45,12 @@ define(['../lib/multi', './snake', './points',  '../lib/jaws'], function (multi,
 
 	// jaws gametick callback for game logic
 	Game.prototype.update = function() {
+		this.points.update();
+		this.points.handleCollision(this.snake);
 		this.snake.update();
 		if (this.snake.isDead()) {
 			this.stop();
 		}
-		this.points.update();
 	};
 
 	// jaws draw callback

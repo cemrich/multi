@@ -22,10 +22,19 @@ define(function () {
 		this.newDirection = 1;
 		this.expired = 0;
 		this.fps = 1/2 * 1000; // speed in fps * 1000
+		this.segmetsToAdd = 0;
 	};
 
 	Snake.prototype.setDirection = function (direction) {
 		this.newDirection = direction;
+	};
+
+	Snake.prototype.getNewTailElement = function (prev) {
+		var tailElement = new this.jaws.Sprite({ x: prev.x, y: prev.y, anchor: 'center' });
+		tailElement.setImage(this.tailAnim.next());
+		tailElement.prev = prev;
+		this.tail.push(tailElement);
+		return tailElement;
 	};
 
 	Snake.prototype.setup = function () {
@@ -44,13 +53,15 @@ define(function () {
 		this.tail.push(this.head);
 		var prev = this.head;
 		for (var i = 0; i < 10; i++) {
-			var tailElement = new this.jaws.Sprite({ x: x, y: y, anchor: 'center' });
-			tailElement.setImage(this.tailAnim.next());
-			tailElement.prev = prev;
+			var tailElement = this.getNewTailElement(prev);
 			prev = tailElement;
-			this.tail.push(tailElement);
 		}
 	};
+
+	Snake.prototype.eatPoints = function (number) {
+		this.segmetsToAdd += number;
+		this.fps *= Math.pow(0.9, number);
+	}
 
 	// which direction?
 	Snake.prototype.updateDirection = function () {
@@ -99,7 +110,14 @@ define(function () {
 
 	// update tail to move behind head
 	Snake.prototype.moveTail = function () {
-		for (var i = this.tail.length-1; i > 0; i--) {
+		var lastIndex = this.tail.length-1;
+		// add new segment if needed
+		if (this.segmetsToAdd > 0) {
+			this.getNewTailElement(this.tail.at(lastIndex));
+			this.segmetsToAdd--;
+		}
+		// move
+		for (var i = lastIndex; i > 0; i--) {
 			var ele = this.tail.at(i);
 			ele.setImage(this.tailAnim.next());
 			ele.x = ele.prev.x;
