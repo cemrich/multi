@@ -23,7 +23,7 @@ define(function () {
 		for (var i in collisions) {
 			this.points.remove(collisions[i]);
 			this.addNew();
-		};
+		}
 	};
 
 	Points.prototype.addNew = function () {
@@ -47,8 +47,8 @@ define(function () {
 	// called according to global framerate
 	Points.prototype.update = function () {
 		var points = this;
-		this.points.forEach(function(point) { 
-			point.setImage(points.anim.next()); 
+		this.points.forEach(function(point) {
+			point.setImage(points.anim.next());
 		});
 	};
 

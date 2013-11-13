@@ -61,7 +61,7 @@ define(function () {
 	Snake.prototype.eatPoints = function (number) {
 		this.segmetsToAdd += number;
 		this.fps *= Math.pow(0.9, number);
-	}
+	};
 
 	// which direction?
 	Snake.prototype.updateDirection = function () {

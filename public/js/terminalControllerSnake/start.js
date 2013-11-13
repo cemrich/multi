@@ -1,3 +1,5 @@
+/* global role */
+
 /*
 One player snake as minimal example.
 One screen as controller, one sreen as presenter.
