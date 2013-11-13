@@ -38,6 +38,7 @@ define(['../lib/multi', './snake', './points',  '../lib/jaws'], function (multi,
 
 	// jaws setup callback
 	Game.prototype.setup = function() {
+		jaws.clear();
 		this.snake.setup();
 		this.points.setup();
 		this.dispatchEvent('start');
@@ -69,9 +70,13 @@ define(['../lib/multi', './snake', './points',  '../lib/jaws'], function (multi,
 	// (re) start this game
 	Game.prototype.start = function () {
 		this.showSection('#game');
-		jaws.assets.add('../../img/snake.png');
 		jaws.init();
-		jaws.assets.loadAll({onload: this.onAssetsLoaded.bind(this)});
+		if (jaws.assets.src_list.length === 0) { // hack around jaws bug
+			jaws.assets.add('../../img/snake.png');
+			jaws.assets.loadAll({onload: this.onAssetsLoaded.bind(this)});
+		} else {
+			this.onAssetsLoaded();
+		}
 	};
 
 	// stop all game action hard
