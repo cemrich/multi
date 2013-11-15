@@ -5,10 +5,10 @@ The snake object
 
 define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 
-	var Snake = function (jaws, grid, directionObject, number) {
+	var Snake = function (jaws, grid, player) {
 		this.jaws = jaws;
 		this.grid = grid;
-		this.number = number;
+		this.player = player;
 		this.headAnim = null;
 		this.tailAnim = null;
 		this.head = null;
@@ -17,7 +17,7 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 		this.fps = 1/2 * 1000; // speed in fps * 1000
 		this.segmetsToAdd = 0;
 		this.direction = 0;
-		this.directionObject = directionObject;
+		this.directionObject = player.attributes;
 		this.directionObject.direction = 0;
 	};
 
@@ -34,11 +34,12 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 			sprite_sheet: '../../img/snake.png',
 			frame_size: [20, 20],
 			frame_duration: 500});
-		var hueRotation = this.number / 2;
+		var rgb = this.player.attributes.color;
 		snakeAnim.frames.forEach(function (canvas) {
-			canvasHelper.rotateHue(canvas, hueRotation);
+			canvasHelper.replaceHues(canvas, rgb);
 		});
-		var x = this.number / 2 * this.grid.width + this.grid.halfTileSize;
+		var x = this.player.number / 2 * this.grid.width;
+		x -= x % this.grid.tileSize + this.grid.halfTileSize;
 		var y = this.grid.centerY;
 		this.tailAnim = snakeAnim.slice(0, 1);
 		this.headAnim = snakeAnim.slice(1, 3);

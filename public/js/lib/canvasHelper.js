@@ -98,8 +98,27 @@ define(function () {
 		ctx.putImageData(imageData, 0, 0);
 	}
 
+	function replaceHues(canvas, rgb) {
+		var newValue = rgbToHsl(rgb.r, rgb.g, rgb.b)[0];
+		var ctx = canvas.getContext('2d');
+		var imageData = ctx.getImageData(0, 0, 22, 22);
+		var pixels = imageData.data;  
+		var numPixels = imageData.width * imageData.height * 4;
+		for (var i = 0; i < numPixels; i+=4) {
+			var hsl = rgbToHsl(pixels[i], pixels[i+1], pixels[i+2]);
+			hsl[0] = newValue;
+			var rgb = hslToRgb(hsl[0], hsl[1], hsl[2]);
+			pixels[i] = rgb[0];
+			pixels[i+1] = rgb[1];
+			pixels[i+2] = rgb[2];
+		};
+		ctx.clearRect(0, 0, canvas.width, canvas.height);  
+		ctx.putImageData(imageData, 0, 0);
+	}
+
 	return {
-		rotateHue: rotateHue
+		rotateHue: rotateHue,
+		replaceHues: replaceHues
 	};
 
 });

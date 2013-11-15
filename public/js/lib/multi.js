@@ -587,6 +587,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		this.id = null;
 		this.role = 'player';
 		this.attributes = {};
+		this.number = null;
 
 		/** 
 		 * Called when the user attributes have been changed.
@@ -743,10 +744,10 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		function addPlayer(playerData) {
 			var player = playerModule.fromPackedData(playerData);
 			session.players[player.id] = player;
-			session.dispatchEvent('playerJoined', { player: player });
 			player.on('attributesChangedLocally', onAttributesChangedLocally);
 			player.on('messageSendLocally', onMessageSendLocally);
 
+			session.dispatchEvent('playerJoined', { player: player });
 			if (session.getPlayerCount() === session.minPlayerNeeded) {
 				session.dispatchEvent('aboveMinPlayerNeeded');
 			}

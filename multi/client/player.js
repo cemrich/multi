@@ -22,6 +22,7 @@ define(function(require, exports, module) {
 		this.id = null;
 		this.role = 'player';
 		this.attributes = {};
+		this.number = null;
 
 		/** 
 		 * Called when the user attributes have been changed.

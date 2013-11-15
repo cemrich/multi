@@ -4,6 +4,12 @@ Screen of the snake game that shows all the action.
 
 define(['./game', './sound'], function (Game, sound) {
 
+	var COLORS = [
+		{r: 255, g:   0, b:   0},
+		{r:   0, g: 255, b:   0},
+		{r:   0, g:   0, b: 255},
+	];
+
 	function start(session, showSection) {
 
 		var game;
@@ -30,6 +36,10 @@ define(['./game', './sound'], function (Game, sound) {
 			session.once('again', onAgain);
 		}
 
+		function onPlayerJoined(event) {
+			event.player.attributes.color = COLORS[event.player.number];
+		}
+
 		function onAboveMinPlayerNeeded() {
 			// we have all players we need and can start the game now
 			startGame();
@@ -52,6 +62,7 @@ define(['./game', './sound'], function (Game, sound) {
 		// waiting for our player
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
+		session.on('playerJoined', onPlayerJoined);
 	}
 
 	return {

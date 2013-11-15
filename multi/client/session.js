@@ -93,10 +93,10 @@ define(function(require, exports, module) {
 		function addPlayer(playerData) {
 			var player = playerModule.fromPackedData(playerData);
 			session.players[player.id] = player;
-			session.dispatchEvent('playerJoined', { player: player });
 			player.on('attributesChangedLocally', onAttributesChangedLocally);
 			player.on('messageSendLocally', onMessageSendLocally);
 
+			session.dispatchEvent('playerJoined', { player: player });
 			if (session.getPlayerCount() === session.minPlayerNeeded) {
 				session.dispatchEvent('aboveMinPlayerNeeded');
 			}

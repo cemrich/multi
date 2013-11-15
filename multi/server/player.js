@@ -36,6 +36,7 @@ var Player = function (socket) {
 	 * @type {string}
 	 */
 	this.role = 'player';
+	this.number = null;
 	/** 
 	 * Object with user attributes for this player.
 	 * All changes within this object will automatically
@@ -100,6 +101,7 @@ Player.prototype.pack = function () {
 	return {
 		id: this.id,
 		role: this.role,
+		number: this.number,
 		attributes: this.attributes
 	};
 };

@@ -14,10 +14,13 @@ define(['../lib/multi', './snake', './points', './grid', '../lib/jaws'], functio
 
 		multi.EventDispatcher.call(this);
 
-		var controller = session.getPlayerArray()[0];
-		var snake = new Snake(jaws, grid, controller.attributes, 0);
 		this.snakes = [];
-		this.snakes.push(snake);
+		for (var i in session.players) {
+			var player = session.players[i];
+			var snake = new Snake(jaws, grid, player);
+			this.snakes.push(snake);
+		}
+
 		this.points = new Points(jaws, grid);
 		this.session = session;
 		this.showSection = showSection;

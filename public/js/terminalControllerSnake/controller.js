@@ -46,6 +46,15 @@ define(['./joystick', './sound'], function (Joystick, sound) {
 			session.disconnectMyself();
 		}
 
+		function onAttributesChanged() {
+			// TODO: doesn't reach me because of multi bug
+			var rgb = session.myself.attributes.color;
+			var colorStr = 'rgb('+rgb.r+','+rgb.g+','+rgb.b+')';
+			$('#controller h1').css('color', colorStr);
+		}
+
+		console.log(session.myself.attributes.color);
+		session.myself.on('attributesChanged', onAttributesChanged);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 		startGame();
 

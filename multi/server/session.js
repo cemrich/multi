@@ -69,6 +69,8 @@ var Session = function (io, options) {
 	 */
 	this.io = io;
 
+	this.freeNumbers = [];
+
 	EventDispatcher.call(this);
 
 	/**
@@ -146,6 +148,12 @@ Session.prototype.isFull = function () {
  */
 Session.prototype.addPlayer = function (player) {
 	var session = this;
+	if (this.freeNumbers.length === 0) {
+		player.number = this.getPlayerCount();
+	} else {
+		player.number = this.freeNumbers.sort()[0];
+		this.freeNumbers.splice(0,1);
+	}
 	this.sendToPlayers('playerJoined', player.pack());
 	player.socket.join(this.token);
 	this.players[player.id] = player;
@@ -168,6 +176,7 @@ Session.prototype.addPlayer = function (player) {
  */
 Session.prototype.removePlayer = function (player) {
 	player.off('attributesChanged', this.onPlayerAttributesChanged);
+	this.freeNumbers.push(player.number);
 	delete this.players[player.id];
 	this.dispatchEvent('playerLeft', { player: player });
 	this.sendToPlayers('playerLeft', { playerId: player.id });
