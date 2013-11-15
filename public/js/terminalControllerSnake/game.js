@@ -14,17 +14,12 @@ define(['../lib/multi', './snake', './points', './grid', '../lib/jaws'], functio
 
 		multi.EventDispatcher.call(this);
 
-		var game = this;
-		this.snake = new Snake(jaws, grid);
+		var controller = session.getPlayerArray()[0];
+		this.snake = new Snake(jaws, grid, controller.attributes);
 		this.points = new Points(jaws, grid);
 		this.session = session;
 		this.showSection = showSection;
 		this.interval = null;
-
-		var controller = session.getPlayerArray()[0];
-		controller.on('attributesChanged', function () {
-			game.snake.setDirection(controller.attributes.direction);
-		});
 	};
 
 	multi.util.inherits(Game, multi.EventDispatcher);

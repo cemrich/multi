@@ -8,22 +8,19 @@ define(['./sound'], function (sound) {
 	var START_X = 0;
 	var START_Y = 0;
 
-	var Snake = function (jaws, grid) {
+	var Snake = function (jaws, grid, directionObject) {
 		this.jaws = jaws;
 		this.grid = grid;
 		this.headAnim = null;
 		this.tailAnim = null;
 		this.head = null;
 		this.tail = new jaws.SpriteList();
-		this.direction = 1;
-		this.newDirection = 1;
 		this.expired = 0;
 		this.fps = 1/2 * 1000; // speed in fps * 1000
 		this.segmetsToAdd = 0;
-	};
-
-	Snake.prototype.setDirection = function (direction) {
-		this.newDirection = direction;
+		this.direction = 1;
+		this.directionObject = directionObject;
+		this.directionObject.direction = 1;
 	};
 
 	Snake.prototype.getNewTailElement = function (prev) {
@@ -64,9 +61,9 @@ define(['./sound'], function (sound) {
 	// which direction?
 	Snake.prototype.updateDirection = function () {
 		this.head.isFree = true;
-		var oppositeDir = (this.newDirection + 2) % 4;
+		var oppositeDir = (this.directionObject.direction + 2) % 4;
 		if (this.direction !== oppositeDir) {
-			this.direction = this.newDirection;
+			this.direction = this.directionObject.direction;
 		}
 		switch (this.direction) {
 			case 0: // up
