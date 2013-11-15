@@ -121,6 +121,33 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 		});
 	});
 
+	asyncTest('test attribute synchronization', function () {
+		expect(1);
+
+		multi.createSession().then(function (session) {
+			var data = { test: 42, foo: 'bar' };
+			var createdSession = session;
+
+			multi.joinSession(createdSession.token).then(function (session) {
+				session.myself.on('attributesChanged', function () {
+					deepEqual(session.myself.attributes.data, data, 'message type is correct');
+					start();
+				});
+
+				function startSync() {
+					var otherPlayer = createdSession.players[createdSession.myself.id];
+					otherPlayer.attributes.data = data;
+				}
+
+				if (Object.keys(createdSession.players).length === 1) {
+					startSync();
+				} else {
+					createdSession.on('playerJoined', startSync);
+				}
+			});
+		});
+	});
+
 	// all modules & tests loaded, so begin testing
 	QUnit.start();
 
