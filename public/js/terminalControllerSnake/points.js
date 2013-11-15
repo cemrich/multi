@@ -5,12 +5,9 @@ All points.
 
 define(function () {
 
-	var Points = function (jaws, tileSize, fieldWidth, fieldHeight) {
-		this.tileSize = tileSize;
-		this.halfTileSize = tileSize/2;
-		this.fieldWidth = fieldWidth;
-		this.fieldHeight = fieldHeight;
+	var Points = function (jaws, grid) {
 		this.jaws = jaws;
+		this.grid = grid;
 		this.anim = null;
 		this.points = new jaws.SpriteList();
 	};
@@ -27,9 +24,8 @@ define(function () {
 	};
 
 	Points.prototype.addNew = function () {
-		var x = Math.floor(Math.random() * (this.fieldWidth/this.tileSize)) * this.tileSize + this.halfTileSize;
-		var y = Math.floor(Math.random() * (this.fieldHeight/this.tileSize)) * this.tileSize + this.halfTileSize;
-		var sprite = new this.jaws.Sprite({ x: x, y: y, anchor: 'center' });
+		var position = this.grid.getRandomPosition();
+		var sprite = new this.jaws.Sprite({ x: position.x, y: position.y, anchor: 'center' });
 		sprite.setImage(this.anim.next());
 		this.points.push(sprite);
 	};

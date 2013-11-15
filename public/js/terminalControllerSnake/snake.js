@@ -8,12 +8,9 @@ define(['./sound'], function (sound) {
 	var START_X = 0;
 	var START_Y = 0;
 
-	var Snake = function (jaws, tileSize, fieldWidth, fieldHeight) {
-		this.tileSize = tileSize;
-		this.halfTileSize = tileSize/2;
-		this.fieldWidth = fieldWidth;
-		this.fieldHeight = fieldHeight;
+	var Snake = function (jaws, grid) {
 		this.jaws = jaws;
+		this.grid = grid;
 		this.headAnim = null;
 		this.tailAnim = null;
 		this.head = null;
@@ -43,8 +40,8 @@ define(['./sound'], function (sound) {
 			frame_size: [20, 20],
 			frame_duration: 500});
 
-		var x = START_X + this.halfTileSize;
-		var y = START_Y + this.halfTileSize;
+		var x = START_X + this.grid.halfTileSize;
+		var y = START_Y + this.grid.halfTileSize;
 		this.tailAnim = snakeAnim.slice(0, 1);
 		this.headAnim = snakeAnim.slice(1, 3);
 		this.head = new this.jaws.Sprite({ x: x, y: y, anchor: 'center' });
@@ -73,19 +70,19 @@ define(['./sound'], function (sound) {
 		}
 		switch (this.direction) {
 			case 0: // up
-				this.head.y -= this.tileSize;
+				this.head.y -= this.grid.tileSize;
 				this.head.rotateTo(-90);
 				break;
 			case 1: // right
-				this.head.x += this.tileSize;
+				this.head.x += this.grid.tileSize;
 				this.head.rotateTo(0);
 				break;
 			case 2: // down
-				this.head.y += this.tileSize;
+				this.head.y += this.grid.tileSize;
 				this.head.rotateTo(90);
 				break;
 			case 3: // left
-				this.head.x -= this.tileSize;
+				this.head.x -= this.grid.tileSize;
 				this.head.rotateTo(180);
 				break;
 			default:
@@ -95,17 +92,17 @@ define(['./sound'], function (sound) {
 
 	// don't leave the canvas
 	Snake.prototype.checkBoundaries = function () {
-		if (this.head.x < this.halfTileSize) {
-			this.head.x = this.fieldWidth - this.halfTileSize;
+		if (this.head.x < this.grid.minX) {
+			this.head.x = this.grid.maxX;
 		}
-		if (this.head.y < this.halfTileSize) {
-			this.head.y = this.fieldHeight - this.halfTileSize;
+		if (this.head.y < this.grid.minY) {
+			this.head.y = this.grid.maxY;
 		}
-		if (this.head.x > this.fieldWidth) {
-			this.head.x = this.halfTileSize;
+		if (this.head.x > this.grid.maxX) {
+			this.head.x = this.grid.minX;
 		}
-		if (this.head.y > this.fieldHeight) {
-			this.head.y = this.halfTileSize;
+		if (this.head.y > this.grid.maxY) {
+			this.head.y = this.grid.minY;
 		}
 	};
 

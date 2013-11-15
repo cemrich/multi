@@ -5,25 +5,18 @@
 The actual game (screen)
 */
 
-define(['../lib/multi', './snake', './points', '../lib/jaws'], function (multi, Snake, Points) {
+define(['../lib/multi', './snake', './points', './grid', '../lib/jaws'], function (multi, Snake, Points, Grid) {
 
-	// some one time setup calculation
-	var TILE_SIZE = 22;
-	var width = document.documentElement.clientWidth;
-	var height = document.documentElement.clientHeight;
-	width -= width % TILE_SIZE;
-	height -= height % TILE_SIZE;
-	$('canvas').attr('width', width);
-	$('canvas').attr('height', height);
-
+	// some one time setup calculation for the grid
+	var grid = new Grid(22);
 
 	var Game = function (session, showSection) {
 
 		multi.EventDispatcher.call(this);
 
 		var game = this;
-		this.snake = new Snake(jaws, TILE_SIZE, width, height);
-		this.points = new Points(jaws, TILE_SIZE, width, height);
+		this.snake = new Snake(jaws, grid);
+		this.points = new Points(jaws, grid);
 		this.session = session;
 		this.showSection = showSection;
 		this.interval = null;
