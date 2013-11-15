@@ -25,11 +25,22 @@ define(function(require, exports, module) {
 		this.attributes = {};
 		this.number = null;
 
-		this.socket.on('playerMessage', function (data) {
+		function onPlayerMessage(data) {
 			if (data.id === player.id) {
 				player.dispatchEvent(data.type, { type: data.type, data: data.data } );
 			}
-		});
+		}
+
+		function onPlayerAttributesChanged(data) {
+			if (data.id === player.id) {
+				WatchJS.noMore = true;
+				for (var i in data.attributes) {
+					player.attributes[i] = data.attributes[i];
+				}
+				player.dispatchEvent('attributesChanged');
+				WatchJS.noMore = false;
+			}
+		}
 
 		/** 
 		 * Called when the user attributes have been changed.
@@ -41,21 +52,17 @@ define(function(require, exports, module) {
 		function onAttributesChange(prop, action, newvalue, oldvalue) {
 			// console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
 			player.dispatchEvent('attributesChangedLocally');
+			player.socket.emit('playerAttributesChanged',
+				{ id: player.id, attributes: player.attributes }
+			);
 		}
 
+		this.socket.on('playerMessage', onPlayerMessage);
+		this.socket.on('playerAttributesChanged', onPlayerAttributesChanged);
 		WatchJS.watch(this.attributes, onAttributesChange, 0, true);
 	};
 
 	util.inherits(Player, EventDispatcher);
-
-	Player.prototype.updateAttributesFromServer = function (val) {
-		WatchJS.noMore = true;
-		for (var i in val) {
-			this.attributes[i] = val[i];
-		}
-		this.dispatchEvent('attributesChanged');
-		WatchJS.noMore = false;
-	};
 
 	/**
 	* Sends the given message to all other instances of this player.
@@ -63,7 +70,9 @@ define(function(require, exports, module) {
 	* @param {object} [data]  message data that should be send
 	*/
 	Player.prototype.message = function (type, data) {
-		this.dispatchEvent('messageSendLocally', { type: type, data: data } );
+		this.socket.emit('playerMessage',
+			{ id: this.id, type: type, data: data }
+		);
 	};
 
 	/**

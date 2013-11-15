@@ -65,36 +65,9 @@ define(function(require, exports, module) {
 		// calculate attributes
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
-		function onMessageSendLocally(event) {
-			var player = event.currentTarget;
-			socket.emit('playerMessage',
-				{ id: player.id, type: event.type, data: event.data }
-			);
-		}
-
-		function onAttributesChangedLocally(event) {
-			var player = event.currentTarget;
-			socket.emit('playerAttributesChanged',
-				{ id: player.id, attributes: player.attributes }
-			);
-		}
-
-		function getPlayer(id) {
-			var player = session.players[id];
-			if (player === undefined && id === session.myself.id) {
-				player = session.myself;
-			}
-			if (player === undefined) {
-				console.error('player not found', id);
-			}
-			return player;
-		}
-
 		function addPlayer(playerData) {
 			var player = playerModule.fromPackedData(playerData, socket);
 			session.players[player.id] = player;
-			player.on('attributesChangedLocally', onAttributesChangedLocally);
-			player.on('messageSendLocally', onMessageSendLocally);
 
 			session.dispatchEvent('playerJoined', { player: player });
 			if (session.getPlayerCount() === session.minPlayerNeeded) {
@@ -102,15 +75,14 @@ define(function(require, exports, module) {
 			}
 		}
 
-		myself.on('attributesChangedLocally', onAttributesChangedLocally);
-		myself.on('messageSendLocally', onMessageSendLocally);
-
+		// TODO: unregister callbacks on disconnect
 		socket.on('playerJoined', function (data) {
 			addPlayer(data);
 		});
 
 		socket.on('playerLeft', function (data) {
 			var player = session.players[data.playerId];
+			// TODO: clean up _all_ player listeners before deleting
 			delete session.players[data.playerId];
 			session.dispatchEvent('playerLeft', { player: player });
 			player.dispatchEvent('disconnected');
@@ -123,13 +95,6 @@ define(function(require, exports, module) {
 		socket.on('disconnect', function (data) {
 			session.dispatchEvent('destroyed');
 			session.socket = null;
-		});
-
-		socket.on('playerAttributesChanged', function (data) {
-			var player = getPlayer(data.id);
-			if (player !== undefined) {
-				player.updateAttributesFromServer(data.attributes);
-			}
 		});
 
 		socket.on('sessionMessage', function (data) {
