@@ -3,14 +3,12 @@
 The snake object
 */
 
-define(['./sound'], function (sound) {
+define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 
-	var START_X = 0;
-	var START_Y = 0;
-
-	var Snake = function (jaws, grid, directionObject) {
+	var Snake = function (jaws, grid, directionObject, number) {
 		this.jaws = jaws;
 		this.grid = grid;
+		this.number = number;
 		this.headAnim = null;
 		this.tailAnim = null;
 		this.head = null;
@@ -18,9 +16,9 @@ define(['./sound'], function (sound) {
 		this.expired = 0;
 		this.fps = 1/2 * 1000; // speed in fps * 1000
 		this.segmetsToAdd = 0;
-		this.direction = 1;
+		this.direction = 0;
 		this.directionObject = directionObject;
-		this.directionObject.direction = 1;
+		this.directionObject.direction = 0;
 	};
 
 	Snake.prototype.getNewTailElement = function (prev) {
@@ -36,9 +34,12 @@ define(['./sound'], function (sound) {
 			sprite_sheet: '../../img/snake.png',
 			frame_size: [20, 20],
 			frame_duration: 500});
-
-		var x = START_X + this.grid.halfTileSize;
-		var y = START_Y + this.grid.halfTileSize;
+		var hueRotation = this.number / 2;
+		snakeAnim.frames.forEach(function (canvas) {
+			canvasHelper.rotateHue(canvas, hueRotation);
+		});
+		var x = this.number / 2 * this.grid.width + this.grid.halfTileSize;
+		var y = this.grid.centerY;
 		this.tailAnim = snakeAnim.slice(0, 1);
 		this.headAnim = snakeAnim.slice(1, 3);
 		this.head = new this.jaws.Sprite({ x: x, y: y, anchor: 'center' });
@@ -140,10 +141,18 @@ define(['./sound'], function (sound) {
 		}
 	};
 
-	// is the snake biting itself?
-	Snake.prototype.isDead = function () {
-		var collisions = this.jaws.collideOneWithMany(this.head, this.tail);
-		return collisions.length > 0 && this.head.isFree;
+	// is the snake biting itself or another snake
+	Snake.prototype.isDead = function (snakes) {
+		var that = this;
+		var dead = false;
+		snakes.some(function (snake) {
+			var collisions = that.jaws.collideOneWithMany(that.head, snake.tail);
+			if (collisions.length > 0 && that.head.isFree) {
+				dead = true;
+				return true;
+			}
+		});
+		return dead;
 	};
 
 	Snake.prototype.draw = function () {

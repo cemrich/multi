@@ -16,6 +16,8 @@ define(function () {
 		this.minY = this.halfTileSize;
 		this.maxX = this.width - this.halfTileSize;
 		this.maxY = this.height - this.halfTileSize;
+		this.centerY = this.height / 2;
+		this.centerY -= this.centerY % this.tileSize - this.halfTileSize;
 		$('canvas').attr('width', this.width);
 		$('canvas').attr('height', this.height);
 	};

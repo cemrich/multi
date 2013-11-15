@@ -15,7 +15,9 @@ define(['../lib/multi', './snake', './points', './grid', '../lib/jaws'], functio
 		multi.EventDispatcher.call(this);
 
 		var controller = session.getPlayerArray()[0];
-		this.snake = new Snake(jaws, grid, controller.attributes);
+		var snake = new Snake(jaws, grid, controller.attributes, 0);
+		this.snakes = [];
+		this.snakes.push(snake);
 		this.points = new Points(jaws, grid);
 		this.session = session;
 		this.showSection = showSection;
@@ -27,17 +29,33 @@ define(['../lib/multi', './snake', './points', './grid', '../lib/jaws'], functio
 	// jaws setup callback
 	Game.prototype.setup = function() {
 		jaws.clear();
-		this.snake.setup();
+		this.snakes.forEach(function (snake) {
+			snake.setup();
+		});
 		this.points.setup();
 		this.dispatchEvent('start');
 	};
 
 	// jaws gametick callback for game logic
 	Game.prototype.update = function() {
+		var game = this;
 		this.points.update();
-		this.points.handleCollision(this.snake);
-		this.snake.update();
-		if (this.snake.isDead()) {
+
+		var deadSnakeIndizes = [];
+		this.snakes.forEach(function (snake, index) {
+			// do stuff with every snake
+			game.points.handleCollision(snake);
+			snake.update();
+			if (snake.isDead(game.snakes)) {
+				deadSnakeIndizes.push(index);
+			}
+		});
+		// remove dead snakes
+		for (var i in deadSnakeIndizes) {
+			this.snakes.splice(deadSnakeIndizes[i], 1);
+		}
+		// all snakes dead?
+		if (this.snakes.length === 0) {
 			this.stop();
 		}
 	};
@@ -46,7 +64,9 @@ define(['../lib/multi', './snake', './points', './grid', '../lib/jaws'], functio
 	Game.prototype.draw = function() {
 		jaws.clear();
 		this.points.draw();
-		this.snake.draw();
+		this.snakes.forEach(function (snake) {
+			snake.draw();
+		});
 	};
 
 	// all assets are there - ready to start
