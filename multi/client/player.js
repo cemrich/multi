@@ -15,14 +15,21 @@ define(function(require, exports, module) {
 	* @mixes EventDispatcher
 	* @memberof module:client/player
 	*/
-	var Player = function () {
+	var Player = function (socket) {
 		var player = this;
 
 		EventDispatcher.call(this);
+		this.socket = socket;
 		this.id = null;
 		this.role = 'player';
 		this.attributes = {};
 		this.number = null;
+
+		this.socket.on('playerMessage', function (data) {
+			if (data.id === player.id) {
+				player.dispatchEvent(data.type, { type: data.type, data: data.data } );
+			}
+		});
 
 		/** 
 		 * Called when the user attributes have been changed.
@@ -50,10 +57,6 @@ define(function(require, exports, module) {
 		WatchJS.noMore = false;
 	};
 
-	Player.prototype.dispatchMessageFromServer = function(type, data) {
-		this.dispatchEvent(type, { type: type, data: data } );
-	};
-
 	/**
 	* Sends the given message to all other instances of this player.
 	* @param {string} type    type of message that should be send
@@ -67,8 +70,8 @@ define(function(require, exports, module) {
 	* Unpacks a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
-	exports.fromPackedData = function (data) {
-		var player = new Player();
+	exports.fromPackedData = function (data, socket) {
+		var player = new Player(socket);
 		for (var i in data) {
 			if (i === 'attributes') {
 				for (var j in data[i]) {

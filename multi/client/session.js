@@ -91,7 +91,7 @@ define(function(require, exports, module) {
 		}
 
 		function addPlayer(playerData) {
-			var player = playerModule.fromPackedData(playerData);
+			var player = playerModule.fromPackedData(playerData, socket);
 			session.players[player.id] = player;
 			player.on('attributesChangedLocally', onAttributesChangedLocally);
 			player.on('messageSendLocally', onMessageSendLocally);
@@ -135,12 +135,6 @@ define(function(require, exports, module) {
 		socket.on('sessionMessage', function (data) {
 			session.dispatchEvent(data.type, data);
 		});
-		socket.on('playerMessage', function (data) {
-			var player = getPlayer(data.id);
-			if (player !== undefined) {
-				player.dispatchMessageFromServer(data.type, data.data);
-			}
-		});
 	};
 
 	util.inherits(Session, EventDispatcher);
@@ -180,7 +174,7 @@ define(function(require, exports, module) {
 	* @returns {module:client/session~Session}
 	*/
 	exports.fromPackedData = function (data, socket) {
-		var myself = playerModule.fromPackedData(data.player);
+		var myself = playerModule.fromPackedData(data.player, socket);
 		var session = new Session(myself, socket, data.session);
 		return session;
 	};
