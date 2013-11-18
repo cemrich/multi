@@ -148,6 +148,22 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 		});
 	});
 
+	asyncTest('cannot create session with same token twice', function () {
+		expect(1);
+		var sessionParams = {
+			token: {
+				func: 'staticToken',
+				args: ['myStaticSessionToken']
+			}
+		};
+		multi.createSession(sessionParams).then(function () {
+			multi.createSession(sessionParams).fail(function (error) {
+				ok(error instanceof multiModule.TokenAlreadyExistsError, 'throwing an TokenAlreadyExistsError');
+				start();
+			}).done();
+		}).done();
+	});
+
 	// all modules & tests loaded, so begin testing
 	QUnit.start();
 

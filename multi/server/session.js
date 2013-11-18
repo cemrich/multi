@@ -209,6 +209,11 @@ exports.getSession = function (token) {
  */
 exports.create = function(io, options) {
 	var session = new Session(io, options);
+
+	if (exports.getSession(session.token) !== null) {
+		return null;
+	}
+
 	sessions[session.token] = session;
 	session.on('destroyed', function() {
 		delete sessions[session.token];

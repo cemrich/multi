@@ -2797,6 +2797,11 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	};
 	util.inherits(NoSuchSessionError, Error);
 
+	var TokenAlreadyExistsError = function () {
+		Error.call(this, 'a session with this token does already exist');
+	};
+	util.inherits(TokenAlreadyExistsError, Error);
+
 	var SessionFullError = function () {
 		Error.call('the requested session is full');
 	};
@@ -2946,6 +2951,11 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 				deferred.resolve(session);
 			});
 		});
+		socket.on('createSessionFailed', function (event) {
+			if (event.reason === 'tokenAlreadyExists') {
+				deferred.reject(new TokenAlreadyExistsError());
+			}
+		});
 		socket.on('connect_failed', function () {
 			deferred.reject(new NoConnectionError());
 		});
@@ -2969,6 +2979,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	exports.NoSuchSessionError = NoSuchSessionError;
 	exports.SessionFullError = SessionFullError;
 	exports.NoConnectionError = NoConnectionError;
+	exports.TokenAlreadyExistsError = TokenAlreadyExistsError;
 
 	exports.color = color;
 	exports.EventDispatcher = EventDispatcher;

@@ -20,8 +20,6 @@ requirejs(['../../lib/multi', '/socket.io/socket.io.js', '../sound', '../layout'
 			maxPlayerAllowed: 2,
 			token: {
 				// static token because we only need a single session
-				// TODO: make sure you cannot create a session
-				// that does already exits!
 				func: 'staticToken',
 				args: [SESSION_TOKEN]
 			}
@@ -38,6 +36,8 @@ requirejs(['../../lib/multi', '/socket.io/socket.io.js', '../sound', '../layout'
 			layout.showError('There is no server connection. Please try again later.');
 		} else if (error instanceof multiModule.NoSuchSessionError) {
 			layout.showError('This game does not exist. Make sure your URL is correct.');
+		} else if (error instanceof multiModule.TokenAlreadyExistsError) {
+			layout.showError('The game has already been started in another window or tab.');
 		} else {
 			layout.showError('Something went terribly wrong. Please try again.');
 		}

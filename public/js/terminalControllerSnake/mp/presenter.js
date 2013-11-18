@@ -107,6 +107,8 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 	function onSessionFailed(error) {
 		if (error instanceof multiModule.NoConnectionError) {
 			layout.showError('There is no server connection. Please try again later.');
+		} else if (error instanceof multiModule.TokenAlreadyExistsError) {
+			layout.showError('The game has already been started in another window or tab.');
 		} else {
 			layout.showError('Something went terribly wrong. Please try again.');
 		}

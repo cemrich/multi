@@ -60,10 +60,17 @@ var Multi = function (app, server) {
 		// create new session
 		socket.on('createSession', function(event) {
 			var session = sessionModule.create(io, event.options);
-			multi.dispatchEvent('sessionCreated', { session: session });
-			player.role = 'presenter';
-			socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });
-			session.addPlayer(player);
+			if (session === null) {
+				socket.emit('createSessionFailed', {
+					token: event.token,
+					reason: 'tokenAlreadyExists'
+				});
+			} else {
+				multi.dispatchEvent('sessionCreated', { session: session });
+				player.role = 'presenter';
+				socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });
+				session.addPlayer(player);
+			}
 		});
 	
 	});
