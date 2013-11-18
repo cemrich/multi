@@ -1,0 +1,17 @@
+extends layout
+
+
+block content
+
+	script(data-main='/js/terminalControllerSnake/mp/controller.js', src='/js/lib/require.js')
+
+	#controller.section
+		h1 Touch to move!
+		#marker
+			.down.marker
+			.move.marker
+
+	#finished.section
+		h1 Game Over
+		button.again Again!
+		button.exit Exit!

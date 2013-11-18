@@ -32,8 +32,10 @@ app.get('/', routes.index);
 // game routes
 app.get('/example1', routes.example1);
 app.get('/symbols', routes.symbols);
-app.get('/snake1p/presenter', routes.terminalControllerSnakePresenter);
-app.get('/snake1p', routes.terminalControllerSnakePlayer);
+app.get('/snake1p/presenter', routes.terminalControllerSnake1pPresenter);
+app.get('/snake1p', routes.terminalControllerSnake1pPlayer);
+app.get('/snakemp/presenter', routes.terminalControllerSnakeMpPresenter);
+app.get('/snakemp', routes.terminalControllerSnakeMpPlayer);
 
 server.listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
