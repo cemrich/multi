@@ -11,22 +11,35 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 	var grid = new Grid(22);
 
 	var Game = function (session) {
-
 		multi.EventDispatcher.call(this);
-
-		this.snakes = [];
-		for (var i in session.players) {
-			var player = session.players[i];
-			var snake = new Snake(jaws, grid, player);
-			this.snakes.push(snake);
-		}
 
 		this.points = new Points(jaws, grid);
 		this.session = session;
 		this.interval = null;
+		this.snakes = [];
+		
+		for (var i in session.players) {
+			this.addPlayer(session.players[i]);
+		}
 	};
 
 	multi.util.inherits(Game, multi.EventDispatcher);
+
+	Game.prototype.addPlayer = function(player) {
+		var game = this;
+		var snake = new Snake(jaws, grid, player, this.session.getPlayerCount());
+		player.once('disconnected', function (event) {
+			game.deleteSnake(snake);
+		});
+		this.snakes.push(snake);
+	};
+
+	Game.prototype.deleteSnake = function(snake) {
+		var index = this.snakes.indexOf(snake);
+		if (index !== -1) {
+			this.snakes.splice(index, 1);
+		}
+	};
 
 	// jaws setup callback
 	Game.prototype.setup = function() {

@@ -68,7 +68,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		}
 
 		function onAboveMinPlayerNeeded() {
-			// enough players - start game
+			// enough players - allow to start the game
 			$('#waiting .start').show();
 		}
 

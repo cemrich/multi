@@ -5,10 +5,11 @@ The snake object
 
 define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 
-	var Snake = function (jaws, grid, player) {
+	var Snake = function (jaws, grid, player, snakeCount) {
 		this.jaws = jaws;
 		this.grid = grid;
 		this.player = player;
+		this.snakeCount = snakeCount || 1;
 		this.headAnim = null;
 		this.tailAnim = null;
 		this.head = null;
@@ -40,7 +41,7 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 				canvasHelper.replaceHues(canvas, rgb);
 			});
 		}
-		var x = this.player.number / 2 * this.grid.width;
+		var x = this.player.number / this.snakeCount * this.grid.width;
 		x -= x % this.grid.tileSize + this.grid.halfTileSize;
 		var y = this.grid.centerY;
 		this.tailAnim = snakeAnim.slice(0, 1);

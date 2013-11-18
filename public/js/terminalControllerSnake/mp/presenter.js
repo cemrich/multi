@@ -1,8 +1,8 @@
 /*
 Screen of the snake game that shows all the action.
-This snake game allows one presenter and two
-controller. 
+This snake game allows one presenter and two to four controller.
 */
+// TODO: what about controller joining the session while the game is already running?
 
 define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../layout'], function (multiModule, socketio, Game, sound, layout) {
 
@@ -79,7 +79,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 				sound.onDisconnect();
 				p.remove();
 			});
-			// event.player.attributes.color = color;
+			event.player.attributes.color = color;
 		}
 
 		function onAboveMinPlayerNeeded() {
