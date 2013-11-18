@@ -13,7 +13,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 		server: 'http://tinelaptopsony/',
 		session: {
 			minPlayerNeeded: 3,
-			maxPlayerAllowed: 3,
+			maxPlayerAllowed: 5,
 			token: {
 				// static token because we only need a single session
 				func: 'staticToken',
@@ -37,6 +37,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 		session.on('playerJoined', onPlayerJoined);
+		session.on('start', startGame);
 		session.once('destroyed', onSessionDestroyed);
 
 
@@ -83,13 +84,15 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 
 		function onAboveMinPlayerNeeded() {
 			// we have all players we need and can start the game now
-			startGame();
+			// startGame();
 		}
 
 		function onBelowMinPlayerNeeded() {
 			// we don't have enough players any longer
-			game.off('stop', onGameFinished);
-			game.stop();
+			if (game) {
+				game.off('stop', onGameFinished);
+				game.stop();
+			}
 			layout.showSection('#waiting');
 		}
 

@@ -95,6 +95,9 @@ canvas {
   box-flex: 1;
   background-color: grey;
 }
+#waiting .start {
+  display: none;
+}
 #controller {
   pointer-events: none;
   position: relative;

@@ -20,11 +20,21 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 
 		var joystick = new Joystick(30, onDirectionChange, $('#marker'));
 		layout.showSection('#waiting');
+		$('#waiting .start').click(onStartClick);
 
 		session.myself.on('attributesChanged', onAttributesChanged);
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
+		session.on('start', startGame);
 		session.once('destroyed', onSessionDestroyed);
+
+		if (session.getPlayerCount() >= session.minPlayerNeeded) {
+			onAboveMinPlayerNeeded();
+		}
+
+		function onStartClick(event) {
+			session.message('start');
+		}
 
 		function onDirectionChange(direction) {
 			$('#marker').attr('class', 'dir' + direction);
@@ -59,14 +69,14 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 
 		function onAboveMinPlayerNeeded() {
 			// enough players - start game
-			// TODO: last connected player does not get this event :(
-			startGame();
+			$('#waiting .start').show();
 		}
 
 		function onBelowMinPlayerNeeded() {
 			// not enough player - go into waiting mode
 			joystick.stop();
 			layout.showSection('#waiting');
+			$('#waiting .start').hide();
 		}
 
 		function onAttributesChanged() {
