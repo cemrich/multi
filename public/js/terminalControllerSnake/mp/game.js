@@ -63,6 +63,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 			snake.update();
 			if (snake.isDead(game.snakes)) {
 				deadSnakeIndizes.push(index);
+				snake.player.message('dead');
 			}
 		});
 		// remove dead snakes

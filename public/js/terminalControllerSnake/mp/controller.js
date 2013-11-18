@@ -21,6 +21,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		var joystick = new Joystick(30, onDirectionChange, $('#marker'));
 		layout.showSection('#waiting');
 		$('#waiting .start').click(onStartClick);
+		$('#waiting .exit').click(onExitClick);
 
 		session.myself.on('attributesChanged', onAttributesChanged);
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
@@ -45,13 +46,13 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		function startGame() {
 			layout.showSection('#controller');
 			session.once('finished', onFinished);
+			session.myself.on('dead', onDead);
 			joystick.start();
 		}
 
-		function onAgainClick(event) {
-			// player wants to play again
-			session.message('again');
-			startGame();
+		function onFinished() {
+			// game is finished for all - go into waiting mode again
+			layout.showSection('#waiting');
 		}
 
 		function onExitClick(event) {
@@ -59,12 +60,10 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 			window.close();
 		}
 
-		function onFinished() {
-			// game is finished
+		function onDead() {
+			// I am dead - quit or wait
 			joystick.stop();
 			layout.showSection('#finished');
-			$('#finished .again').one('click', onAgainClick);
-			$('#finished .exit').one('click', onExitClick);
 		}
 
 		function onAboveMinPlayerNeeded() {
@@ -81,9 +80,8 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 
 		function onAttributesChanged() {
 			// TODO: doesn't reach me because of multi bug
-			//var rgb = session.myself.attributes.color;
-			//var colorStr = 'rgb('+rgb.r+','+rgb.g+','+rgb.b+')';
-			//$('#controller h1').css('color', colorStr);
+			//var color = session.myself.attributes.color;
+			//$('#controller h1').css('color', color.hex);
 		}
 
 		function onSessionDestroyed() {
