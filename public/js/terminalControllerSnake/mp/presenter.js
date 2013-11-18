@@ -69,7 +69,16 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 		}
 
 		function onPlayerJoined(event) {
-			// event.player.attributes.color = COLORS[event.player.number];
+			sound.onConnect();
+			var color = layout.colors[event.player.number-1];
+			var p = $('<div class="player"></div>');
+			p.css('background-color', color.hex);
+			$('#waiting .players').append(p);
+			event.player.on('disconnected', function () {
+				sound.onDisconnect();
+				p.remove();
+			});
+			// event.player.attributes.color = color;
 		}
 
 		function onAboveMinPlayerNeeded() {
@@ -79,7 +88,6 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 
 		function onBelowMinPlayerNeeded() {
 			// we don't have enough players any longer
-			sound.onDisconnect();
 			game.off('stop', onGameFinished);
 			game.stop();
 			layout.showSection('#waiting');

@@ -31,6 +31,10 @@ define(['../lib/midi', '../lib/jquery-2.0.0.min'], function (midi) {
 			fadeBackgroundVolume(0.5);
 		},
 
+		onConnect: function () {
+			midi.play('bell', 'B', 0.2);
+		},
+
 		onError: function () {
 			midi.play('harpsichord', 'C', 0.2);
 		},

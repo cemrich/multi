@@ -81,6 +81,7 @@ define(function(require, exports, module) {
 		});
 
 		socket.on('playerLeft', function (data) {
+			// TODO: this may fail with players from 'last' session
 			var player = session.players[data.playerId];
 			// TODO: clean up _all_ player listeners before deleting
 			delete session.players[data.playerId];
