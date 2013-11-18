@@ -5,12 +5,12 @@
 The actual game (screen)
 */
 
-define(['../../lib/multi', '../snake', '../points', '../grid', '../../lib/jaws'], function (multi, Snake, Points, Grid) {
+define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../../lib/jaws'], function (multi, Snake, Points, Grid, layout) {
 
 	// some one time setup calculation for the grid
 	var grid = new Grid(22);
 
-	var Game = function (session, showSection) {
+	var Game = function (session) {
 
 		multi.EventDispatcher.call(this);
 
@@ -18,7 +18,6 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../../lib/jaws']
 		this.snake = new Snake(jaws, grid, controller);
 		this.points = new Points(jaws, grid);
 		this.session = session;
-		this.showSection = showSection;
 		this.interval = null;
 	};
 
@@ -57,7 +56,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../../lib/jaws']
 
 	// (re) start this game
 	Game.prototype.start = function () {
-		this.showSection('#game');
+		layout.showSection('#game');
 		jaws.init();
 		if (jaws.assets.src_list.length === 0) { // hack around jaws bug
 			jaws.assets.add('../../img/snake.png');

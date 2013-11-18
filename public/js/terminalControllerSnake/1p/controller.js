@@ -2,9 +2,9 @@
 Dumb game controller for the snake.
 */
 
-define(['../joystick', '../sound'], function (Joystick, sound) {
+define(['../joystick', '../sound', '../layout'], function (Joystick, sound, layout) {
 
-	function start(session, showSection) {
+	function start(session) {
 
 		var joystick = new Joystick(30, onDirectionChange, $('#marker'));
 
@@ -15,7 +15,7 @@ define(['../joystick', '../sound'], function (Joystick, sound) {
 		}
 
 		function startGame() {
-			showSection('#controller');
+			layout.showSection('#controller');
 			session.once('finished', onFinished);
 			joystick.start();
 		}
@@ -34,7 +34,7 @@ define(['../joystick', '../sound'], function (Joystick, sound) {
 		function onFinished() {
 			// game is finished
 			joystick.stop();
-			showSection('#finished');
+			layout.showSection('#finished');
 			$('#finished .again').one('click', onAgainClick);
 			$('#finished .exit').one('click', onExitClick);
 		}
