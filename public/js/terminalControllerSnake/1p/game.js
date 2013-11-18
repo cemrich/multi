@@ -5,7 +5,7 @@
 The actual game (screen)
 */
 
-define(['../lib/multi', './snake', './points', './grid', '../lib/jaws'], function (multi, Snake, Points, Grid) {
+define(['../../lib/multi', '../snake', '../points', '../grid', '../../lib/jaws'], function (multi, Snake, Points, Grid) {
 
 	// some one time setup calculation for the grid
 	var grid = new Grid(22);

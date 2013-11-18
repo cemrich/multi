@@ -2,7 +2,7 @@
 Dumb game controller for the snake.
 */
 
-define(['./joystick', './sound'], function (Joystick, sound) {
+define(['../joystick', '../sound'], function (Joystick, sound) {
 
 	function start(session, showSection) {
 

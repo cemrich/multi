@@ -22,8 +22,8 @@ exports.symbols = function(req, res) {
 };
 
 exports.terminalControllerSnakePlayer = function(req, res) {
-	res.render('games/terminalControllerSnakePlayer');
+	res.render('games/terminalControllerSnake1p/player');
 };
 exports.terminalControllerSnakePresenter = function(req, res) {
-	res.render('games/terminalControllerSnakePresenter');
+	res.render('games/terminalControllerSnake1p/presenter');
 };

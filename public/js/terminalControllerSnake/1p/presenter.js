@@ -2,7 +2,7 @@
 Screen of the snake game that shows all the action.
 */
 
-define(['./game', './sound'], function (Game, sound) {
+define(['./game', '../sound'], function (Game, sound) {
 
 	var COLORS = [
 		{r: 255, g:   0, b:   0},
@@ -54,7 +54,7 @@ define(['./game', './sound'], function (Game, sound) {
 		}
 
 		// show url to join this session
-		var url = window.location.host + '/snake';
+		var url = window.location.host + '/snake1p';
 		$('#waiting .controllerUrl').text(url);
 		$('#waiting .controllerUrl').attr('href', 'http://' + url);
 		showSection('#waiting');
