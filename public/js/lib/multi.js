@@ -575,27 +575,76 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 	var util = require('util');
 
 	/**
+	* @classdesc This player class represents a device connected
+	* to a session. Every player is mirrored from its original instance 
+	* on the server side.
+	* 
 	* @inner
 	* @class
 	* @mixes EventDispatcher
 	* @memberof module:client/player
+	* @fires module:client/player~Player#attributesChanged
+	* @fires module:client/player~Player#disconnected
+	*
+	* @param socket ready to use socket.io socket
 	*/
 	var Player = function (socket) {
 		var player = this;
 
 		EventDispatcher.call(this);
+
+		/** 
+		 * communication socket for this player
+		 * @type {socket.io-socket}
+		 * @readonly
+		 */
 		this.socket = socket;
+		/** 
+		 * unique id for this player
+		 * @type {string}
+		 * @readonly
+		 */
 		this.id = null;
+		/**
+		 * Role that is fulfilled by this
+		 * player. Either 'presenter' or 'player'.
+		 * @type {string}
+		 */
 		this.role = 'player';
+		/** 
+		 * Object with user attributes for this player.
+		 * All changes within this object will automatically
+		 * be synced to the server side and all other clients. 
+		 * Make sure not to override the hole object but only 
+		 * its attributes.
+		 * <br>
+		 * Listen for changes by subscribing to the
+		 * {@link module:client/player~Player#attributesChanged attributesChanged}
+		 * event.
+		 * @type {object}
+		 */
 		this.attributes = {};
+		/**
+		 * Unique player-number inside this session beginning with 0.
+		 * Free numbers from disconnected players will be reused to
+		 * avoid gaps.
+		 * @type {integer}
+		 */
 		this.number = null;
 
+		/**
+		 * Called when this socket receives a message for any player.
+		 */
 		function onPlayerMessage(data) {
 			if (data.id === player.id) {
 				player.dispatchEvent(data.type, { type: data.type, data: data.data } );
 			}
 		}
 
+		/**
+		 * Called when attributes for any player have been changed
+		 * on server side.
+		 */
 		function onPlayerAttributesChanged(data) {
 			if (data.id === player.id) {
 				WatchJS.noMore = true;
@@ -616,7 +665,6 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		 */
 		function onAttributesChange(prop, action, newvalue, oldvalue) {
 			// console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-			player.dispatchEvent('attributesChangedLocally');
 			player.socket.emit('playerAttributesChanged',
 				{ id: player.id, attributes: player.attributes }
 			);
@@ -631,6 +679,14 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 
 	/**
 	* Sends the given message to all other instances of this player.
+	* @example
+	* // on client no 1
+	* player.on('ping', function (event) {
+	*   // outputs 'bar'
+	*   console.log(event.data.foo);
+	* });
+	* // on client no 2, instance of same player
+	* player.message('ping', { foo: 'bar' });
 	* @param {string} type    type of message that should be send
 	* @param {object} [data]  message data that should be send
 	*/
@@ -639,6 +695,21 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 			{ id: this.id, type: type, data: data }
 		);
 	};
+
+
+	/**
+	 * Fired when the {@link module:client/player~Player#attributes attributes} of 
+	 * this player have been changed by this client, another client or 
+	 * the server.
+	 * @event module:client/player~Player#attributesChanged
+	 */
+
+	/**
+	 * Fired when this player disconnects from the server. Don't use this
+	 * instance any longer after this event has been fired.
+	 * @event module:client/player~Player#disconnected
+	 */
+
 
 	/**
 	* Unpacks a player object send over a socket connection.
@@ -2835,7 +2906,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	var Multi = function (options) {
 
 		EventDispatcher.call(this);
-		this.color = color;
+
 		this.io = options.io;
 		this.server = options.server;
 		this.sessionOptions = options.session;

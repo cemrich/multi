@@ -61,7 +61,7 @@ define(function(require, exports, module) {
 	var Multi = function (options) {
 
 		EventDispatcher.call(this);
-		this.color = color;
+
 		this.io = options.io;
 		this.server = options.server;
 		this.sessionOptions = options.session;

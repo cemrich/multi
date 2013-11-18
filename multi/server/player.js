@@ -9,7 +9,13 @@ var WatchJS = require('../debs/watch');
 var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
+ * @classdesc This player class represents a device connected
+ * to a session. Every player will be mirrored to all connected
+ * devices.
+ *
  * @mixes EventDispatcher
+ * @fires module:server/player~Player#attributesChanged
+ * @fires module:server/player~Player#disconnected
  * @class
  * @protected
  * @param {socket.io-socket} socket  communication socket for the new player
@@ -26,25 +32,36 @@ var Player = function (socket) {
 	this.socket = socket;
 	/** 
 	 * unique id for this player
-	 * @type {number}
+	 * @type {string}
 	 * @readonly
 	 */
 	this.id = socket.id;
 	/**
-	 * Roles that is fulfilled by this
+	 * Role that is fulfilled by this
 	 * player. Either 'presenter' or 'player'.
 	 * @type {string}
 	 */
 	this.role = 'player';
-	this.number = null;
 	/** 
 	 * Object with user attributes for this player.
 	 * All changes within this object will automatically
-	 * be synced to the client side. Make sure not to 
-	 * override the hole object but only its attributes.
+	 * be synced to all other clients. 
+	 * Make sure not to override the hole object but only 
+	 * its attributes.
+	 * <br>
+	 * Listen for changes by subscribing to the
+	 * {@link module:server/player~Player#attributesChanged attributesChanged}
+	 * event.
 	 * @type {object}
 	 */
 	this.attributes = { };
+	/**
+	 * Unique player-number inside this session beginning with 0.
+	 * Free numbers from disconnected players will be reused to
+	 * avoid gaps.
+	 * @type {integer}
+	 */
+	this.number = null;
 
 	EventDispatcher.call(this);
 	WatchJS.watch(this.attributes, onAttributesChange, 0, true);
@@ -105,6 +122,20 @@ Player.prototype.pack = function () {
 		attributes: this.attributes
 	};
 };
+
+
+ /**
+ * Fired when the {@link module:server/player~Player#attributes attributes} 
+ * of this player have been changed by the server or any client.
+ * @event module:server/player~Player#attributesChanged
+ */
+
+ /**
+ * Fired when this player disconnects from the server. Don't use this
+ * instance any longer after this event has been fired.
+ * @event module:server/player~Player#disconnected
+ */
+
 
 /* exports */
 /**
