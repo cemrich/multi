@@ -35,9 +35,11 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 			frame_size: [20, 20],
 			frame_duration: 500});
 		var rgb = this.player.attributes.color;
-		snakeAnim.frames.forEach(function (canvas) {
-			canvasHelper.replaceHues(canvas, rgb);
-		});
+		if (typeof rgb !== 'undefined') {
+			snakeAnim.frames.forEach(function (canvas) {
+				canvasHelper.replaceHues(canvas, rgb);
+			});
+		}
 		var x = this.player.number / 2 * this.grid.width;
 		x -= x % this.grid.tileSize + this.grid.halfTileSize;
 		var y = this.grid.centerY;
@@ -146,6 +148,9 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 	Snake.prototype.isDead = function (snakes) {
 		var that = this;
 		var dead = false;
+		if (!snakes) {
+			snakes = [this];
+		}
 		snakes.some(function (snake) {
 			var collisions = that.jaws.collideOneWithMany(that.head, snake.tail);
 			if (collisions.length > 0 && that.head.isFree) {
