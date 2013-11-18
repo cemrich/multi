@@ -28,7 +28,6 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * @param {SessionOptions} options to tweak this sessions behaviour
  */
 var Session = function (io, options) {
-	var session = this;
 
 	var tokenFunction = token.numeric;
 	var tokenFunctionArgs = [];
@@ -73,18 +72,6 @@ var Session = function (io, options) {
 
 	EventDispatcher.call(this);
 
-	/**
-	 * Called when the user attributes of any player in this session 
-	 * had been changed. Relays this event to all players in this
-	 * session.
-	 */
-	this.onPlayerAttributesChanged = function (event) {
-		var player = event.currentTarget;
-		session.sendToPlayers('playerAttributesChanged',
-			{ id: player.id, attributes: player.attributes }
-		);
-	};
-
 	if (options !== undefined && options.scriptName !== undefined) {
 		var gameModule = require('../../' + options.scriptName);
 		gameModule.Game(this);
@@ -93,13 +80,13 @@ var Session = function (io, options) {
 
 util.inherits(Session, EventDispatcher);
 
-Session.prototype.onSessionMessage = function (event) {
-	this.sendToPlayers('sessionMessage', { type: event.type, data: event.data });
-	this.dispatchEvent(event.type, { type: event.type, data: event.data });
+Session.prototype.onSessionMessage = function (data) {
+	this.sendToPlayers('sessionMessage', { type: data.type, data: data.data });
+	this.dispatchEvent(data.type, { type: data.type, data: data.data });
 };
 
-Session.prototype.onPlayerMessage = function (event) {
-	this.sendToPlayers('playerMessage', { id: event.id, type: event.type, data: event.data });
+Session.prototype.onPlayerMessage = function (data) {
+	this.sendToPlayers('playerMessage', { id: data.id, type: data.type, data: data.data });
 };
 
 /**
@@ -148,21 +135,40 @@ Session.prototype.isFull = function () {
  */
 Session.prototype.addPlayer = function (player) {
 	var session = this;
+
+	// assign player number
 	if (this.freeNumbers.length === 0) {
 		player.number = this.getPlayerCount();
 	} else {
 		player.number = this.freeNumbers.sort()[0];
 		this.freeNumbers.splice(0,1);
 	}
+
+	// inform clients expect added player about this player
 	this.sendToPlayers('playerJoined', player.pack());
+
+	// add to collections
 	player.socket.join(this.token);
 	this.players[player.id] = player;
+
+	// add listeners
 	player.on('disconnected', function(event) {
 		session.removePlayer(player);
 	});
-	player.on('attributesChanged', this.onPlayerAttributesChanged);
-	player.on('sessionMessage', this.onSessionMessage.bind(this));
-	player.on('playerMessage', this.onPlayerMessage.bind(this));
+	player.on('attributesChanged', function () {
+		session.sendToPlayers('playerAttributesChanged',
+			{ id: player.id, attributes: player.attributes });
+	});
+	player.socket.on('playerAttributesClientChanged', function (data) {
+		var player = session.players[data.id];
+		for (var i in data.attributes) {
+			player.attributes[i] = data.attributes[i];
+		}
+	});
+	player.socket.on('sessionMessage', this.onSessionMessage.bind(this));
+	player.socket.on('playerMessage', this.onPlayerMessage.bind(this));
+
+	// inform others about this player
 	this.dispatchEvent('playerAdded', { player: player });
 	if (this.getPlayerCount() === this.minPlayerNeeded) {
 		this.dispatchEvent('aboveMinPlayerNeeded');
@@ -175,7 +181,7 @@ Session.prototype.addPlayer = function (player) {
  * @fires module:server/session~Session#playerRemoved
  */
 Session.prototype.removePlayer = function (player) {
-	player.off('attributesChanged', this.onPlayerAttributesChanged);
+	//player.off('attributesChanged', this.onPlayerAttributesChanged);
 	this.freeNumbers.push(player.number);
 	delete this.players[player.id];
 	this.dispatchEvent('playerLeft', { player: player });

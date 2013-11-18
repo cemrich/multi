@@ -84,25 +84,11 @@ var Player = function (socket) {
 		player.dispatchEvent('disconnected');
 	});
 
-	// a client has changed player attributes
-	this.socket.on('playerAttributesChanged', function(event) {
-		if (event.id === player.id) {
-			for (var i in event.attributes) {
-				player.attributes[i] = event.attributes[i];
-			}
+	// is it my player message?
+	this.socket.on('playerMessage', function (data) {
+		if (data.id === player.id) {
+			player.dispatchEvent(data.type, { type: data.type, data: data.data });
 		}
-	});
-
-	// the corresponding session sends us a message
-	// this should be mirrored to the other session instances
-	this.socket.on('sessionMessage', function (event) {
-		player.dispatchEvent('sessionMessage', event);
-	});
-
-	// this player sends us a message
-	// this should be mirrored to the other player instances
-	this.socket.on('playerMessage', function (event) {
-		player.dispatchEvent('playerMessage', event);
 	});
 };
 

@@ -79,9 +79,9 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		}
 
 		function onAttributesChanged() {
-			// TODO: doesn't reach me because of multi bug
-			//var color = session.myself.attributes.color;
-			//$('#controller h1').css('color', color.hex);
+			var color = session.myself.attributes.color;
+			$('#waiting h1').css('color', color.hex);
+			$('#controller h1').css('color', color.hex);
 		}
 
 		function onSessionDestroyed() {

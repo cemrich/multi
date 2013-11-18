@@ -82,12 +82,12 @@ define(function(require, exports, module) {
 		 */
 		function onPlayerAttributesChanged(data) {
 			if (data.id === player.id) {
-				WatchJS.noMore = true;
+				WatchJS.unwatch(player.attributes, onAttributesChange);
 				for (var i in data.attributes) {
 					player.attributes[i] = data.attributes[i];
 				}
 				player.dispatchEvent('attributesChanged');
-				WatchJS.noMore = false;
+				WatchJS.watch(player.attributes, onAttributesChange, 0, true);
 			}
 		}
 
@@ -99,8 +99,8 @@ define(function(require, exports, module) {
 		 * @param          oldvalue  old value of the changed property
 		 */
 		function onAttributesChange(prop, action, newvalue, oldvalue) {
-			// console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-			player.socket.emit('playerAttributesChanged',
+			//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+			player.socket.emit('playerAttributesClientChanged',
 				{ id: player.id, attributes: player.attributes }
 			);
 		}

@@ -45,7 +45,8 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 				ok(joinedSession, 'session can be joined');
 				ok(joinedSession.myself, 'session has own player added');
 				equal(joinedSession.myself.role, 'player', 'joined player has a player role');
-				equal(joinedSession.token, createdSession.token, 'session tokens are equal');ok(joinedSession.players[createdSession.myself.id], 'old player added to new session');
+				equal(joinedSession.token, createdSession.token, 'session tokens are equal');
+				ok(joinedSession.players[createdSession.myself.id], 'old player added to new session');
 
 				function checkNewPlayer() {
 					ok(createdSession.players[joinedSession.myself.id], 'new player added to created session');
@@ -135,7 +136,7 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 				});
 
 				function startSync() {
-					var otherPlayer = createdSession.players[createdSession.myself.id];
+					var otherPlayer = createdSession.players[session.myself.id];
 					otherPlayer.attributes.data = data;
 				}
 
