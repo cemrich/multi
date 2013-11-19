@@ -58,6 +58,13 @@ define(function(require, exports, module) {
 	};
 
 	/**
+	 * Removes all callbacks ever registered on any event.
+	 */
+	exports.EventDispatcher.prototype.removeAllListeners = function () {
+		this.events = {};
+	};
+
+	/**
 	 * Adds a callback function to the given event. The callback
 	 * is only called one and then removed from the given event.
 	 * @param {string}                                      key

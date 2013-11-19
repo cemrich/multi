@@ -59,6 +59,13 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 	};
 
 	/**
+	 * Removes all callbacks ever registered on any event.
+	 */
+	exports.EventDispatcher.prototype.removeAllListeners = function () {
+		this.events = {};
+	};
+
+	/**
 	 * Adds a callback function to the given event. The callback
 	 * is only called one and then removed from the given event.
 	 * @param {string}                                      key
@@ -441,6 +448,7 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
     };
 
     var unwatchOne = function (obj, prop, watcher) {
+				console.log(obj);
         for(var i in obj.watchers[prop]){
             var w = obj.watchers[prop][i];
 

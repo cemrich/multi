@@ -29,6 +29,7 @@ var EventDispatcher = require('../shared/eventDispatcher');
  */
 var Session = function (io, options) {
 
+	// parse session options
 	var tokenFunction = token.numeric;
 	var tokenFunctionArgs = [];
 	this.minPlayerNeeded = 1;
@@ -87,6 +88,13 @@ Session.prototype.onSessionMessage = function (data) {
 
 Session.prototype.onPlayerMessage = function (data) {
 	this.sendToPlayers('playerMessage', { id: data.id, type: data.type, data: data.data });
+};
+
+Session.prototype.onPlayerAttributesClientChanged = function (data) {
+	var player = this.players[data.id];
+	if (typeof player !== 'undefined') {
+		player.updateAttributes(data.attributes);
+	}
 };
 
 /**
@@ -159,12 +167,7 @@ Session.prototype.addPlayer = function (player) {
 		session.sendToPlayers('playerAttributesChanged',
 			{ id: player.id, attributes: player.attributes });
 	});
-	player.socket.on('playerAttributesClientChanged', function (data) {
-		var player = session.players[data.id];
-		for (var i in data.attributes) {
-			player.attributes[i] = data.attributes[i];
-		}
-	});
+	player.socket.on('playerAttributesClientChanged', this.onPlayerAttributesClientChanged.bind(this));
 	player.socket.on('sessionMessage', this.onSessionMessage.bind(this));
 	player.socket.on('playerMessage', this.onPlayerMessage.bind(this));
 
@@ -181,7 +184,6 @@ Session.prototype.addPlayer = function (player) {
  * @fires module:server/session~Session#playerRemoved
  */
 Session.prototype.removePlayer = function (player) {
-	//player.off('attributesChanged', this.onPlayerAttributesChanged);
 	this.freeNumbers.push(player.number);
 	delete this.players[player.id];
 	this.dispatchEvent('playerLeft', { player: player });

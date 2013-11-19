@@ -58,6 +58,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		function onExitClick(event) {
 			// with one player bored the game is over
 			window.close();
+			session.disconnectMyself();
 		}
 
 		function onDead() {
@@ -79,6 +80,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		}
 
 		function onAttributesChanged() {
+			// TODO: only execute when _color_ has changed
 			var color = session.myself.attributes.color;
 			$('#waiting h1').css('color', color.hex);
 			$('#controller h1').css('color', color.hex);
