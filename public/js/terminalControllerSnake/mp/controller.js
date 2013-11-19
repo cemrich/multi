@@ -26,6 +26,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		session.myself.on('attributesChanged', onAttributesChanged);
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
+		session.on('playerLeft', onPlayerLeft);
 		session.on('start', startGame);
 		session.once('destroyed', onSessionDestroyed);
 
@@ -48,6 +49,13 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 			session.once('finished', onFinished);
 			session.myself.on('dead', onDead);
 			joystick.start();
+		}
+
+		function onPlayerLeft(event) {
+			if (event.player.role === 'presenter') {
+				// our presenter disconnected - no reason to resume
+				session.disconnectMyself();
+			}
 		}
 
 		function onFinished() {
