@@ -193,6 +193,7 @@ Session.prototype.removePlayer = function (player) {
 	}
 	if (this.getPlayerCount() === 0) {
 		this.dispatchEvent('destroyed');
+		this.removeAllListeners();
 	}
 };
 

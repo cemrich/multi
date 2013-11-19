@@ -90,7 +90,7 @@ var Player = function (socket) {
 		player.removeAllListeners();
 		try {
 			WatchJS.unwatch(player.attributes, onAttributesChange);
-		} catch (error) {};
+		} catch (error) {}
 	});
 
 	// is it my player message?
