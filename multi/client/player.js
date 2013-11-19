@@ -100,9 +100,13 @@ define(function(require, exports, module) {
 			if (data.id === player.id) {
 				WatchJS.unwatch(player.attributes, onAttributesChange);
 				for (var i in data.attributes) {
-					player.attributes[i] = data.attributes[i];
+					if (!player.attributes.hasOwnProperty(i) ||
+							JSON.stringify(player.attributes[i]) !== JSON.stringify(data.attributes[i])) {
+						player.attributes[i] = data.attributes[i];
+						player.dispatchEvent('attributesChanged',
+							{ key: i, value: data.attributes[i]});
+					}
 				}
-				player.dispatchEvent('attributesChanged');
 				WatchJS.watch(player.attributes, onAttributesChange, 0, true);
 			}
 		}
@@ -154,6 +158,9 @@ define(function(require, exports, module) {
 	 * this player have been changed by this client, another client or 
 	 * the server.
 	 * @event module:client/player~Player#attributesChanged
+	 * @property {string} key    name of the changed attribute
+	 * @property {*}      value  new value of the changed attribute
+	 * @todo this is currently dispatched only when changed from outside
 	 */
 
 	/**

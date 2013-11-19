@@ -115,6 +115,12 @@ canvas {
 
   user-select: none;
 }
+#controller .points {
+  font-family: 'Monofett', 'Consolas', 'Monaco', sans-serif;
+  font-size: 1500%;
+  line-height: 75%;
+  color: #e4f2fa;
+}
 #controller .marker {
   width: 100px;
   height: 100px;

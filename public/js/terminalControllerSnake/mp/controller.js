@@ -87,13 +87,17 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 			$('#waiting .start').hide();
 		}
 
-		function onAttributesChanged() {
-			// TODO: only execute when _color_ has changed
-			var color = session.myself.attributes.color;
-			$('#waiting h1').css('color', color.hex);
-			$('#controller h1').css('color', color.hex);
-			$('#finished h1').css('color', color.hex);
-			$('#waiting button').css('background-color', color.hex);
+		function onAttributesChanged(event) {
+			if (event.key === 'color') {
+				var color = event.value.hex;
+				$('#waiting h1').css('color', color);
+				$('#controller h1').css('color', color);
+				$('#finished h1').css('color', color);
+				$('#waiting button').css('background-color', color);
+			} else if (event.key === 'points') {
+				sound.onPoint();
+				$('#controller .points').text(event.value);
+			}
 		}
 
 		function onSessionDestroyed() {

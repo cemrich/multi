@@ -20,6 +20,7 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 		this.direction = 0;
 		this.directionObject = player.attributes;
 		this.directionObject.direction = 0;
+		player.attributes.points = 0;
 	};
 
 	Snake.prototype.getNewTailElement = function (prev) {
@@ -59,6 +60,7 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 
 	Snake.prototype.eatPoints = function (number) {
 		sound.onPoint();
+		this.player.attributes.points += number;
 		this.segmetsToAdd += number;
 		this.fps *= Math.pow(0.9, number);
 	};

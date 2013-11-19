@@ -123,15 +123,17 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 	});
 
 	asyncTest('test attribute synchronization', function () {
-		expect(1);
+		expect(3);
 
 		multi.createSession().then(function (session) {
 			var data = { test: 42, foo: 'bar' };
 			var createdSession = session;
 
 			multi.joinSession(createdSession.token).then(function (session) {
-				session.myself.on('attributesChanged', function () {
-					deepEqual(session.myself.attributes.data, data, 'message type is correct');
+				session.myself.on('attributesChanged', function (event) {
+					equal(event.key, 'data', 'event recognizes which attribute changed');
+					deepEqual(event.value, data, 'event recognizes to which value attribute changed');
+					deepEqual(session.myself.attributes.data, data, 'attributes were really updated');
 					start();
 				});
 
