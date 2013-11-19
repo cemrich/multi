@@ -68,6 +68,22 @@ define(function(require, exports, module) {
 		this.number = null;
 
 		/**
+		 * Called when any player left its session.
+		 */
+		function onPlayerLeft(data) {
+			if (data.playerId === player.id) {
+				// I do not longer exist - inform...
+				player.dispatchEvent('disconnected');
+				// ... and remove listeners
+				player.removeAllListeners();
+				player.socket.removeListener('playerMessage', onPlayerMessage);
+				player.socket.removeListener('playerAttributesChanged', onPlayerAttributesChanged);
+				player.socket.removeListener('playerLeft', onPlayerLeft);
+				WatchJS.unwatch(this.attributes, onAttributesChange);
+			}
+		}
+
+		/**
 		 * Called when this socket receives a message for any player.
 		 */
 		function onPlayerMessage(data) {
@@ -107,6 +123,7 @@ define(function(require, exports, module) {
 
 		this.socket.on('playerMessage', onPlayerMessage);
 		this.socket.on('playerAttributesChanged', onPlayerAttributesChanged);
+		this.socket.on('playerLeft', onPlayerLeft);
 		WatchJS.watch(this.attributes, onAttributesChange, 0, true);
 	};
 

@@ -59,48 +59,22 @@ define(function(require, exports, module) {
 		}
 		// unpack players
 		for (i in packedPlayers) {
-			addPlayer(packedPlayers[i]);
+			this.onPlayerConnected(packedPlayers[i]);
 		}
 
 		// calculate attributes
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
-		function addPlayer(playerData) {
-			var player = playerModule.fromPackedData(playerData, socket);
-			session.players[player.id] = player;
-
-			session.dispatchEvent('playerJoined', { player: player });
-			if (session.getPlayerCount() === session.minPlayerNeeded) {
-				session.dispatchEvent('aboveMinPlayerNeeded');
-			}
-		}
-
-		// TODO: unregister callbacks on disconnect
-		socket.on('playerJoined', function (data) {
-			addPlayer(data);
-		});
-
-		socket.on('playerLeft', function (data) {
-			// TODO: this may fail with players from 'last' session
-			var player = session.players[data.playerId];
-			// TODO: clean up _all_ player listeners before deleting
-			delete session.players[data.playerId];
-			session.dispatchEvent('playerLeft', { player: player });
-			player.dispatchEvent('disconnected');
-
-			if (session.getPlayerCount() === (session.minPlayerNeeded-1)) {
-				session.dispatchEvent('belowMinPlayerNeeded');
-			}
-		});
-
+		// add socket listeners
 		socket.on('disconnect', function (data) {
 			session.dispatchEvent('destroyed');
-			session.socket = null;
+			session.socket.removeAllListeners();
+			session.removeAllListeners();
 		});
-
 		socket.on('sessionMessage', function (data) {
 			session.dispatchEvent(data.type, data);
 		});
+		socket.on('playerJoined', this.onPlayerConnected.bind(this));
 	};
 
 	util.inherits(Session, EventDispatcher);
@@ -112,7 +86,42 @@ define(function(require, exports, module) {
 		return Object.keys(this.players).length + 1;
 	};
 
-	// TODO: document
+	/**
+	 * Creates a player from the given data and adds it to this session.
+	 * @private
+	 */
+	Session.prototype.onPlayerConnected = function (playerData) {
+		var session = this;
+		var player = playerModule.fromPackedData(playerData, this.socket);
+		this.players[player.id] = player;
+
+		player.on('disconnected', function () {
+			session.onPlayerDisconnected(player);
+		});
+
+		session.dispatchEvent('playerJoined', { player: player });
+		if (session.getPlayerCount() === session.minPlayerNeeded) {
+			session.dispatchEvent('aboveMinPlayerNeeded');
+		}
+	};
+
+	/**
+	 * Removes the given player from this session.
+	 * @private
+	 */
+	Session.prototype.onPlayerDisconnected = function (player) {
+		delete this.players[player.id];
+		this.dispatchEvent('playerLeft', { player: player });
+
+		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
+			this.dispatchEvent('belowMinPlayerNeeded');
+		}
+	};
+
+	/**
+	 * @returns {Array.<module:client/player~Player>} an array of all players
+	 * currently connected to this session
+	 */
 	// TODO: this feels wrong as no specific order is guaranteed maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
 	Session.prototype.getPlayerArray = function () {
 		var playerArray = [];
@@ -131,9 +140,24 @@ define(function(require, exports, module) {
 		this.socket.emit('sessionMessage', { type: type, data: data });
 	};
 
+	/**
+	 * Disconnects own player from this session.
+	 * @fires module:client/session~Session#destroyed
+	 */
 	Session.prototype.disconnectMyself = function () {
 		this.socket.socket.disconnect();
 	};
+
+
+	/**
+	 * Fired when this session is no longer valid. <br>
+	 * The reason could be a broken connection or the
+	 * removal of your own player. <br><br>
+	 * Don't use this session any longer after the event 
+	 * has been fired.
+	 * @event module:client/session~Session#destroyed
+	 */
+
 
 	/**
 	* Unpacks a session object send over a socket connection.
