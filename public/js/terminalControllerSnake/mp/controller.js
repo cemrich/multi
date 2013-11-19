@@ -82,6 +82,8 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 			var color = session.myself.attributes.color;
 			$('#waiting h1').css('color', color.hex);
 			$('#controller h1').css('color', color.hex);
+			$('#finished h1').css('color', color.hex);
+			$('#waiting button').css('background-color', color.hex);
 		}
 
 		function onSessionDestroyed() {
