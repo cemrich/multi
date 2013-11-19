@@ -165,6 +165,31 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 		}).done();
 	});
 
+	asyncTest('test disconnectMyself', function () {
+		expect(1);
+		multi.createSession().then(function (session) {
+			var createdSession = session;
+
+			multi.joinSession(createdSession.token).then(function (session) {
+				var player = session.players[createdSession.myself.id];
+				player.on('disconnected', function () {
+					ok(true, 'disconnected event is fired on disconnected player');
+					start();
+				});
+
+				function disconnect() {
+					createdSession.disconnectMyself();
+				}
+
+				if (Object.keys(createdSession.players).length === 1) {
+					disconnect();
+				} else {
+					createdSession.on('playerJoined', disconnect);
+				}
+			});
+		});
+	});
+
 	// all modules & tests loaded, so begin testing
 	QUnit.start();
 
