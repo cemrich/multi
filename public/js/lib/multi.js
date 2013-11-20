@@ -605,14 +605,13 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 	* @param socket ready to use socket.io socket
 	*/
 	var Player = function (socket) {
-		var player = this;
 
 		EventDispatcher.call(this);
 
 		/** 
 		 * communication socket for this player
 		 * @type {socket.io-socket}
-		 * @readonly
+		 * @private
 		 */
 		this.socket = socket;
 		/** 
@@ -625,6 +624,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		 * Role that is fulfilled by this
 		 * player. Either 'presenter' or 'player'.
 		 * @type {string}
+		 * @readonly
 		 */
 		this.role = 'player';
 		/** 
@@ -645,74 +645,80 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		 * Free numbers from disconnected players will be reused to
 		 * avoid gaps.
 		 * @type {integer}
+		 * @readonly
 		 */
 		this.number = null;
 
-		/**
-		 * Called when any player left its session.
-		 */
-		function onPlayerLeft(data) {
-			if (data.playerId === player.id) {
-				// I do not longer exist - inform...
-				player.dispatchEvent('disconnected');
-				// ... and remove listeners
-				player.removeAllListeners();
-				player.socket.removeListener('playerMessage', onPlayerMessage);
-				player.socket.removeListener('playerAttributesChanged', onPlayerAttributesChanged);
-				player.socket.removeListener('playerLeft', onPlayerLeft);
-				WatchJS.unwatch(this.attributes, onAttributesChange);
-			}
-		}
-
-		/**
-		 * Called when this socket receives a message for any player.
-		 */
-		function onPlayerMessage(data) {
-			if (data.id === player.id) {
-				player.dispatchEvent(data.type, { type: data.type, data: data.data } );
-			}
-		}
-
-		/**
-		 * Called when attributes for any player have been changed
-		 * on server side.
-		 */
-		function onPlayerAttributesChanged(data) {
-			if (data.id === player.id) {
-				WatchJS.unwatch(player.attributes, onAttributesChange);
-				for (var i in data.attributes) {
-					if (!player.attributes.hasOwnProperty(i) ||
-							JSON.stringify(player.attributes[i]) !== JSON.stringify(data.attributes[i])) {
-						player.attributes[i] = data.attributes[i];
-						player.dispatchEvent('attributesChanged',
-							{ key: i, value: data.attributes[i]});
-					}
-				}
-				WatchJS.watch(player.attributes, onAttributesChange, 0, true);
-			}
-		}
-
-		/** 
-		 * Called when the user attributes have been changed.
-		 * @param {string} prop      property that has been changed
-		 * @param {string} action    what has been done to the property
-		 * @param          newvalue  new value of the changed property
-		 * @param          oldvalue  old value of the changed property
-		 */
-		function onAttributesChange(prop, action, newvalue, oldvalue) {
-			//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-			player.socket.emit('playerAttributesClientChanged',
-				{ id: player.id, attributes: player.attributes }
-			);
-		}
-
-		this.socket.on('playerMessage', onPlayerMessage);
-		this.socket.on('playerAttributesChanged', onPlayerAttributesChanged);
-		this.socket.on('playerLeft', onPlayerLeft);
-		WatchJS.watch(this.attributes, onAttributesChange, 0, true);
+		this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
+		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged.bind(this));
+		this.socket.on('playerLeft', this.onPlayerLeft.bind(this));
+		WatchJS.watch(this.attributes, this.onAttributesChange.bind(this), 0, true);
 	};
 
 	util.inherits(Player, EventDispatcher);
+
+	/**
+	 * Called when any player left its session.
+	 * @private
+	 */
+	Player.prototype.onPlayerLeft = function (data) {
+		if (data.playerId === this.id) {
+			// I do not longer exist - inform...
+			this.dispatchEvent('disconnected');
+			// ... and remove listeners
+			this.removeAllListeners();
+			this.socket.removeListener('playerMessage', this.onPlayerMessage.bind(this));
+			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged.bind(this));
+			this.socket.removeListener('playerLeft', this.onPlayerLeft.bind(this));
+			WatchJS.unwatch(this.attributes, this.onAttributesChange.bind(this));
+		}
+	};
+
+	/**
+	 * Called when this socket receives a message for any player.
+	 * @private
+	 */
+	Player.prototype.onPlayerMessage = function (data) {
+		if (data.id === this.id) {
+			this.dispatchEvent(data.type, { type: data.type, data: data.data } );
+		}
+	};
+
+	/**
+	 * Called when attributes for any player have been changed
+	 * on server side.
+	 * @private
+	 */
+	Player.prototype.onPlayerAttributesChanged = function (data) {
+		if (data.id === this.id) {
+			var onAttributesChange = this.onAttributesChange.bind(this);
+			WatchJS.unwatch(this.attributes, onAttributesChange);
+			for (var i in data.attributes) {
+				if (!this.attributes.hasOwnProperty(i) ||
+						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
+					this.attributes[i] = data.attributes[i];
+					this.dispatchEvent('attributesChanged',
+						{ key: i, value: data.attributes[i]});
+				}
+			}
+			WatchJS.watch(this.attributes, onAttributesChange, 0, true);
+		}
+	};
+
+	/** 
+	 * Called when the user attributes have been changed.
+	 * @param {string} prop      property that has been changed
+	 * @param {string} action    what has been done to the property
+	 * @param          newvalue  new value of the changed property
+	 * @param          oldvalue  old value of the changed property
+	 * @private
+	 */
+	Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
+		//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+		this.socket.emit('playerAttributesClientChanged',
+			{ id: this.id, attributes: this.attributes }
+		);
+	};
 
 	/**
 	* Sends the given message to all other instances of this player.
@@ -952,6 +958,23 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	};
 
 	/**
+	 * When you call this new players are not allowed to join this
+	 * session any more. Instead their promise will be rejected with a 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
+	 */
+	Session.prototype.disablePlayerJoining = function () {
+		this.socket.emit('changePlayerJoining', { enablePlayerJoining: false });
+	};
+
+	/**
+	 * A call to this method will allow new players to join this session
+	 * again.
+	 */
+	Session.prototype.enablePlayerJoining = function () {
+		this.socket.emit('changePlayerJoining', { enablePlayerJoining: true });
+	};
+
+	/**
 	* Sends the given message to all other instances of this session.
 	* @param {string} type    type of message that should be send
 	* @param {object} [data]  message data that should be send
@@ -1156,6 +1179,19 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 		Error.call(this, 'no session token found in url');
 	};
 	util.inherits(exports.NoSessionTokenFoundError, Error);
+
+
+	/**
+	 * @classdesc New players are currently not allowed to join
+	 * this session. Maybe someone called 
+	 * {@link module:client/session~Session#disablePlayerJoining}.
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.JoiningDisabledError = function () {
+		Error.call(this, 'player joining is currently disabled');
+	};
+	util.inherits(exports.JoiningDisabledError, Error);
 
 
 	return exports;
@@ -3178,6 +3214,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	 * On error it will be rejected with either 
 	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
 	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}, 
 	 * {@link module:shared/errors.NoSessionTokenFoundError NoSessionTokenFoundError}, 
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
@@ -3206,6 +3243,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
 	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
 	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError}, 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}, 
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
 	Multi.prototype.autoJoinElseCreateSession = function () {
@@ -3243,7 +3281,8 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	 * the joined {@link module:client/session~Session Session} instance.<br><br>
 	 * On error it will be rejected with either 
 	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
-	 * {@link module:shared/errors.SessionFullError SessionFullError},
+	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError},
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 *
 	 * @example
@@ -3284,6 +3323,8 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 				error = new errors.NoSuchSessionError();
 			} else if (data.reason === 'sessionFull') {
 				error = new errors.SessionFullError();
+			} else if (data.reason === 'joiningDisabled') {
+				error = new errors.JoiningDisabledError();
 			}
 			deferred.reject(error);
 		});
@@ -3388,6 +3429,11 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	 * @type module:shared/errors.NoSessionTokenFoundError
 	 */
 	exports.NoSessionTokenFoundError = errors.NoSessionTokenFoundError;
+
+	/**
+	 * @type module:shared/errors.JoiningDisabledError
+	 */
+	exports.JoiningDisabledError = errors.JoiningDisabledError;
 
 	/**
 	 * @type EventDispatcher

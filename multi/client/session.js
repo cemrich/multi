@@ -178,6 +178,23 @@ define(function(require, exports, module) {
 	};
 
 	/**
+	 * When you call this new players are not allowed to join this
+	 * session any more. Instead their promise will be rejected with a 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
+	 */
+	Session.prototype.disablePlayerJoining = function () {
+		this.socket.emit('changePlayerJoining', { enablePlayerJoining: false });
+	};
+
+	/**
+	 * A call to this method will allow new players to join this session
+	 * again.
+	 */
+	Session.prototype.enablePlayerJoining = function () {
+		this.socket.emit('changePlayerJoining', { enablePlayerJoining: true });
+	};
+
+	/**
 	* Sends the given message to all other instances of this session.
 	* @param {string} type    type of message that should be send
 	* @param {object} [data]  message data that should be send

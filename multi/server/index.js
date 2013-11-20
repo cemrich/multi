@@ -50,6 +50,11 @@ var Multi = function (app, server) {
 						token: event.token,
 						reason: 'sessionFull'
 					});
+				} else if (!session.enablePlayerJoining) {
+					socket.emit('joinSessionFailed', {
+						token: event.token,
+						reason: 'joiningDisabled'
+					});
 				} else {
 					player.role = 'player';
 					socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });

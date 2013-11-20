@@ -79,6 +79,7 @@ define(function(require, exports, module) {
 	 * On error it will be rejected with either 
 	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
 	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}, 
 	 * {@link module:shared/errors.NoSessionTokenFoundError NoSessionTokenFoundError}, 
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
@@ -107,6 +108,7 @@ define(function(require, exports, module) {
 	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
 	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
 	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError}, 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}, 
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
 	Multi.prototype.autoJoinElseCreateSession = function () {
@@ -144,7 +146,8 @@ define(function(require, exports, module) {
 	 * the joined {@link module:client/session~Session Session} instance.<br><br>
 	 * On error it will be rejected with either 
 	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
-	 * {@link module:shared/errors.SessionFullError SessionFullError},
+	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError},
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 *
 	 * @example
@@ -185,6 +188,8 @@ define(function(require, exports, module) {
 				error = new errors.NoSuchSessionError();
 			} else if (data.reason === 'sessionFull') {
 				error = new errors.SessionFullError();
+			} else if (data.reason === 'joiningDisabled') {
+				error = new errors.JoiningDisabledError();
 			}
 			deferred.reject(error);
 		});
@@ -289,6 +294,11 @@ define(function(require, exports, module) {
 	 * @type module:shared/errors.NoSessionTokenFoundError
 	 */
 	exports.NoSessionTokenFoundError = errors.NoSessionTokenFoundError;
+
+	/**
+	 * @type module:shared/errors.JoiningDisabledError
+	 */
+	exports.JoiningDisabledError = errors.JoiningDisabledError;
 
 	/**
 	 * @type EventDispatcher

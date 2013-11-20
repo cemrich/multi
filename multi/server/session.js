@@ -79,6 +79,11 @@ var Session = function (io, options) {
 	 * @private
 	 */
 	this.io = io;
+	/**
+	 * if false no more clients are allowed to join this session
+	 * @private
+	 */
+	this.enablePlayerJoining = true;
 
 	this.freeNumbers = [];
 
@@ -92,24 +97,36 @@ var Session = function (io, options) {
 
 util.inherits(Session, EventDispatcher);
 
-/*
+/**
+ * Some client decided that the player policy should change
+ * for this session.
+ * @private
+ */
+Session.prototype.onChangePlayerJoining = function (data) {
+	this.enablePlayerJoining = data.enablePlayerJoining;
+};
+
+/**
  * Some session instance emitted a message. Distribute to _all_ clients. 
+ * @private
  */
 Session.prototype.onSessionMessage = function (data) {
 	this.sendToPlayers('sessionMessage', { type: data.type, data: data.data });
 	this.dispatchEvent(data.type, { type: data.type, data: data.data });
 };
 
-/*
+/**
  * Some player emitted a message. Distribute to _all_ clients. 
+ * @private
  */
 Session.prototype.onPlayerMessage = function (data) {
 	this.sendToPlayers('playerMessage', { id: data.id, type: data.type, data: data.data });
 };
 
-/*
+/**
  * Some players attributes were changed on the client side. 
  * Apply the changes to the affected player.
+ * @private
  */
 Session.prototype.onPlayerAttributesClientChanged = function (data) {
 	var player = this.players[data.id];
@@ -196,6 +213,7 @@ Session.prototype.addPlayer = function (player) {
 	player.socket.on('playerAttributesClientChanged', this.onPlayerAttributesClientChanged.bind(this));
 	player.socket.on('sessionMessage', this.onSessionMessage.bind(this));
 	player.socket.on('playerMessage', this.onPlayerMessage.bind(this));
+	player.socket.on('changePlayerJoining', this.onChangePlayerJoining.bind(this));
 
 	// inform others about this player
 	this.dispatchEvent('playerJoined', { player: player });

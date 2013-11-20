@@ -192,6 +192,29 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 		});
 	});
 
+	asyncTest('test disable and enable olayer joining', function () {
+		expect(2);
+		multi.createSession().then(function (session) {
+
+			// disable
+			session.disablePlayerJoining();
+			var failJoin = multi.joinSession(session.token).fail(function (error) {
+				var isDisabledError = error instanceof multiModule.JoiningDisabledError;
+				ok(isDisabledError, 'JoiningDisabledError is thrown');
+			});
+
+			failJoin.then(function () {
+				// enable again
+				session.enablePlayerJoining();
+				multi.joinSession(session.token).then(function () {
+					ok(true, 'enablePlayerJoining enables joining again');
+					start();
+				}).done();
+			}).done();
+
+		}).done();
+	});
+
 	// all modules & tests loaded, so begin testing
 	QUnit.start();
 

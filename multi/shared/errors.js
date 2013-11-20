@@ -90,6 +90,19 @@ define(function(require, exports, module) {
 	util.inherits(exports.NoSessionTokenFoundError, Error);
 
 
+	/**
+	 * @classdesc New players are currently not allowed to join
+	 * this session. Maybe someone called 
+	 * {@link module:client/session~Session#disablePlayerJoining}.
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.JoiningDisabledError = function () {
+		Error.call(this, 'player joining is currently disabled');
+	};
+	util.inherits(exports.JoiningDisabledError, Error);
+
+
 	return exports;
 
  });
