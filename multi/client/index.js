@@ -42,23 +42,21 @@ define(function(require, exports, module) {
 
 
 	/**
+	* @classdesc Use this class to create new sessions or connect to 
+	* existing ones. You can get ready a to use instance of this class
+	* by initializing the multi framework with 
+	* {@link module:client/multi.init multiModule.init(options)}.
 	* @inner
 	* @private
 	* @memberof module:client/multi
 	* @class
-	* @mixes EventDispatcher
 	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  
 	*/
 	var Multi = function (options) {
-
-		EventDispatcher.call(this);
-
 		this.io = options.io;
 		this.server = options.server;
 		this.sessionOptions = options.session;
 	};
-
-	util.inherits(Multi, EventDispatcher);
 
 	function getSessionToken() {
 		var sessionToken = window.location.hash.substring(1);
@@ -96,6 +94,21 @@ define(function(require, exports, module) {
 		}
 	};
 
+	/**
+	 * Tries to auto join an existing session.
+	 * When no valid session token can be extracted from the URL a
+	 * new session will be created instead.<br>
+	 * As this operation is executed asynchrony a Q promise will be returned.
+	 *
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the created or joined {@link module:client/session~Session Session} 
+	 * instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError}, 
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
+	 */
 	Multi.prototype.autoJoinElseCreateSession = function () {
 		var that = this;
 		var deferred = Q.defer();
