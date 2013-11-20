@@ -20,10 +20,10 @@ var EventDispatcher = require('../shared/eventDispatcher');
  */
 
 /**
- * A game session that connects multiple players.
+ * @classdesc A game session that connects and manages multiple players.
  * @mixes EventDispatcher
  * @class
- * @protected
+ * @private
  * @param {socket.io} io  ready to use and listening socket.io instance
  * @param {SessionOptions} options to tweak this sessions behaviour
  */
@@ -32,7 +32,16 @@ var Session = function (io, options) {
 	// parse session options
 	var tokenFunction = token.numeric;
 	var tokenFunctionArgs = [];
+
+	/**
+	 * @see SessionOptions
+	 * @readonly
+	 */
 	this.minPlayerNeeded = 1;
+	/**
+	 * @see SessionOptions
+	 * @readonly
+	 */
 	this.maxPlayerAllowed = 10;
 
 	if (options !== undefined) {
@@ -58,7 +67,7 @@ var Session = function (io, options) {
 	/**
 	 * Dictionary of all players currently connected
 	 * to this session mapped on their ids.
-	 * @type {object}
+	 * @type {Object.<string, module:client/player~Player>}
 	 * @readonly
 	 */
 	this.players = {};
@@ -81,15 +90,25 @@ var Session = function (io, options) {
 
 util.inherits(Session, EventDispatcher);
 
+/*
+ * Some session instance emitted a message. Distribute to _all_ clients. 
+ */
 Session.prototype.onSessionMessage = function (data) {
 	this.sendToPlayers('sessionMessage', { type: data.type, data: data.data });
 	this.dispatchEvent(data.type, { type: data.type, data: data.data });
 };
 
+/*
+ * Some player emitted a message. Distribute to _all_ clients. 
+ */
 Session.prototype.onPlayerMessage = function (data) {
 	this.sendToPlayers('playerMessage', { id: data.id, type: data.type, data: data.data });
 };
 
+/*
+ * Some players attributes were changed on the client side. 
+ * Apply the changes to the affected player.
+ */
 Session.prototype.onPlayerAttributesClientChanged = function (data) {
 	var player = this.players[data.id];
 	if (typeof player !== 'undefined') {
@@ -102,6 +121,7 @@ Session.prototype.onPlayerAttributesClientChanged = function (data) {
  * to this session. 
  * @param {string} eventName       name of the event
  * @param {object} [eventData={}]  optional event data
+ * @private
  */
 Session.prototype.sendToPlayers = function (eventName, eventData) {
 	this.io.sockets.in(this.token).emit(eventName, eventData);
@@ -132,6 +152,10 @@ Session.prototype.getPlayerCount = function () {
 	return Object.keys(this.players).length;
 };
 
+/**
+ * @return {boolean} true if there are as many ore more players 
+ * connected to this session as are allowed
+ */
 Session.prototype.isFull = function () {
 	return this.getPlayerCount() >= this.maxPlayerAllowed;
 };
@@ -182,6 +206,7 @@ Session.prototype.addPlayer = function (player) {
  * Removes the given player from this session.
  * @param player {module:server/player~Player} player instance to remove
  * @fires module:server/session~Session#playerRemoved
+ * @private
  */
 Session.prototype.removePlayer = function (player) {
 	this.freeNumbers.push(player.number);
@@ -239,7 +264,7 @@ exports.create = function(io, options) {
  */
 
 /**
- * Fired when a new player has been removed from this session.
+ * Fired when a player has been removed from this session.
  * @event module:server/session~Session#playerRemoved
  * @property {module:server/player~Player} player  The removed player.
  */
@@ -248,4 +273,22 @@ exports.create = function(io, options) {
  * Fired when this session is no longer valid. Don't use this
  * session any longer after the event has been fired.
  * @event module:server/session~Session#destroyed
+ */
+ 
+/**
+ * Fired when a player has been removed from this session and
+ * there are now less player connected to this session than stated 
+ * in minPlayerNeeded.<br><br>
+ * You could listen for this event to stop a running game when
+ * the player count is getting to low.
+ * @event module:server/session~Session#belowMinPlayerNeeded
+ */
+ 
+/**
+ * Fired when a new player has been added to this session and
+ * there are now exactly as many players connected to this session
+ * as stated in minPlayerNeeded.<br><br>
+ * You could listen for this event to start your game when
+ * enough players have connected.
+ * @event module:server/session~Session#aboveMinPlayerNeeded
  */
