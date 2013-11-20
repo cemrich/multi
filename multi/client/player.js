@@ -69,10 +69,16 @@ define(function(require, exports, module) {
 		 */
 		this.number = null;
 
-		this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
-		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged.bind(this));
-		this.socket.on('playerLeft', this.onPlayerLeft.bind(this));
-		WatchJS.watch(this.attributes, this.onAttributesChange.bind(this), 0, true);
+		// listeners
+		this.onPlayerMessage = this.onPlayerMessage.bind(this);
+		this.onPlayerAttributesChanged = this.onPlayerAttributesChanged.bind(this);
+		this.onPlayerLeft = this.onPlayerLeft.bind(this);
+		this.onAttributesChange = this.onAttributesChange.bind(this);
+
+		this.socket.on('playerMessage', this.onPlayerMessage);
+		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
+		this.socket.on('playerLeft', this.onPlayerLeft);
+		WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
 	};
 
 	util.inherits(Player, EventDispatcher);
@@ -87,10 +93,10 @@ define(function(require, exports, module) {
 			this.dispatchEvent('disconnected');
 			// ... and remove listeners
 			this.removeAllListeners();
-			this.socket.removeListener('playerMessage', this.onPlayerMessage.bind(this));
-			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged.bind(this));
-			this.socket.removeListener('playerLeft', this.onPlayerLeft.bind(this));
-			WatchJS.unwatch(this.attributes, this.onAttributesChange.bind(this));
+			this.socket.removeListener('playerMessage', this.onPlayerMessage);
+			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged);
+			this.socket.removeListener('playerLeft', this.onPlayerLeft);
+			WatchJS.unwatch(this.attributes, this.onAttributesChange);
 		}
 	};
 
@@ -111,8 +117,7 @@ define(function(require, exports, module) {
 	 */
 	Player.prototype.onPlayerAttributesChanged = function (data) {
 		if (data.id === this.id) {
-			var onAttributesChange = this.onAttributesChange.bind(this);
-			WatchJS.unwatch(this.attributes, onAttributesChange);
+			WatchJS.unwatch(this.attributes, this.onAttributesChange);
 			for (var i in data.attributes) {
 				if (!this.attributes.hasOwnProperty(i) ||
 						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
@@ -121,7 +126,7 @@ define(function(require, exports, module) {
 						{ key: i, value: data.attributes[i]});
 				}
 			}
-			WatchJS.watch(this.attributes, onAttributesChange, 0, true);
+			WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
 		}
 	};
 

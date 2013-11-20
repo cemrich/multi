@@ -66,11 +66,12 @@ var Player = function (socket) {
 	this.number = null;
 
 	EventDispatcher.call(this);
-	WatchJS.watch(this.attributes, this.onAttributesChange.bind(this), 0, true);
 
-	// socket listeners
+	// listeners
+	this.onAttributesChange = this.onAttributesChange.bind(this);
 	this.socket.on('disconnect', this.onDisconnect.bind(this));
 	this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
+	WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
 };
 
 /* class methods */
@@ -96,7 +97,7 @@ Player.prototype.onDisconnect = function () {
 	this.socket.removeAllListeners();
 	this.removeAllListeners();
 	try {
-		WatchJS.unwatch(this.attributes, this.onAttributesChange.bind(this));
+		WatchJS.unwatch(this.attributes, this.onAttributesChange);
 	} catch (error) {}
 };
 
