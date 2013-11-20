@@ -32,7 +32,7 @@ define(function(require, exports, module) {
 		/** 
 		 * communication socket for this player
 		 * @type {socket.io-socket}
-		 * @readonly
+		 * @private
 		 */
 		this.socket = socket;
 		/** 
@@ -45,6 +45,7 @@ define(function(require, exports, module) {
 		 * Role that is fulfilled by this
 		 * player. Either 'presenter' or 'player'.
 		 * @type {string}
+		 * @readonly
 		 */
 		this.role = 'player';
 		/** 
@@ -65,11 +66,13 @@ define(function(require, exports, module) {
 		 * Free numbers from disconnected players will be reused to
 		 * avoid gaps.
 		 * @type {integer}
+		 * @readonly
 		 */
 		this.number = null;
 
 		/**
 		 * Called when any player left its session.
+		 * @private
 		 */
 		function onPlayerLeft(data) {
 			if (data.playerId === player.id) {
@@ -86,6 +89,7 @@ define(function(require, exports, module) {
 
 		/**
 		 * Called when this socket receives a message for any player.
+		 * @private
 		 */
 		function onPlayerMessage(data) {
 			if (data.id === player.id) {
@@ -96,6 +100,7 @@ define(function(require, exports, module) {
 		/**
 		 * Called when attributes for any player have been changed
 		 * on server side.
+		 * @private
 		 */
 		function onPlayerAttributesChanged(data) {
 			if (data.id === player.id) {
@@ -118,6 +123,7 @@ define(function(require, exports, module) {
 		 * @param {string} action    what has been done to the property
 		 * @param          newvalue  new value of the changed property
 		 * @param          oldvalue  old value of the changed property
+		 * @private
 		 */
 		function onAttributesChange(prop, action, newvalue, oldvalue) {
 			//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
