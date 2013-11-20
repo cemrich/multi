@@ -19,39 +19,12 @@ define(function(require, exports, module) {
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
 	var color = require('../shared/color');
-	var util = require('util');
+	var errors = require('../shared/errors');
+	var util = require('../shared/util');
 	var Q = require('../debs/q');
 	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;
-
-
-	// custom error types
-
-	var NoSuchSessionError = function () {
-		Error.call(this, 'the requested session does not exist');
-	};
-	util.inherits(NoSuchSessionError, Error);
-
-	var TokenAlreadyExistsError = function () {
-		Error.call(this, 'a session with this token does already exist');
-	};
-	util.inherits(TokenAlreadyExistsError, Error);
-
-	var SessionFullError = function () {
-		Error.call('the requested session is full');
-	};
-	util.inherits(SessionFullError, Error);
-
-	var NoConnectionError = function () {
-		Error.call(this, 'no connection to server');
-	};
-	util.inherits(NoConnectionError, Error);
-
-	var NoSessionTokenFoundError = function () {
-		Error.call(this, 'no session token found in url');
-	};
-	util.inherits(NoSessionTokenFoundError, Error);
 
 
 	/**
@@ -62,10 +35,17 @@ define(function(require, exports, module) {
 	*/
 
 	/**
+	 * A promise object provided by the q promise library.
+	 * @external Promise
+	 * @see {@link https://github.com/kriskowal/q/wiki/API-Reference}
+	 */
+
+
+	/**
 	* @inner
 	* @private
-	* @class
 	* @memberof module:client/multi
+	* @class
 	* @mixes EventDispatcher
 	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  
 	*/
@@ -99,16 +79,16 @@ define(function(require, exports, module) {
 	 * @return {external:Promise} On success the promise will be resolved with 
 	 * the joined {@link module:client/session~Session Session} instance.<br><br>
 	 * On error it will be rejected with either 
-	 * {@link module:client/multi.NoSuchSessionError NoSuchSessionError}, 
-	 * {@link module:client/multi.SessionFullError SessionFullError}, 
-	 * {@link module:client/multi.NoSessionTokenFoundError NoSessionTokenFoundError}, 
-	 * or {@link module:client/multi.NoConnectionError NoConnectionError}.
+	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.NoSessionTokenFoundError NoSessionTokenFoundError}, 
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
 	Multi.prototype.autoJoinSession = function () {
 		var sessionToken = getSessionToken();
 		if (sessionToken === null) {
 			var deferred = Q.defer();
-			var error = new NoSessionTokenFoundError();
+			var error = new errors.NoSessionTokenFoundError();
 			deferred.reject(error);
 			return deferred.promise;
 		} else {
@@ -127,7 +107,7 @@ define(function(require, exports, module) {
 				deferred.resolve(session);
 			},
 			function (error) {
-				if (error instanceof NoSessionTokenFoundError) {
+				if (error instanceof errors.NoSessionTokenFoundError) {
 					that.createSession().then(
 						function (session) {
 							deferred.resolve(session);
@@ -150,9 +130,9 @@ define(function(require, exports, module) {
 	 * @return {external:Promise} On success the promise will be resolved with 
 	 * the joined {@link module:client/session~Session Session} instance.<br><br>
 	 * On error it will be rejected with either 
-	 * {@link module:client/multi.NoSuchSessionError NoSuchSessionError}, 
-	 * {@link module:client/multi.SessionFullError SessionFullError},
-	 * or {@link module:client/multi.NoConnectionError NoConnectionError}.
+	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:shared/errors.SessionFullError SessionFullError},
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 *
 	 * @example
 	 * var multiOptions = {
@@ -184,14 +164,14 @@ define(function(require, exports, module) {
 			});
 		});
 		socket.on('connect_failed', function () {
-			deferred.reject(new NoConnectionError());
+			deferred.reject(new errors.NoConnectionError());
 		});
 		socket.on('joinSessionFailed', function (data) {
 			var error;
 			if (data.reason === 'sessionNotFound') {
-				error = new NoSuchSessionError();
+				error = new errors.NoSuchSessionError();
 			} else if (data.reason === 'sessionFull') {
-				error = new SessionFullError();
+				error = new errors.SessionFullError();
 			}
 			deferred.reject(error);
 		});
@@ -208,8 +188,8 @@ define(function(require, exports, module) {
 	 * @return {external:Promise} On success the promise will be resolved with the 
 	 * created {@link module:client/session~Session Session} instance.<br><br>
 	 * On error it will be rejected with either 
-	 * {@link module:client/multi.TokenAlreadyExistsError TokenAlreadyExistsError},
-	 * or {@link module:client/multi.NoConnectionError NoConnectionError}.
+	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError},
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 *
 	 * @example
 	 * var multiOptions = {
@@ -248,11 +228,11 @@ define(function(require, exports, module) {
 		});
 		socket.on('createSessionFailed', function (event) {
 			if (event.reason === 'tokenAlreadyExists') {
-				deferred.reject(new TokenAlreadyExistsError());
+				deferred.reject(new errors.TokenAlreadyExistsError());
 			}
 		});
 		socket.on('connect_failed', function () {
-			deferred.reject(new NoConnectionError());
+			deferred.reject(new errors.NoConnectionError());
 		});
 		return deferred.promise;
 	};
@@ -271,75 +251,45 @@ define(function(require, exports, module) {
 		}
 	};
 
-	/**
-	 * A promise object provided by the q promise library.
-	 * @external Promise
-	 * @see {@link https://github.com/kriskowal/q/wiki/API-Reference}
-	 */
 
 	/**
-	 * The built in error object.
-	 * @external Error
-	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error}
+	 * @type module:shared/errors.NoSuchSessionError
 	 */
+	exports.NoSuchSessionError = errors.NoSuchSessionError;
 
 	/**
-	 * @classdesc The session you were looking for was not found
-	 * on the server. Most likely the token has been misspelled.
-	 * @class
-	 * @mixes external:Error
+	 * @type module:shared/errors.TokenAlreadyExistsError
 	 */
-	exports.NoSuchSessionError = NoSuchSessionError;
+	exports.TokenAlreadyExistsError = errors.TokenAlreadyExistsError;
 
 	/**
-	 * @classdesc There could be no valid session token extracted
-	 * from the url. You may want to check if the current url has
-	 * the format http://myGameUrl/some/game#myToken
-	 * @class
-	 * @mixes external:Error
+	 * @type module:shared/errors.SessionFullError
 	 */
-	exports.NoSessionTokenFoundError = NoSessionTokenFoundError;
+	exports.SessionFullError = errors.SessionFullError;
 
 	/**
-	 * @classdesc The session you wanted to join already has enough
-	 * players. This happens when there are as many or more players 
-	 * connected as defined in 
-	 * {@link module:client/session~Session#maxPlayerAllowed maxPlayerAllowed}.
-	 * @class
-	 * @mixes external:Error
+	 * @type module:shared/errors.NoConnectionError
 	 */
-	exports.SessionFullError = SessionFullError;
-	/**
-	 * @classdesc You are not able to create or join a session
-	 * because there is no connection to the server. Maybe the
-	 * socket.io settings are wrong or the internet connection
-	 * dropped.
-	 * @class
-	 * @mixes external:Error
-	 */
-	exports.NoConnectionError = NoConnectionError;
-	/**
-	 * @classdesc The session you wanted to create already exists.
-	 * This can happen when you have configured a static session 
-	 * token inside the {@link SessionOptions} and are trying to 
-	 * create this session more than once. Closing any open tabs
-	 * connected to this session may solve your problem.
-	 * @class
-	 * @mixes external:Error
-	 */
-	exports.TokenAlreadyExistsError = TokenAlreadyExistsError;
+	exports.NoConnectionError = errors.NoConnectionError;
 
 	/**
-	 * @see module:shared/color
+	 * @type module:shared/errors.NoSessionTokenFoundError
 	 */
-	exports.color = color;
+	exports.NoSessionTokenFoundError = errors.NoSessionTokenFoundError;
+
 	/**
-	 * @see EventDispatcher
+	 * @type EventDispatcher
 	 */
 	exports.EventDispatcher = EventDispatcher;
+
 	/**
-	 * @see module:client/util
+	 * @type module:shared/util
 	 */
 	exports.util = util;
+
+	/**
+	 * @type module:shared/color
+	 */
+	exports.color = color;
 
 });
