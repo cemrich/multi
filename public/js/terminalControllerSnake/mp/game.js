@@ -93,6 +93,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 
 	// (re) start this game
 	Game.prototype.start = function () {
+		this.session.disablePlayerJoining();
 		layout.showSection('#game');
 		jaws.init();
 		if (jaws.assets.src_list.length === 0) { // hack around jaws bug
@@ -105,6 +106,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 
 	// stop all game action hard
 	Game.prototype.stop = function () {
+		this.session.enablePlayerJoining();
 		clearInterval(this.interval);
 		jaws.game_loop.stop();
 		this.dispatchEvent('stop');

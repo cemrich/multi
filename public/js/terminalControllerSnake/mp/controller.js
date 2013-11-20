@@ -115,6 +115,8 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 			layout.showError('There is no server connection. Please try again later.');
 		} else if (error instanceof multiModule.NoSuchSessionError) {
 			layout.showError('This game does not exist. Make sure your URL is correct.');
+		} else if (error instanceof multiModule.JoiningDisabledError) {
+			layout.showError('This game is already running. Try to join later.');
 		} else {
 			layout.showError('Something went terribly wrong. Please try again.');
 		}
