@@ -16,8 +16,11 @@ define(['./sound', '../lib/jquery-2.0.0.min'], function (sound) {
 
 	function showError(message) {
 		sound.onError();
-		showSection('#error');
 		$('#error .message').text(message);
+		$('#error .try-again').one('click', function () {
+			window.location.reload();
+		});
+		showSection('#error');
 	}
 
 	return {
