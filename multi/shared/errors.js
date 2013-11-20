@@ -13,7 +13,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define(function(require, exports, module) {
 
-	var util = require('util');
+	var util = require('./util');
 
 	/**
 	 * The built in error object.

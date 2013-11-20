@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var playerModule = require('./player');
-	var util = require('util');
+	var util = require('../shared/util');
 
 
 	/* 

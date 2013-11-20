@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var WatchJS = require('../debs/watch');
-	var util = require('util');
+	var util = require('../shared/util');
 
 	/**
 	* @classdesc This player class represents a device connected
