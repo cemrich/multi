@@ -25,7 +25,6 @@ define(function(require, exports, module) {
 	* @param socket ready to use socket.io socket
 	*/
 	var Player = function (socket) {
-		var player = this;
 
 		EventDispatcher.call(this);
 
@@ -70,75 +69,76 @@ define(function(require, exports, module) {
 		 */
 		this.number = null;
 
-		/**
-		 * Called when any player left its session.
-		 * @private
-		 */
-		function onPlayerLeft(data) {
-			if (data.playerId === player.id) {
-				// I do not longer exist - inform...
-				player.dispatchEvent('disconnected');
-				// ... and remove listeners
-				player.removeAllListeners();
-				player.socket.removeListener('playerMessage', onPlayerMessage);
-				player.socket.removeListener('playerAttributesChanged', onPlayerAttributesChanged);
-				player.socket.removeListener('playerLeft', onPlayerLeft);
-				WatchJS.unwatch(this.attributes, onAttributesChange);
-			}
-		}
-
-		/**
-		 * Called when this socket receives a message for any player.
-		 * @private
-		 */
-		function onPlayerMessage(data) {
-			if (data.id === player.id) {
-				player.dispatchEvent(data.type, { type: data.type, data: data.data } );
-			}
-		}
-
-		/**
-		 * Called when attributes for any player have been changed
-		 * on server side.
-		 * @private
-		 */
-		function onPlayerAttributesChanged(data) {
-			if (data.id === player.id) {
-				WatchJS.unwatch(player.attributes, onAttributesChange);
-				for (var i in data.attributes) {
-					if (!player.attributes.hasOwnProperty(i) ||
-							JSON.stringify(player.attributes[i]) !== JSON.stringify(data.attributes[i])) {
-						player.attributes[i] = data.attributes[i];
-						player.dispatchEvent('attributesChanged',
-							{ key: i, value: data.attributes[i]});
-					}
-				}
-				WatchJS.watch(player.attributes, onAttributesChange, 0, true);
-			}
-		}
-
-		/** 
-		 * Called when the user attributes have been changed.
-		 * @param {string} prop      property that has been changed
-		 * @param {string} action    what has been done to the property
-		 * @param          newvalue  new value of the changed property
-		 * @param          oldvalue  old value of the changed property
-		 * @private
-		 */
-		function onAttributesChange(prop, action, newvalue, oldvalue) {
-			//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-			player.socket.emit('playerAttributesClientChanged',
-				{ id: player.id, attributes: player.attributes }
-			);
-		}
-
-		this.socket.on('playerMessage', onPlayerMessage);
-		this.socket.on('playerAttributesChanged', onPlayerAttributesChanged);
-		this.socket.on('playerLeft', onPlayerLeft);
-		WatchJS.watch(this.attributes, onAttributesChange, 0, true);
+		this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
+		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged.bind(this));
+		this.socket.on('playerLeft', this.onPlayerLeft.bind(this));
+		WatchJS.watch(this.attributes, this.onAttributesChange.bind(this), 0, true);
 	};
 
 	util.inherits(Player, EventDispatcher);
+
+	/**
+	 * Called when any player left its session.
+	 * @private
+	 */
+	Player.prototype.onPlayerLeft = function (data) {
+		if (data.playerId === this.id) {
+			// I do not longer exist - inform...
+			this.dispatchEvent('disconnected');
+			// ... and remove listeners
+			this.removeAllListeners();
+			this.socket.removeListener('playerMessage', this.onPlayerMessage.bind(this));
+			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged.bind(this));
+			this.socket.removeListener('playerLeft', this.onPlayerLeft.bind(this));
+			WatchJS.unwatch(this.attributes, this.onAttributesChange.bind(this));
+		}
+	};
+
+	/**
+	 * Called when this socket receives a message for any player.
+	 * @private
+	 */
+	Player.prototype.onPlayerMessage = function (data) {
+		if (data.id === this.id) {
+			this.dispatchEvent(data.type, { type: data.type, data: data.data } );
+		}
+	};
+
+	/**
+	 * Called when attributes for any player have been changed
+	 * on server side.
+	 * @private
+	 */
+	Player.prototype.onPlayerAttributesChanged = function (data) {
+		if (data.id === this.id) {
+			var onAttributesChange = this.onAttributesChange.bind(this);
+			WatchJS.unwatch(this.attributes, onAttributesChange);
+			for (var i in data.attributes) {
+				if (!this.attributes.hasOwnProperty(i) ||
+						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
+					this.attributes[i] = data.attributes[i];
+					this.dispatchEvent('attributesChanged',
+						{ key: i, value: data.attributes[i]});
+				}
+			}
+			WatchJS.watch(this.attributes, onAttributesChange, 0, true);
+		}
+	};
+
+	/** 
+	 * Called when the user attributes have been changed.
+	 * @param {string} prop      property that has been changed
+	 * @param {string} action    what has been done to the property
+	 * @param          newvalue  new value of the changed property
+	 * @param          oldvalue  old value of the changed property
+	 * @private
+	 */
+	Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
+		//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+		this.socket.emit('playerAttributesClientChanged',
+			{ id: this.id, attributes: this.attributes }
+		);
+	};
 
 	/**
 	* Sends the given message to all other instances of this player.

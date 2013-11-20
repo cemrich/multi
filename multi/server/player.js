@@ -23,8 +23,6 @@ var EventDispatcher = require('../shared/eventDispatcher');
  */
 var Player = function (socket) {
 
-	var player = this;
-
 	/** 
 	 * communication socket for this player
 	 * @type {socket.io-socket}
@@ -68,42 +66,52 @@ var Player = function (socket) {
 	this.number = null;
 
 	EventDispatcher.call(this);
-	WatchJS.watch(this.attributes, onAttributesChange, 0, true);
+	WatchJS.watch(this.attributes, this.onAttributesChange.bind(this), 0, true);
 
-	/** 
-	 * Called when the user attributes have been changed.
-	 * @param {string} prop      property that has been changed
-	 * @param {string} action    what has been done to the property
-	 * @param          newvalue  new value of the changed property
-	 * @param          oldvalue  old value of the changed property
-	 * @private
-	 */
-	function onAttributesChange(prop, action, newvalue, oldvalue) {
-		//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-		player.dispatchEvent('attributesChanged');
-	}
-
-	// socket disconnection
-	this.socket.on('disconnect', function(event) {
-		player.dispatchEvent('disconnected');
-		// remove all listeners
-		player.socket.removeAllListeners();
-		player.removeAllListeners();
-		try {
-			WatchJS.unwatch(player.attributes, onAttributesChange);
-		} catch (error) {}
-	});
-
-	// is it my player message?
-	this.socket.on('playerMessage', function (data) {
-		if (data.id === player.id) {
-			player.dispatchEvent(data.type, { type: data.type, data: data.data });
-		}
-	});
+	// socket listeners
+	this.socket.on('disconnect', this.onDisconnect.bind(this));
+	this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
 };
 
 /* class methods */
 util.inherits(Player, EventDispatcher);
+
+/**
+ * Any player send a player message. is it mine?
+ * @private
+ */
+Player.prototype.onPlayerMessage = function (data) {
+	if (data.id === this.id) {
+		this.dispatchEvent(data.type, { type: data.type, data: data.data });
+	}
+};
+
+/**
+ * Handle socket disconnection.
+ * @private
+ */
+Player.prototype.onDisconnect = function () {
+	this.dispatchEvent('disconnected');
+	// remove all listeners
+	this.socket.removeAllListeners();
+	this.removeAllListeners();
+	try {
+		WatchJS.unwatch(this.attributes, this.onAttributesChange.bind(this));
+	} catch (error) {}
+};
+
+/** 
+ * Called when the user attributes have been changed.
+ * @param {string} prop      property that has been changed
+ * @param {string} action    what has been done to the property
+ * @param          newvalue  new value of the changed property
+ * @param          oldvalue  old value of the changed property
+ * @private
+ */
+Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
+	//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+	this.dispatchEvent('attributesChanged');
+};
 
 /**
  * Overrides {@link module:server/player~Player#attributes attributes} 
