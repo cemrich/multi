@@ -19,6 +19,7 @@ var instance = null;
 /**
 * @inner
 * @class
+* @protected
 * @mixes EventDispatcher
 * @fires module:server/multi~Multi#sessionCreated
 */
@@ -28,7 +29,6 @@ var Multi = function (app, server) {
 
 	var multi = this;
 	var io = require('socket.io').listen(server);
-	console.log('starting multi');
 
 	// when a new player connection is coming in...
 	io.on('connection', function (socket) {

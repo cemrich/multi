@@ -47,7 +47,7 @@ define(function(require, exports, module) {
 	* by initializing the multi framework with 
 	* {@link module:client/multi.init multiModule.init(options)}.
 	* @inner
-	* @private
+	* @protected
 	* @memberof module:client/multi
 	* @class
 	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  

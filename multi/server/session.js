@@ -2,6 +2,7 @@
 
 /**
  * @module server/session
+ * @private
  */
 
 var util = require('util');
@@ -23,7 +24,7 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * @classdesc A game session that connects and manages multiple players.
  * @mixes EventDispatcher
  * @class
- * @private
+ * @protected
  * @param {socket.io} io  ready to use and listening socket.io instance
  * @param {SessionOptions} options to tweak this sessions behaviour
  */
@@ -75,6 +76,7 @@ var Session = function (io, options) {
 	/**
 	 * Ready to use and listening socket.io instance
 	 * @type {socket.io}
+	 * @private
 	 */
 	this.io = io;
 
@@ -163,7 +165,7 @@ Session.prototype.isFull = function () {
 /**
  * Adds the given player to this session.
  * @param player {module:server/player~Player} player instance to add
- * @fires module:server/session~Session#playerAdded
+ * @fires module:server/session~Session#playerJoined
  */
 Session.prototype.addPlayer = function (player) {
 	var session = this;
@@ -196,7 +198,7 @@ Session.prototype.addPlayer = function (player) {
 	player.socket.on('playerMessage', this.onPlayerMessage.bind(this));
 
 	// inform others about this player
-	this.dispatchEvent('playerAdded', { player: player });
+	this.dispatchEvent('playerJoined', { player: player });
 	if (this.getPlayerCount() === this.minPlayerNeeded) {
 		this.dispatchEvent('aboveMinPlayerNeeded');
 	}
@@ -240,6 +242,7 @@ exports.getSession = function (token) {
  * @param {socket.io}      io       ready to use and listening socket.io instance
  * @param {SessionOptions} options  to tweak the new sessions behaviour
  * @returns {module:server/session~Session} newly created session
+ * @private
  */
 exports.create = function(io, options) {
 	var session = new Session(io, options);
@@ -259,13 +262,13 @@ exports.create = function(io, options) {
 /**
  * Fired when a new player has been added to this session.
  * From now on you can safely communicate with this player.
- * @event module:server/session~Session#playerAdded
+ * @event module:server/session~Session#playerJoined
  * @property {module:server/player~Player} player  The newly added player.
  */
 
 /**
  * Fired when a player has been removed from this session.
- * @event module:server/session~Session#playerRemoved
+ * @event module:server/session~Session#playerLeft
  * @property {module:server/player~Player} player  The removed player.
  */
  

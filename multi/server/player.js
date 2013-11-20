@@ -2,6 +2,7 @@
 
 /**
  * @module server/player
+ * @private
  */
 
 var util = require('util');

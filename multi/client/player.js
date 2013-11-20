@@ -16,6 +16,7 @@ define(function(require, exports, module) {
 	* 
 	* @inner
 	* @class
+	* @protected
 	* @mixes EventDispatcher
 	* @memberof module:client/player
 	* @fires module:client/player~Player#attributesChanged

@@ -542,12 +542,20 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 
 }));
 
-/**
-* Collection of util functions.
-* @module client/util
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
 */
 
-define('util',['require','exports','module'],function(require, exports, module) {
+
+/**
+* Collection of util functions.
+* @module shared/util
+* @private
+* @ignore
+*/
+
+define('../shared/util',['require','exports','module'],function(require, exports, module) {
 
 	/**
 	* Inherit the prototype methods from one constructor into another.
@@ -575,11 +583,11 @@ define('util',['require','exports','module'],function(require, exports, module) 
  * @private
  */
  
-define('player',['require','exports','module','../shared/eventDispatcher','../debs/watch','util'],function(require, exports, module) {
+define('player',['require','exports','module','../shared/eventDispatcher','../debs/watch','../shared/util'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var WatchJS = require('../debs/watch');
-	var util = require('util');
+	var util = require('../shared/util');
 
 	/**
 	* @classdesc This player class represents a device connected
@@ -588,6 +596,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 	* 
 	* @inner
 	* @class
+	* @protected
 	* @mixes EventDispatcher
 	* @memberof module:client/player
 	* @fires module:client/player~Player#attributesChanged
@@ -768,11 +777,11 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
  * @private
  */
 
-define('session',['require','exports','module','../shared/eventDispatcher','./player','util'],function(require, exports, module) {
+define('session',['require','exports','module','../shared/eventDispatcher','./player','../shared/util'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var playerModule = require('./player');
-	var util = require('util');
+	var util = require('../shared/util');
 
 
 	/* 
@@ -794,18 +803,50 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	*/
 
 	/**
+	* @classdesc A game session that connects and manages multiple players.
 	* @inner
 	* @class
+	* @protected
 	* @mixes EventDispatcher
 	* @memberof module:client/session
+	*
+	* @fires module:client/session~Session#playerJoined
+	* @fires module:client/session~Session#playerLeft
+	* @fires module:client/session~Session#destroyed
+	* @fires module:client/session~Session#belowMinPlayerNeeded
+	* @fires module:client/session~Session#aboveMinPlayerNeeded
+	*
+	* @param {module:client/player~Player} myself  the player instance that 
+	* represents my own client.
+	* @param {socket} socket  a socket.io socket already connected to 
+	* the server
+	* @param {object} sessionData  data object from the server that
+	* describes this session
 	*/
 	var Session = function (myself, socket, sessionData) {
 
 		EventDispatcher.call(this);
 		var session = this;
 
+		/**
+		 * The player instance that represents my own client.
+		 * @type {module:client/player~Player}
+		 * @readonly
+		 */
 		this.myself = myself;
+		/**
+		 * A socket.io socket connected to the server. This will
+		 * be used to send and receive messages for managing this
+		 * session.
+		 * @private
+		 */
 		this.socket = socket;
+		/**
+		 * Dictionary of all players except myself currently 
+		 * connected to this session; mapped on their ids.
+		 * @type {Object.<string, module:client/player~Player>}
+		 * @readonly
+		 */
 		this.players = {};
 		/** 
 		 * unique token identifying this session
@@ -813,7 +854,16 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		 * @readonly
 		 */
 		this.token = null;
+		/**
+		 * @see SessionOptions
+		 * @readonly
+		 */
 		this.minPlayerNeeded = null;
+		/**
+		 * @see SessionOptions
+		 * @readonly
+		 */
+		this.maxPlayerAllowed = null;
 
 		var packedPlayers = sessionData.players;
 		delete sessionData.players;
@@ -828,6 +878,11 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 		}
 
 		// calculate attributes
+		/**
+		 * URL you have to visit in order to connect to this session.
+		 * @type {string}
+		 * @readonly
+		 */
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
 		// add socket listeners
@@ -885,7 +940,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 
 	/**
 	 * @returns {Array.<module:client/player~Player>} an array of all players
-	 * currently connected to this session
+	 * currently connected to this session excluding myself.
 	 */
 	// TODO: this feels wrong as no specific order is guaranteed maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
 	Session.prototype.getPlayerArray = function () {
@@ -900,6 +955,14 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	* Sends the given message to all other instances of this session.
 	* @param {string} type    type of message that should be send
 	* @param {object} [data]  message data that should be send
+	* @example
+	* // on client no 1
+	* session.on('ping', function (event) {
+	*   // outputs 'bar'
+	*   console.log(event.data.foo);
+	* });
+	* // on client no 2, instance of same session
+	* session.message('ping', { foo: 'bar' });
 	*/
 	Session.prototype.message = function (type, data) {
 		this.socket.emit('sessionMessage', { type: type, data: data });
@@ -907,6 +970,8 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 
 	/**
 	 * Disconnects own player from this session.
+	 * This will remove this player from all existing
+	 * instances of this session.
 	 * @fires module:client/session~Session#destroyed
 	 */
 	Session.prototype.disconnectMyself = function () {
@@ -923,6 +988,44 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	 * @event module:client/session~Session#destroyed
 	 */
 
+	/**
+	 * Fired when a new player has been added to this session.
+	 * From now on you can safely communicate with this player.
+	 * @event module:client/session~Session#playerJoined
+	 * @property {module:client/player~Player} player  The newly added player.
+	 * @example <caption>Adding connected players to the DOM</caption>
+	 * session.on('playerJoined', function (event) {
+	 *   var playerDiv = $('#player').clone();
+	 *   $('#players').append(playerDiv);
+	 *   event.player.on('disconnected', function () {
+	 *     playerDiv.remove();
+	 *   });
+	 * }
+	 */
+
+	/**
+	 * Fired when a player has been removed from this session.
+	 * @event module:client/session~Session#playerLeft
+	 * @property {module:client/player~Player} player  The removed player.
+	 */
+
+	/**
+	 * Fired when a player has been removed from this session and
+	 * there are now less player connected to this session than stated 
+	 * in minPlayerNeeded.<br><br>
+	 * You could listen for this event to stop a running game when
+	 * the player count is getting to low.
+	 * @event module:client/session~Session#belowMinPlayerNeeded
+	 */
+
+	/**
+	 * Fired when a new player has been added to this session and
+	 * there are now exactly as many players connected to this session
+	 * as stated in minPlayerNeeded.<br><br>
+	 * You could listen for this event to start your game when
+	 * enough players have connected.
+	 * @event module:client/session~Session#aboveMinPlayerNeeded
+	 */
 
 	/**
 	* Unpacks a session object send over a socket connection.
@@ -947,6 +1050,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 /**
  * Here you can find some useful functions for working with colors.
  * @module
+ * @private
  */
 define('../shared/color',['require','exports','module'],function(require, exports, module) {
 
@@ -958,6 +1062,101 @@ define('../shared/color',['require','exports','module'],function(require, export
 		color = '#' + color.slice(-6);
 		return color;
 	};
+
+	return exports;
+
+ });
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+/**
+ * Collection of Error classes that multi uses to communicate that
+ * something went wrong.
+ * @private
+ * @module
+ */
+define('../shared/errors',['require','exports','module','./util'],function(require, exports, module) {
+
+	var util = require('./util');
+
+	/**
+	 * The built in error object.
+	 * @external Error
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error}
+	 */
+
+
+	/**
+	 * @classdesc The session you were looking for was not found
+	 * on the server. Most likely the token has been misspelled.
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.NoSuchSessionError = function () {
+		Error.call(this, 'the requested session does not exist');
+	};
+	util.inherits(exports.NoSuchSessionError, Error);
+
+
+	/**
+	 * @classdesc The session you wanted to create already exists.
+	 * This can happen when you have configured a static session 
+	 * token inside the {@link SessionOptions} and are trying to 
+	 * create this session more than once. Closing any open tabs
+	 * connected to this session may solve your problem.
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.TokenAlreadyExistsError = function () {
+		Error.call(this, 'a session with this token does already exist');
+	};
+	util.inherits(exports.TokenAlreadyExistsError, Error);
+
+
+	/**
+	 * @classdesc The session you wanted to join already has enough
+	 * players. This happens when there are as many or more players 
+	 * connected as defined in 
+	 * {@link module:client/session~Session#maxPlayerAllowed maxPlayerAllowed}.
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.SessionFullError = function () {
+		Error.call('the requested session is full');
+	};
+	util.inherits(exports.SessionFullError, Error);
+
+
+	/**
+	 * @classdesc You are not able to create or join a session
+	 * because there is no connection to the server. Maybe the
+	 * socket.io settings are wrong or the internet connection
+	 * dropped.
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.NoConnectionError = function () {
+		Error.call(this, 'no connection to server');
+	};
+	util.inherits(exports.NoConnectionError, Error);
+
+
+	/**
+	 * @classdesc There could be no valid session token extracted
+	 * from the url. You may want to check if the current url has
+	 * the format http://myGameUrl/some/game#myToken
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.NoSessionTokenFoundError = function () {
+		Error.call(this, 'no session token found in url');
+	};
+	util.inherits(exports.NoSessionTokenFoundError, Error);
+
 
 	return exports;
 
@@ -2902,46 +3101,29 @@ return Q;
 * Entry point for the client side multi library for developing
 * multiscreen games.
 * @module client/multi
+* @example
+* 
+var multiOptions = {
+  io: socketio,
+  server: 'http://mySocketioServer/'
+};
+
+// init and try to create the session
+var multi = multiModule.init(multiOptions);
+multi.createSession().then(onSession, onSessionFailed).done();
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','util','../debs/q'],function(require, exports, module) {
+define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../debs/q'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
 	var color = require('../shared/color');
-	var util = require('util');
+	var errors = require('../shared/errors');
+	var util = require('../shared/util');
 	var Q = require('../debs/q');
 	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;
-
-
-	// custom error types
-
-	var NoSuchSessionError = function () {
-		Error.call(this, 'the requested session does not exist');
-	};
-	util.inherits(NoSuchSessionError, Error);
-
-	var TokenAlreadyExistsError = function () {
-		Error.call(this, 'a session with this token does already exist');
-	};
-	util.inherits(TokenAlreadyExistsError, Error);
-
-	var SessionFullError = function () {
-		Error.call('the requested session is full');
-	};
-	util.inherits(SessionFullError, Error);
-
-	var NoConnectionError = function () {
-		Error.call(this, 'no connection to server');
-	};
-	util.inherits(NoConnectionError, Error);
-
-	var NoSessionTokenFoundError = function () {
-		Error.call(this, 'no session token found in url');
-	};
-	util.inherits(NoSessionTokenFoundError, Error);
 
 
 	/**
@@ -2952,28 +3134,28 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	*/
 
 	/**
+	 * A promise object provided by the q promise library.
+	 * @external Promise
+	 * @see {@link https://github.com/kriskowal/q/wiki/API-Reference}
+	 */
+
+
+	/**
+	* @classdesc Use this class to create new sessions or connect to 
+	* existing ones. You can get ready a to use instance of this class
+	* by initializing the multi framework with 
+	* {@link module:client/multi.init multiModule.init(options)}.
 	* @inner
-	* @class
+	* @protected
 	* @memberof module:client/multi
-	* @mixes EventDispatcher
+	* @class
 	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  
 	*/
 	var Multi = function (options) {
-
-		EventDispatcher.call(this);
-
 		this.io = options.io;
 		this.server = options.server;
 		this.sessionOptions = options.session;
-
-		this.onSession = function (eventString, data, socket) {
-			var session = sessionModule.fromPackedData(data, socket);
-			var event = { session: session };
-			this.dispatchEvent(eventString, event);
-		};
 	};
-
-	util.inherits(Multi, EventDispatcher);
 
 	function getSessionToken() {
 		var sessionToken = window.location.hash.substring(1);
@@ -2985,11 +3167,25 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		}
 	}
 
+	/**
+	 * Tries to connect to a session that does already exist on the server. 
+	 * The session token will be extracted from the URL by using characters 
+	 * after the url hash.<br>
+	 * As this operation is executed asynchrony a Q promise will be returned.
+	 *
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the joined {@link module:client/session~Session Session} instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.NoSessionTokenFoundError NoSessionTokenFoundError}, 
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
+	 */
 	Multi.prototype.autoJoinSession = function () {
 		var sessionToken = getSessionToken();
 		if (sessionToken === null) {
 			var deferred = Q.defer();
-			var error = new NoSessionTokenFoundError();
+			var error = new errors.NoSessionTokenFoundError();
 			deferred.reject(error);
 			return deferred.promise;
 		} else {
@@ -2997,6 +3193,21 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		}
 	};
 
+	/**
+	 * Tries to auto join an existing session.
+	 * When no valid session token can be extracted from the URL a
+	 * new session will be created instead.<br>
+	 * As this operation is executed asynchrony a Q promise will be returned.
+	 *
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the created or joined {@link module:client/session~Session Session} 
+	 * instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:shared/errors.SessionFullError SessionFullError}, 
+	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError}, 
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
+	 */
 	Multi.prototype.autoJoinElseCreateSession = function () {
 		var that = this;
 		var deferred = Q.defer();
@@ -3008,7 +3219,7 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 				deferred.resolve(session);
 			},
 			function (error) {
-				if (error instanceof NoSessionTokenFoundError) {
+				if (error instanceof errors.NoSessionTokenFoundError) {
 					that.createSession().then(
 						function (session) {
 							deferred.resolve(session);
@@ -3024,12 +3235,35 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	};
 
 	/**
-	 * @public
-	 * @return promise
+	 * Tries to connect to a session that does already exist on the server. 
+	 * As this operation is executed asynchrony a Q promise will be returned.
+	 * @param {string} sessionToken  unique token of the session you want
+	 * to join
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the joined {@link module:client/session~Session Session} instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:shared/errors.SessionFullError SessionFullError},
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
+	 *
+	 * @example
+	 * var multiOptions = {
+	 *  io: socketio,
+	 *  server: 'http://mySocketioServer/'
+	 * };
+	 *
+	 * function onSession(session) {
+	 *  console.log('session joined', session.token);
+	 * }
+	 * function onSessionFailed(error) {
+	 *  console.log('session joining failed:', error.message);
+	 * }
+	 *
+	 * // init and join the session
+	 * var multi = multiModule.init(multiOptions);
+	 * multi.joinSession('123').then(onSession, onSessionFailed).done();
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
-		// console.log('joining session', sessionToken);
-
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
@@ -3042,14 +3276,14 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 			});
 		});
 		socket.on('connect_failed', function () {
-			deferred.reject(new NoConnectionError());
+			deferred.reject(new errors.NoConnectionError());
 		});
 		socket.on('joinSessionFailed', function (data) {
 			var error;
 			if (data.reason === 'sessionNotFound') {
-				error = new NoSuchSessionError();
+				error = new errors.NoSuchSessionError();
 			} else if (data.reason === 'sessionFull') {
-				error = new SessionFullError();
+				error = new errors.SessionFullError();
 			}
 			deferred.reject(error);
 		});
@@ -3057,13 +3291,40 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	};
 
 	/**
-	 * @public
-	 * @param {SessionOptions} [options]  to tweak this new sessions behaviour
-	 * @return promise
+	 * Tries to create a new game session on the server. As this
+	 * operation is executed asynchrony a Q promise will be returned.
+	 * @param {SessionOptions} [options]  To tweak this new sessions behaviour.
+	 * If not provided, the session section of the multiOptions-object will
+	 * be used. If that does not exist either the default values will be used.
+	 *
+	 * @return {external:Promise} On success the promise will be resolved with the 
+	 * created {@link module:client/session~Session Session} instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError},
+	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
+	 *
+	 * @example
+	 * var multiOptions = {
+	 *  io: socketio,
+	 *  server: 'http://mySocketioServer/',
+	 *  session: {
+	 *    minPlayerNeeded: 3,
+	 *    maxPlayerAllowed: 5
+	 *  }
+	 * };
+	 *
+	 * function onSession(session) {
+	 *  console.log('session created', session.token);
+	 * }
+	 * function onSessionFailed(error) {
+	 *  console.log('session creation failed:', error.message);
+	 * }
+	 *
+	 * // init and try to create the session
+	 * var multi = multiModule.init(multiOptions);
+	 * multi.createSession().then(onSession, onSessionFailed).done();
 	 */
 	Multi.prototype.createSession = function (options) {
-		// console.log('creating new session');
-
 		options = options || this.sessionOptions;
 
 		var deferred = Q.defer();
@@ -3079,11 +3340,11 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		});
 		socket.on('createSessionFailed', function (event) {
 			if (event.reason === 'tokenAlreadyExists') {
-				deferred.reject(new TokenAlreadyExistsError());
+				deferred.reject(new errors.TokenAlreadyExistsError());
 			}
 		});
 		socket.on('connect_failed', function () {
-			deferred.reject(new NoConnectionError());
+			deferred.reject(new errors.NoConnectionError());
 		});
 		return deferred.promise;
 	};
@@ -3102,14 +3363,46 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 		}
 	};
 
-	exports.NoSuchSessionError = NoSuchSessionError;
-	exports.SessionFullError = SessionFullError;
-	exports.NoConnectionError = NoConnectionError;
-	exports.TokenAlreadyExistsError = TokenAlreadyExistsError;
 
-	exports.color = color;
+	/**
+	 * @type module:shared/errors.NoSuchSessionError
+	 */
+	exports.NoSuchSessionError = errors.NoSuchSessionError;
+
+	/**
+	 * @type module:shared/errors.TokenAlreadyExistsError
+	 */
+	exports.TokenAlreadyExistsError = errors.TokenAlreadyExistsError;
+
+	/**
+	 * @type module:shared/errors.SessionFullError
+	 */
+	exports.SessionFullError = errors.SessionFullError;
+
+	/**
+	 * @type module:shared/errors.NoConnectionError
+	 */
+	exports.NoConnectionError = errors.NoConnectionError;
+
+	/**
+	 * @type module:shared/errors.NoSessionTokenFoundError
+	 */
+	exports.NoSessionTokenFoundError = errors.NoSessionTokenFoundError;
+
+	/**
+	 * @type EventDispatcher
+	 */
 	exports.EventDispatcher = EventDispatcher;
+
+	/**
+	 * @type module:shared/util
+	 */
 	exports.util = util;
+
+	/**
+	 * @type module:shared/color
+	 */
+	exports.color = color;
 
 });
 define(["index"], function(index) { return index; });

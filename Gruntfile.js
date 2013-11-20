@@ -8,7 +8,8 @@ module.exports = function(grunt) {
 			multi : {
 				src: ['multi/client/**/*.js', 'multi/server/**/*.js', 'multi/shared/**/*.js', 'README.md'],
 				options: {
-					destination: './documentation/'
+					destination: './documentation/',
+					private: false
 				}
 			}
 		},
@@ -80,7 +81,7 @@ module.exports = function(grunt) {
 			// test client on test change
 			testsClient: {
 				files: ['tests/client/**/*.js'],
-				tasks: ['qunit']
+				tasks: []
 			}
 		}
 	});

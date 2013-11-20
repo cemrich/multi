@@ -32,7 +32,7 @@ define(function(require, exports, module) {
 	* @classdesc A game session that connects and manages multiple players.
 	* @inner
 	* @class
-	* @private
+	* @protected
 	* @mixes EventDispatcher
 	* @memberof module:client/session
 	*
@@ -64,7 +64,6 @@ define(function(require, exports, module) {
 		 * A socket.io socket connected to the server. This will
 		 * be used to send and receive messages for managing this
 		 * session.
-		 * @type {socket}
 		 * @private
 		 */
 		this.socket = socket;
@@ -133,8 +132,9 @@ define(function(require, exports, module) {
 		return Object.keys(this.players).length + 1;
 	};
 
-	/*
+	/**
 	 * Creates a player from the given data and adds it to this session.
+	 * @private
 	 */
 	Session.prototype.onPlayerConnected = function (playerData) {
 		var session = this;
@@ -151,8 +151,9 @@ define(function(require, exports, module) {
 		}
 	};
 
-	/*
+	/**
 	 * Removes the given player from this session.
+	 * @private
 	 */
 	Session.prototype.onPlayerDisconnected = function (player) {
 		delete this.players[player.id];
