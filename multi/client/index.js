@@ -2,6 +2,16 @@
 * Entry point for the client side multi library for developing
 * multiscreen games.
 * @module client/multi
+* @example
+* 
+var multiOptions = {
+  io: socketio,
+  server: 'http://mySocketioServer/'
+};
+
+// init and try to create the session
+var multi = multiModule.init(multiOptions);
+multi.createSession().then(onSession, onSessionFailed).done();
 */
 
 define(function(require, exports, module) {
@@ -53,6 +63,7 @@ define(function(require, exports, module) {
 
 	/**
 	* @inner
+	* @private
 	* @class
 	* @memberof module:client/multi
 	* @mixes EventDispatcher
@@ -65,12 +76,6 @@ define(function(require, exports, module) {
 		this.io = options.io;
 		this.server = options.server;
 		this.sessionOptions = options.session;
-
-		this.onSession = function (eventString, data, socket) {
-			var session = sessionModule.fromPackedData(data, socket);
-			var event = { session: session };
-			this.dispatchEvent(eventString, event);
-		};
 	};
 
 	util.inherits(Multi, EventDispatcher);
@@ -85,6 +90,20 @@ define(function(require, exports, module) {
 		}
 	}
 
+	/**
+	 * Tries to connect to a session that does already exist on the server. 
+	 * The session token will be extracted from the URL by using characters 
+	 * after the url hash.<br>
+	 * As this operation is executed asynchrony a Q promise will be returned.
+	 *
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the joined {@link module:client/session~Session Session} instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:client/multi.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:client/multi.SessionFullError SessionFullError}, 
+	 * {@link module:client/multi.NoSessionTokenFoundError NoSessionTokenFoundError}, 
+	 * or {@link module:client/multi.NoConnectionError NoConnectionError}.
+	 */
 	Multi.prototype.autoJoinSession = function () {
 		var sessionToken = getSessionToken();
 		if (sessionToken === null) {
@@ -124,12 +143,35 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @public
-	 * @return promise
+	 * Tries to connect to a session that does already exist on the server. 
+	 * As this operation is executed asynchrony a Q promise will be returned.
+	 * @param {string} sessionToken  unique token of the session you want
+	 * to join
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the joined {@link module:client/session~Session Session} instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:client/multi.NoSuchSessionError NoSuchSessionError}, 
+	 * {@link module:client/multi.SessionFullError SessionFullError},
+	 * or {@link module:client/multi.NoConnectionError NoConnectionError}.
+	 *
+	 * @example
+	 * var multiOptions = {
+	 *  io: socketio,
+	 *  server: 'http://mySocketioServer/'
+	 * };
+	 *
+	 * function onSession(session) {
+	 *  console.log('session joined', session.token);
+	 * }
+	 * function onSessionFailed(error) {
+	 *  console.log('session joining failed:', error.message);
+	 * }
+	 *
+	 * // init and join the session
+	 * var multi = multiModule.init(multiOptions);
+	 * multi.joinSession('123').then(onSession, onSessionFailed).done();
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
-		// console.log('joining session', sessionToken);
-
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
@@ -157,13 +199,40 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @public
-	 * @param {SessionOptions} [options]  to tweak this new sessions behaviour
-	 * @return promise
+	 * Tries to create a new game session on the server. As this
+	 * operation is executed asynchrony a Q promise will be returned.
+	 * @param {SessionOptions} [options]  To tweak this new sessions behaviour.
+	 * If not provided, the session section of the multiOptions-object will
+	 * be used. If that does not exist either the default values will be used.
+	 *
+	 * @return {external:Promise} On success the promise will be resolved with the 
+	 * created {@link module:client/session~Session Session} instance.<br><br>
+	 * On error it will be rejected with either 
+	 * {@link module:client/multi.TokenAlreadyExistsError TokenAlreadyExistsError},
+	 * or {@link module:client/multi.NoConnectionError NoConnectionError}.
+	 *
+	 * @example
+	 * var multiOptions = {
+	 *  io: socketio,
+	 *  server: 'http://mySocketioServer/',
+	 *  session: {
+	 *    minPlayerNeeded: 3,
+	 *    maxPlayerAllowed: 5
+	 *  }
+	 * };
+	 *
+	 * function onSession(session) {
+	 *  console.log('session created', session.token);
+	 * }
+	 * function onSessionFailed(error) {
+	 *  console.log('session creation failed:', error.message);
+	 * }
+	 *
+	 * // init and try to create the session
+	 * var multi = multiModule.init(multiOptions);
+	 * multi.createSession().then(onSession, onSessionFailed).done();
 	 */
 	Multi.prototype.createSession = function (options) {
-		// console.log('creating new session');
-
 		options = options || this.sessionOptions;
 
 		var deferred = Q.defer();
@@ -202,13 +271,75 @@ define(function(require, exports, module) {
 		}
 	};
 
+	/**
+	 * A promise object provided by the q promise library.
+	 * @external Promise
+	 * @see {@link https://github.com/kriskowal/q/wiki/API-Reference}
+	 */
+
+	/**
+	 * The built in error object.
+	 * @external Error
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error}
+	 */
+
+	/**
+	 * @classdesc The session you were looking for was not found
+	 * on the server. Most likely the token has been misspelled.
+	 * @class
+	 * @mixes external:Error
+	 */
 	exports.NoSuchSessionError = NoSuchSessionError;
+
+	/**
+	 * @classdesc There could be no valid session token extracted
+	 * from the url. You may want to check if the current url has
+	 * the format http://myGameUrl/some/game#myToken
+	 * @class
+	 * @mixes external:Error
+	 */
+	exports.NoSessionTokenFoundError = NoSessionTokenFoundError;
+
+	/**
+	 * @classdesc The session you wanted to join already has enough
+	 * players. This happens when there are as many or more players 
+	 * connected as defined in 
+	 * {@link module:client/session~Session#maxPlayerAllowed maxPlayerAllowed}.
+	 * @class
+	 * @mixes external:Error
+	 */
 	exports.SessionFullError = SessionFullError;
+	/**
+	 * @classdesc You are not able to create or join a session
+	 * because there is no connection to the server. Maybe the
+	 * socket.io settings are wrong or the internet connection
+	 * dropped.
+	 * @class
+	 * @mixes external:Error
+	 */
 	exports.NoConnectionError = NoConnectionError;
+	/**
+	 * @classdesc The session you wanted to create already exists.
+	 * This can happen when you have configured a static session 
+	 * token inside the {@link SessionOptions} and are trying to 
+	 * create this session more than once. Closing any open tabs
+	 * connected to this session may solve your problem.
+	 * @class
+	 * @mixes external:Error
+	 */
 	exports.TokenAlreadyExistsError = TokenAlreadyExistsError;
 
+	/**
+	 * @see module:shared/color
+	 */
 	exports.color = color;
+	/**
+	 * @see EventDispatcher
+	 */
 	exports.EventDispatcher = EventDispatcher;
+	/**
+	 * @see module:client/util
+	 */
 	exports.util = util;
 
 });

@@ -48,7 +48,16 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.token = null;
+		/**
+		 * @see SessionOptions
+		 * @readonly
+		 */
 		this.minPlayerNeeded = null;
+		/**
+		 * @see SessionOptions
+		 * @readonly
+		 */
+		this.maxPlayerAllowed = null;
 
 		var packedPlayers = sessionData.players;
 		delete sessionData.players;
