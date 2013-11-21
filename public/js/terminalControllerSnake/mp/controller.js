@@ -1,3 +1,4 @@
+/*jshint maxparams: 6 */
 /*
 Dumb game controller for the snake.
 */
