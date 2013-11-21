@@ -67,7 +67,6 @@ define(function(require, exports, module) {
 		 * @type {integer}
 		 * @readonly
 		 */
-		// TODO: last connected player has no number 
 		this.number = null;
 
 		// listeners

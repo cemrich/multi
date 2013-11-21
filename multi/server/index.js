@@ -57,6 +57,7 @@ var Multi = function (app, server) {
 					});
 				} else {
 					player.role = 'player';
+					player.number = session.getNextFreePlayerNumber();
 					socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
 					session.addPlayer(player);
 				}
@@ -73,6 +74,7 @@ var Multi = function (app, server) {
 			} else {
 				multi.dispatchEvent('sessionCreated', { session: session });
 				player.role = 'presenter';
+				player.number = session.getNextFreePlayerNumber();
 				socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });
 				session.addPlayer(player);
 			}

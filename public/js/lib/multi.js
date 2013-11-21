@@ -647,7 +647,6 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		 * @type {integer}
 		 * @readonly
 		 */
-		// TODO: last connected player has no number 
 		this.number = null;
 
 		// listeners

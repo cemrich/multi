@@ -180,20 +180,28 @@ Session.prototype.isFull = function () {
 };
 
 /**
+ * @return The next unused player number. Gaps from disconnected
+ * players will be filled first.
+ * @private
+ */
+Session.prototype.getNextFreePlayerNumber = function () {
+	var number;
+	if (this.freeNumbers.length === 0) {
+		number = this.getPlayerCount();
+	} else {
+		number = this.freeNumbers.sort()[0];
+		this.freeNumbers.splice(0,1);
+	}
+	return number;
+};
+
+/**
  * Adds the given player to this session.
  * @param player {module:server/player~Player} player instance to add
  * @fires module:server/session~Session#playerJoined
  */
 Session.prototype.addPlayer = function (player) {
 	var session = this;
-
-	// assign player number
-	if (this.freeNumbers.length === 0) {
-		player.number = this.getPlayerCount();
-	} else {
-		player.number = this.freeNumbers.sort()[0];
-		this.freeNumbers.splice(0,1);
-	}
 
 	// inform clients expect added player about this player
 	this.sendToPlayers('playerJoined', player.pack());
