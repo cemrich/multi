@@ -169,6 +169,7 @@ define(function(require, exports, module) {
 	 * currently connected to this session excluding myself.
 	 */
 	// TODO: this feels wrong as no specific order is guaranteed maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
+	// TODO: sort by player number
 	Session.prototype.getPlayerArray = function () {
 		var playerArray = [];
 		for(var i in this.players) {
