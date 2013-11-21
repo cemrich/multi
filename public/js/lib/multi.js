@@ -647,6 +647,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		 * @type {integer}
 		 * @readonly
 		 */
+		// TODO: last connected player has no number 
 		this.number = null;
 
 		// listeners
@@ -654,6 +655,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 		this.onPlayerAttributesChanged = this.onPlayerAttributesChanged.bind(this);
 		this.onPlayerLeft = this.onPlayerLeft.bind(this);
 		this.onAttributesChange = this.onAttributesChange.bind(this);
+
 		this.socket.on('playerMessage', this.onPlayerMessage);
 		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
 		this.socket.on('playerLeft', this.onPlayerLeft);
@@ -760,6 +762,15 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 	 * @event module:client/player~Player#disconnected
 	 */
 
+
+	/**
+	 * Compare function to sort an array of players by 
+	 * {@link module:client/player~Player#number player numbers}.
+	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+	 */
+	exports.compare = function (p1, p2) {
+		return p2.number - p1.number;
+	};
 
 	/**
 	* Unpacks a player object send over a socket connection.
@@ -949,16 +960,38 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	};
 
 	/**
-	 * @returns {Array.<module:client/player~Player>} an array of all players
-	 * currently connected to this session excluding myself.
+	 * @returns {Array.<module:client/player~Player>} an array of all 
+	 * players currently connected to this session including myself.
+	 * The array is sorted by 
+	 * {@link module:client/player~Player#number player numbers} 
+	 * from small to high.
 	 */
-	// TODO: this feels wrong as no specific order is guaranteed maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
 	Session.prototype.getPlayerArray = function () {
 		var playerArray = [];
 		for(var i in this.players) {
 			playerArray.push(this.players[i]);
 		}
-		return playerArray;
+		playerArray.push(this.myself);
+		return playerArray.sort(playerModule.compare);
+	};
+
+	/**
+	 * @returns {module:client/player~Player} the player with the
+	 * given {@link module:client/player~Player#number player numbers} 
+	 * (even if this is myself) or null if no player with this number 
+	 * exists
+	 */
+	Session.prototype.getPlayerByNumber = function (number) {
+		for (var i in this.players) {
+			var player = this.players[i];
+			if (player.number === number) {
+				return player;
+			}
+		}
+		if (this.myself.number === number) {
+			return this.myself.number;
+		}
+		return null;
 	};
 
 	/**

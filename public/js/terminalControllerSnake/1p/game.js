@@ -14,7 +14,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 
 		multi.EventDispatcher.call(this);
 
-		var controller = session.getPlayerArray()[0];
+		var controller = session.getPlayerByNumber(1);
 		this.snake = new Snake(jaws, grid, controller);
 		this.points = new Points(jaws, grid);
 		this.session = session;

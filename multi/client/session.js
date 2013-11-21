@@ -165,17 +165,38 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @returns {Array.<module:client/player~Player>} an array of all players
-	 * currently connected to this session excluding myself.
+	 * @returns {Array.<module:client/player~Player>} an array of all 
+	 * players currently connected to this session including myself.
+	 * The array is sorted by 
+	 * {@link module:client/player~Player#number player numbers} 
+	 * from small to high.
 	 */
-	// TODO: this feels wrong as no specific order is guaranteed maps would be great (http://www.nczonline.net/blog/2012/10/09/ecmascript-6-collections-part-2-maps/)
-	// TODO: sort by player number
 	Session.prototype.getPlayerArray = function () {
 		var playerArray = [];
 		for(var i in this.players) {
 			playerArray.push(this.players[i]);
 		}
-		return playerArray;
+		playerArray.push(this.myself);
+		return playerArray.sort(playerModule.compare);
+	};
+
+	/**
+	 * @returns {module:client/player~Player} the player with the
+	 * given {@link module:client/player~Player#number player numbers} 
+	 * (even if this is myself) or null if no player with this number 
+	 * exists
+	 */
+	Session.prototype.getPlayerByNumber = function (number) {
+		for (var i in this.players) {
+			var player = this.players[i];
+			if (player.number === number) {
+				return player;
+			}
+		}
+		if (this.myself.number === number) {
+			return this.myself.number;
+		}
+		return null;
 	};
 
 	/**

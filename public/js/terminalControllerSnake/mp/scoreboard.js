@@ -53,10 +53,7 @@ define(['../../lib/jquery-2.0.0.min'], function () {
 
 	function start(session) {
 		board.empty();
-		for (var i in session.players) {
-			addToScoreboard(session.players[i]);
-		}
-		addToScoreboard(session.myself);
+		session.getPlayerArray().forEach(addToScoreboard);
 		sort();
 	}
 
