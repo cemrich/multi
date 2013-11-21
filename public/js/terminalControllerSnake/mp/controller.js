@@ -73,6 +73,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 
 		function onDead() {
 			// I am dead - quit or wait
+			sound.onGameOver();
 			joystick.stop();
 			scoreboard.start(session);
 			layout.showSection('#finished');
