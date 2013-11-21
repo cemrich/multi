@@ -74,6 +74,7 @@ define(function () {
 		// PUBLIC
 
 		this.start = function () {
+			direction = null;
 			eventEmitter.on('touchstart mousedown', onDown);
 		};
 
