@@ -2,7 +2,6 @@
 Screen of the snake game that shows all the action.
 This snake game allows one presenter and two to four controller.
 */
-// TODO: what about controller joining the session while the game is already running?
 
 define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../layout'], function (multiModule, socketio, Game, sound, layout) {
 
@@ -34,7 +33,6 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 		showJoinUrl();
 
 		// waiting for our players
-		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 		session.on('playerJoined', onPlayerJoined);
 		session.on('start', startGame);
@@ -56,17 +54,12 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 			game.start();
 		}
 
-		function onAgain() {
-			// player wants to play again
-			startGame();
-		}
-
 		function onGameFinished() {
 			// assuming the game is finished here
+			// -> go back to waiting mode
 			sound.onGameOver();
-			layout.showSection('#finished');
 			session.message('finished');
-			session.once('again', onAgain);
+			layout.showSection('#waiting');
 		}
 
 		function onPlayerJoined(event) {
@@ -80,11 +73,6 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 				p.remove();
 			});
 			event.player.attributes.color = color;
-		}
-
-		function onAboveMinPlayerNeeded() {
-			// we have all players we need and can start the game now
-			// startGame();
 		}
 
 		function onBelowMinPlayerNeeded() {
