@@ -22,7 +22,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		var joystick = new Joystick(30, onDirectionChange, $('#marker'));
 		layout.showSection('#waiting');
 		$('#waiting .start').click(onStartClick);
-		$('#waiting .exit').click(onExitClick);
+		$('button.exit').click(onExitClick);
 
 		session.myself.on('attributesChanged', onAttributesChanged);
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
