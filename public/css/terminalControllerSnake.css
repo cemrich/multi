@@ -46,6 +46,16 @@ canvas {
 .section {
   display: none;
 }
+.scoreboard {
+  list-style-position: inside;
+  color: white;
+  font-size: 150%;
+  padding: 0;
+  text-transform: uppercase;
+}
+.scoreboard li {
+  padding: 10px;
+}
 #preloader .dot {
   position: relative;
   font-size: 80%;

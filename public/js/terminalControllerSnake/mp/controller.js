@@ -2,7 +2,7 @@
 Dumb game controller for the snake.
 */
 
-define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound', '../layout'], function (multiModule, socketio, Joystick, sound, layout) {
+define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound', '../layout', './scoreboard'], function (multiModule, socketio, Joystick, sound, layout, scoreboard) {
 
 	var SESSION_TOKEN = 'snake-multiplayer';
 	var multiOptions = {
@@ -47,7 +47,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		function startGame() {
 			layout.showSection('#controller');
 			session.once('finished', onFinished);
-			session.myself.on('dead', onDead);
+			session.myself.once('dead', onDead);
 			joystick.start();
 		}
 
@@ -60,6 +60,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 
 		function onFinished() {
 			// game is finished for all - go into waiting mode again
+			scoreboard.stop();
 			layout.showSection('#waiting');
 		}
 
@@ -72,6 +73,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		function onDead() {
 			// I am dead - quit or wait
 			joystick.stop();
+			scoreboard.start(session);
 			layout.showSection('#finished');
 		}
 
@@ -83,6 +85,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		function onBelowMinPlayerNeeded() {
 			// not enough player - go into waiting mode
 			joystick.stop();
+			scoreboard.stop();
 			layout.showSection('#waiting');
 			$('#waiting .start').hide();
 		}
@@ -103,6 +106,8 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 		function onSessionDestroyed() {
 			// something went wrong - my session does not longer exist
 			sound.onDisconnect();
+			scoreboard.stop();
+			joystick.stop();
 			layout.showError('Ooops. The connection dropped. Try to reload.');
 		}
 	}
