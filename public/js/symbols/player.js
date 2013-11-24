@@ -1,5 +1,6 @@
 define(function(require, exports, module) {
 
+	var multiModule = require('../lib/multi');
 	var multi = null;
 	var sound = null;
 	var session = null;
@@ -58,15 +59,14 @@ define(function(require, exports, module) {
 		$('#created').show();
 		$('#loading').hide();
 
-		session.myself.on('attributesChanged', function () {
-			$('body').css('background-color', session.myself.attributes.color);
-		});
-
 		session.on('destroyed', function () {
+			// TODO: throw this when presenter disconnects
+			// add a reason to the destroyed event
 			alert('Opps - you have no connection. Try a reload when your connection returns.');
 		});
 		session.on('start', onStart);
 
+		changeColor();
 		$('html').click(changeColor);
 	}
 
@@ -76,8 +76,10 @@ define(function(require, exports, module) {
 	}
 
 	function changeColor() {
-		var color = multi.color.random();
+		// TODO: remove color from multi module
+		var color = multiModule.color.random();
 		session.myself.attributes.color = color;
+		$('body').css('background-color', color);
 	}
 
 	function go(multiInstance, soundModule) {

@@ -1,7 +1,6 @@
 define(function(require, exports, module) {
 
 	var gameModule = require('./game');
-	var multi = null;
 	var sound = null;
 
 	function onPlayerConnected(event) {
@@ -46,10 +45,8 @@ define(function(require, exports, module) {
 		$('#new .symbols').css('pointer-events', 'none');
 	}
 
-	function go(multiInstance, soundModule) {
-		multi = multiInstance;
+	function go(multi, soundModule) {
 		sound = soundModule;
-		multi.on('sessionCreated', onSessionCreated);
 		$('#new .ready').click(onReadyClick);
 		$('#intro').hide();
 		$('#loading').show();
