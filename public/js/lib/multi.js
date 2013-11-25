@@ -1151,7 +1151,6 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	/**
 	 * @classdesc Generic framewok error.
 	 * @class
-	 * @memberof module:errors
 	 * @mixes external:Error
 	 */
 	var MultiError = exports.MultiError = function () {

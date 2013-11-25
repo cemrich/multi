@@ -136,6 +136,23 @@ Session.prototype.onPlayerAttributesClientChanged = function (data) {
 };
 
 /**
+* Sends the given message to all client instances of this session.
+* @param {string} type    type of message that should be send
+* @param {object} [data]  message data that should be send
+* @example
+* // on client no 1
+* session.on('ping', function (event) {
+*   // outputs 'bar'
+*   console.log(event.data.foo);
+* });
+* // on server, instance of same session
+* session.message('ping', { foo: 'bar' });
+*/
+Session.prototype.message = function (type, data) {
+	this.sendToPlayers('sessionMessage', { type: type, data: data });
+};
+
+/**
  * Relays a given event to all players currently connected
  * to this session. 
  * @param {string} eventName       name of the event

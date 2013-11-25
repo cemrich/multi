@@ -9,7 +9,9 @@ exports.Game = function (session) {
 	}
 
 	function onStartGame() {
-		console.log('--- onStartGame');
+		setTimeout(function () {
+			session.message('finished');
+		}, 500);
 	}
 
 	session.on('playerJoined', onPlayerJoined);

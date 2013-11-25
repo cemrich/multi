@@ -36,6 +36,10 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		showSection('game');
 	}
 
+	function onGameFinished() {
+		showSection('joined');
+	}
+
 	function onSession(session) {
 		showSection('joined');
 		$('#status').text('connected');
@@ -50,6 +54,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 			session.message('startGame');
 		});
 		session.on('startGame', onStartGame);
+		session.on('finished', onGameFinished);
 	}
 
 	function onSessionDestroyed() {
