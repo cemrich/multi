@@ -32,6 +32,10 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		$('#error').text(message);
 	}
 
+	function onStartGame() {
+		showSection('game');
+	}
+
 	function onSession(session) {
 		showSection('joined');
 		$('#status').text('connected');
@@ -42,6 +46,10 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		session.on('playerJoined', function (event) {
 			addPlayer(event.player);
 		});
+		$('button.start').click(function () {
+			session.message('startGame');
+		});
+		session.on('startGame', onStartGame);
 	}
 
 	function onSessionDestroyed() {

@@ -8,6 +8,11 @@ exports.Game = function (session) {
 		event.player.attributes.color = multiModule.color.random();
 	}
 
+	function onStartGame() {
+		console.log('--- onStartGame');
+	}
+
 	session.on('playerJoined', onPlayerJoined);
+	session.on('startGame', onStartGame);
 
 };
