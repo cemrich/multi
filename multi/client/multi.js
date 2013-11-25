@@ -271,6 +271,11 @@ define(function(require, exports, module) {
 
 
 	/**
+	 * @type module:shared/errors.MultiError
+	 */
+	exports.MultiError = errors.MultiError;
+
+	/**
 	 * @type module:shared/errors.NoSuchSessionError
 	 */
 	exports.NoSuchSessionError = errors.NoSuchSessionError;
