@@ -159,9 +159,10 @@ requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiM
 				args: ['myStaticSessionToken']
 			}
 		};
-		multi.createSession(sessionParams).then(function () {
+		multi.createSession(sessionParams).then(function (session) {
 			multi.createSession(sessionParams).fail(function (error) {
 				ok(error instanceof multiModule.TokenAlreadyExistsError, 'throwing an TokenAlreadyExistsError');
+				session.disconnectMyself();
 				start();
 			}).done();
 		}).done();

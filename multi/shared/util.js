@@ -33,4 +33,36 @@ define(function(require, exports, module) {
 		});
 	};
 
+	/* Function.bind-polyfill from 
+	* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility
+	* This is needed to support older browsers without proper
+	* ECMAScript 5.1 support. Especially PhantomJS that's running
+	* the tests of this project will throw errors without this
+	* polyfill.
+	* See https://groups.google.com/forum/#!msg/phantomjs/r0hPOmnCUpc/uxusqsl2LNoJ
+	*/
+	if (!Function.prototype.bind) {
+		Function.prototype.bind = function (oThis) {
+			if (typeof this !== "function") {
+				// closest thing possible to the ECMAScript 5 internal IsCallable function
+				throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+			}
+
+			var aArgs = Array.prototype.slice.call(arguments, 1), 
+					fToBind = this, 
+					fNOP = function () {},
+					fBound = function () {
+						return fToBind.apply(this instanceof fNOP && oThis
+																	 ? this
+																	 : oThis,
+																 aArgs.concat(Array.prototype.slice.call(arguments)));
+					};
+
+			fNOP.prototype = this.prototype;
+			fBound.prototype = new fNOP();
+
+			return fBound;
+		};
+	}
+
 });
