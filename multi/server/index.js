@@ -33,9 +33,6 @@ var Multi = function (server) {
 	// when a new player connection is coming in...
 	io.on('connection', function (socket) {
 
-		// create new player and wait
-		var player = playerModule.create(socket);
-
 		// use existing session
 		socket.on('joinSession', function(event) {
 			var session = sessionModule.getSession(event.token);
@@ -56,6 +53,7 @@ var Multi = function (server) {
 						reason: 'joiningDisabled'
 					});
 				} else {
+					var player = playerModule.create(socket, event.playerParams);
 					player.role = 'player';
 					player.number = session.getNextFreePlayerNumber();
 					socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
@@ -73,6 +71,7 @@ var Multi = function (server) {
 				});
 			} else {
 				multi.dispatchEvent('sessionCreated', { session: session });
+				var player = playerModule.create(socket, event.playerParams);
 				player.role = 'presenter';
 				player.number = session.getNextFreePlayerNumber();
 				socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });

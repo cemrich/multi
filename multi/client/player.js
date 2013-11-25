@@ -68,6 +68,18 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.number = null;
+		/**
+		 * pixel width of this clients screen
+		 * @type {integer}
+		 * @readonly
+		 */
+		this.width = null;
+		/**
+		 * pixel height of this clients screen
+		 * @type {integer}
+		 * @readonly
+		 */
+		this.height = null;
 
 		// listeners
 		this.onPlayerMessage = this.onPlayerMessage.bind(this);

@@ -168,12 +168,16 @@ define(function(require, exports, module) {
 	 * multi.joinSession('123').then(onSession, onSessionFailed).done();
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
+		var multi = this;
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {
-			socket.emit('joinSession', { token: sessionToken });
+			socket.emit('joinSession', {
+				token: sessionToken,
+				playerParams: multi.getPlayerParams()
+			});
 			socket.on('sessionJoined', function (data) {
 				var session = sessionModule.fromPackedData(data, socket);
 				deferred.resolve(session);
@@ -233,12 +237,16 @@ define(function(require, exports, module) {
 	Multi.prototype.createSession = function (options) {
 		options = options || this.sessionOptions;
 
+		var multi = this;
 		var deferred = Q.defer();
 		var socket = this.io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {
-			socket.emit('createSession', { options: options });
+			socket.emit('createSession', {
+				options: options,
+				playerParams: multi.getPlayerParams()
+			});
 			socket.on('sessionCreated', function (data) {
 				var session = sessionModule.fromPackedData(data, socket);
 				deferred.resolve(session);
@@ -254,6 +262,19 @@ define(function(require, exports, module) {
 		});
 		return deferred.promise;
 	};
+
+	/**
+	 * @returns {module:server/player~PlayerParams} an object containing
+	 * device information for this client
+	 * @private
+	 */
+	Multi.prototype.getPlayerParams = function () {
+		return {
+			width: window.innerWidth,
+			height: window.innerHeight
+		};
+	};
+
 
 	/**
 	 * @public

@@ -16,6 +16,8 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	function addPlayer(player) {
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
+		playerView.css('height', player.height/10);
+		playerView.css('max-width', player.width/10);
 
 		var setColor = function () {
 			playerView.css('background-color', player.attributes.color);
@@ -72,5 +74,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	var multi = multiModule.init(multiOptions);
 	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
+	$('#game canvas').css('width', window.innerWidth);
+	$('#game canvas').css('height', window.innerHeight);
 
 });

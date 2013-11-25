@@ -9,6 +9,15 @@ var util = require('util');
 var WatchJS = require('../debs/watch');
 var EventDispatcher = require('../shared/eventDispatcher');
 
+
+/**
+ * @typedef {Object} PlayerParams
+ * @property {integer} width   pixel width of this clients screen
+ * @property {integer} height  pixel height of this clients screen
+ * @private
+ */
+ 
+ 
 /**
  * @classdesc This player class represents a device connected
  * to a session. Every player will be mirrored to all connected
@@ -20,8 +29,9 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * @class
  * @protected
  * @param {socket.io-socket} socket  communication socket for the new player
+ * @param {module:server/player~PlayerParams} playerParams
  */
-var Player = function (socket) {
+var Player = function (socket, playerParams) {
 
 	/** 
 	 * communication socket for this player
@@ -64,6 +74,18 @@ var Player = function (socket) {
 	 * @readonly
 	 */
 	this.number = null;
+	/**
+	 * pixel width of this clients screen
+	 * @type {integer}
+	 * @readonly
+	 */
+	this.width = playerParams.width || 0;
+	/**
+	 * pixel height of this clients screen
+	 * @type {integer}
+	 * @readonly
+	 */
+	this.height = playerParams.height || 0;
 
 	EventDispatcher.call(this);
 
@@ -137,7 +159,9 @@ Player.prototype.pack = function () {
 		id: this.id,
 		role: this.role,
 		number: this.number,
-		attributes: this.attributes
+		attributes: this.attributes,
+		width: this.width,
+		height: this.height
 	};
 };
 
@@ -159,8 +183,9 @@ Player.prototype.pack = function () {
 /**
  * Creates a new player.
  * @param {socket.io-socket} socket        communication socket for the new player
+ * @param {module:server/player~PlayerParams} playerParams
  * @returns {module:server/player~Player}  newly created player
  */
-exports.create = function(socket) {
-	return new Player(socket);
+exports.create = function(socket, playerParams) {
+	return new Player(socket, playerParams);
 };
