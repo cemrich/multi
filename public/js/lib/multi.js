@@ -3185,7 +3185,7 @@ var multi = multiModule.init(multiOptions);
 multi.createSession().then(onSession, onSessionFailed).done();
 */
 
-define('index',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../debs/q'],function(require, exports, module) {
+define('multi',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../debs/q'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
@@ -3487,5 +3487,5 @@ define('index',['require','exports','module','../shared/eventDispatcher','sessio
 	exports.color = color;
 
 });
-define(["index"], function(index) { return index; });
+define(["multi"], function(index) { return index; });
 //# sourceMappingURL=multi.js.map
