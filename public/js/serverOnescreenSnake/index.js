@@ -16,13 +16,17 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	function addPlayer(player) {
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
-		playerView.css('background-color', player.attributes.color);
+
+		var setColor = function () {
+			playerView.css('background-color', player.attributes.color);
+		};
+
+		setColor();
 		$('.players').append(playerView);
+
+		player.on('attributesChanged', setColor);
 		player.on('disconnected', function () {
 			playerView.remove();
-		});
-		player.on('attributesChanged', function () {
-			playerView.css('background-color', player.attributes.color);
 		});
 	}
 
