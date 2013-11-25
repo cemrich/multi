@@ -31,7 +31,6 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 		$('#status').text('connected');
 		$('#join-url').text(session.joinSessionUrl);
 		$('#join-url').attr('href', 'http://' + session.joinSessionUrl);
-		// TODO: players are sorted the wrong way
 		session.getPlayerArray().forEach(addPlayer);
 		session.on('destroyed', onSessionDestroyed);
 		session.on('playerJoined', function (event) {

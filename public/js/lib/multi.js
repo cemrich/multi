@@ -768,7 +768,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../de
 	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
 	 */
 	exports.compare = function (p1, p2) {
-		return p2.number - p1.number;
+		return p1.number - p2.number;
 	};
 
 	/**
