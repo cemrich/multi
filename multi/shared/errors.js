@@ -31,7 +31,6 @@ define(function(require, exports, module) {
 		var err = Error.apply(this, arguments);
 		this.stack = err.stack;
 		this.message = err.message;
-		return this;
 	};
 	util.inherits(MultiError, Error);
 
@@ -43,7 +42,6 @@ define(function(require, exports, module) {
 	 */
 	exports.NoSuchSessionError = function () {
 		MultiError.call(this, 'the requested session does not exist');
-		return this
 	};
 	util.inherits(exports.NoSuchSessionError, MultiError);
 
