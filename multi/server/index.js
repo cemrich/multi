@@ -23,7 +23,7 @@ var instance = null;
 * @mixes EventDispatcher
 * @fires module:server/multi~Multi#sessionCreated
 */
-var Multi = function (app, server) {
+var Multi = function (server) {
 
 	EventDispatcher.call(this);
 
@@ -101,9 +101,9 @@ util.inherits(Multi, EventDispatcher);
  * @public
  * @returns {module:server/multi~Multi} the one and only Multi instance
  */
-exports.init = function (app, server) {
+exports.init = function (server) {
 	if (instance === null) {
-		instance = new Multi(app, server);
+		instance = new Multi(server);
 		return instance;
 	} else {
 		throw 'only one call to init allowed';

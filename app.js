@@ -52,5 +52,5 @@ function onSessionCreated(event) {
 	event.session.on('playerAdded', onPlayerAdded);
 }
 
-var multi = multiModule.init(app, server);
+var multi = multiModule.init(server);
 multi.on('sessionCreated', onSessionCreated);
