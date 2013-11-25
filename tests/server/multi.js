@@ -1,6 +1,12 @@
-/* global multi, test, ok */
+/* global multiModule, test, ok */
+
+var app = require('express')();
+var server = require('http').createServer(app);
+var multi = multiModule.init(server);
+
 
 test('test if main module functions are defined', function (assert) {
-	ok(multi, 'multi module is defined');
-	ok(multi.init, 'multi init function is defined');
+	ok(multiModule, 'multi module is defined');
+	ok(multiModule.init, 'multi init function is defined');
+	ok(multi, 'multi instance can be created');
 });

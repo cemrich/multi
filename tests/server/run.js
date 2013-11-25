@@ -22,7 +22,7 @@ var log = {
 };
 
 testrunner.run({
-	deps: {path: 'multi/server', namespace: 'multi'},
+	deps: {path: 'multi/server', namespace: 'multiModule'},
 	code: 'multi/server/index.js',
 	tests: 'tests/server/multi.js',
 	log: log
