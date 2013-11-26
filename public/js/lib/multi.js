@@ -127,7 +127,7 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
         module.exports = factory();
     } else if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define('../debs/watch',factory);
+        define('../lib/watch',factory);
     } else {
         // Browser globals
         window.WatchJS = factory();
@@ -587,20 +587,20 @@ define('../shared/util',['require','exports','module'],function(require, exports
 	*/
 	if (!Function.prototype.bind) {
 		Function.prototype.bind = function (oThis) {
-			if (typeof this !== "function") {
+			if (typeof this !== 'function') {
 				// closest thing possible to the ECMAScript 5 internal IsCallable function
-				throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+				throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
 			}
 
-			var aArgs = Array.prototype.slice.call(arguments, 1), 
-					fToBind = this, 
-					fNOP = function () {},
-					fBound = function () {
-						return fToBind.apply(this instanceof fNOP && oThis
-																	 ? this
-																	 : oThis,
-																 aArgs.concat(Array.prototype.slice.call(arguments)));
-					};
+			var aArgs = Array.prototype.slice.call(arguments, 1);
+			var fToBind = this;
+			var fNOP = function () {};
+			var fBound = function () {
+				var isValid = this instanceof fNOP && oThis;
+				return fToBind.apply(isValid ? this : oThis,
+					aArgs.concat(Array.prototype.slice.call(arguments))
+				);
+			};
 
 			fNOP.prototype = this.prototype;
 			fBound.prototype = new fNOP();
@@ -615,10 +615,10 @@ define('../shared/util',['require','exports','module'],function(require, exports
  * @private
  */
  
-define('player',['require','exports','module','../shared/eventDispatcher','../debs/watch','../shared/util'],function(require, exports, module) {
+define('player',['require','exports','module','../shared/eventDispatcher','../lib/watch','../shared/util'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
-	var WatchJS = require('../debs/watch');
+	var WatchJS = require('../lib/watch');
 	var util = require('../shared/util');
 
 	/**
@@ -1336,7 +1336,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 
     // RequireJS
     } else if (typeof define === "function" && define.amd) {
-        define('../debs/q',definition);
+        define('../lib/q',definition);
 
     // SES (Secure EcmaScript)
     } else if (typeof ses !== "undefined") {
@@ -3241,14 +3241,14 @@ var multi = multiModule.init(multiOptions);
 multi.createSession().then(onSession, onSessionFailed).done();
 */
 
-define('multi',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../debs/q'],function(require, exports, module) {
+define('multi',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../lib/q'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
 	var util = require('../shared/util');
-	var Q = require('../debs/q');
+	var Q = require('../lib/q');
 	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;

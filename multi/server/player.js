@@ -6,7 +6,7 @@
  */
 
 var util = require('util');
-var WatchJS = require('../debs/watch');
+var WatchJS = require('../lib/watch');
 var EventDispatcher = require('../shared/eventDispatcher');
 
 

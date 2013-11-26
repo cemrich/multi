@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 			files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js', 'public/js/**/*.js', '.jshintrc'],
 			options: {
 				// ignore third party libs
-				ignores: ['node_modules', 'documentation', 'multi/debs/*', 'tests/client/lib/*.js', 'public/js/lib/*'],
+				ignores: ['node_modules', 'documentation', 'multi/lib/*', 'tests/client/lib/*.js', 'public/js/lib/*'],
 				// loading jshintrc config file
 				jshintrc: '.jshintrc',
 			}

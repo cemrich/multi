@@ -21,7 +21,7 @@ define(function(require, exports, module) {
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
 	var util = require('../shared/util');
-	var Q = require('../debs/q');
+	var Q = require('../lib/q');
 	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;

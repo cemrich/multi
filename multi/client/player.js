@@ -6,7 +6,7 @@
 define(function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
-	var WatchJS = require('../debs/watch');
+	var WatchJS = require('../lib/watch');
 	var util = require('../shared/util');
 
 	/**
