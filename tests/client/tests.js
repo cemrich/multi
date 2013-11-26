@@ -1,14 +1,16 @@
 /* global test, ok, raises, asyncTest, expect, start, QUnit, equal, deepEqual */
 
 requirejs.config({
-	baseUrl: '../../public/js/lib/'
+	baseUrl: '../../public/js/lib/',
+	paths: {
+		'socket.io': 'http://localhost/socket.io/socket.io.js'
+	}
 });
 
 
-requirejs(['multi', 'http://localhost/socket.io/socket.io.js'], function (multiModule, socketio) {
+requirejs(['multi'], function (multiModule) {
 
 	var multiOptions = {
-		io: socketio,
 		server: 'http://localhost/'
 	};
 	var multi = multiModule.init(multiOptions);

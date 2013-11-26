@@ -594,16 +594,16 @@ define('../shared/util',['require','exports','module'],function(require, exports
 
 			var aArgs = Array.prototype.slice.call(arguments, 1);
 			var fToBind = this;
-			var fNOP = function () {};
+			var FNOP = function () {};
 			var fBound = function () {
-				var isValid = this instanceof fNOP && oThis;
+				var isValid = this instanceof FNOP && oThis;
 				return fToBind.apply(isValid ? this : oThis,
 					aArgs.concat(Array.prototype.slice.call(arguments))
 				);
 			};
 
-			fNOP.prototype = this.prototype;
-			fBound.prototype = new fNOP();
+			FNOP.prototype = this.prototype;
+			fBound.prototype = new FNOP();
 
 			return fBound;
 		};
@@ -3230,9 +3230,14 @@ return Q;
 * multiscreen games.
 * @module client/multi
 * @example
-* 
+* // configure where multi can find your client side socket.io lib
+requirejs.config({
+	paths: {
+		'socket.io': '/socket.io/socket.io.js'
+	}
+});
+
 var multiOptions = {
-  io: socketio,
   server: 'http://mySocketioServer/'
 };
 
@@ -3241,7 +3246,9 @@ var multi = multiModule.init(multiOptions);
 multi.createSession().then(onSession, onSessionFailed).done();
 */
 
-define('multi',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../lib/q'],function(require, exports, module) {
+
+
+define('multi',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../lib/q','socket.io'],function(require, exports, module) {
 
 	var EventDispatcher = require('../shared/eventDispatcher');
 	var sessionModule = require('session');
@@ -3249,6 +3256,8 @@ define('multi',['require','exports','module','../shared/eventDispatcher','sessio
 	var errors = require('../shared/errors');
 	var util = require('../shared/util');
 	var Q = require('../lib/q');
+	var io = require('socket.io');
+
 	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;
@@ -3256,7 +3265,6 @@ define('multi',['require','exports','module','../shared/eventDispatcher','sessio
 
 	/**
 	* @typedef {Object} module:client/multi~MultiOptions
-	* @property {socketio}        io        ready to use socket.io module
 	* @property                   server    full url of a running socket.io server
 	* @property {SessionOptions}  [session] default options for session creation
 	*/
@@ -3280,7 +3288,6 @@ define('multi',['require','exports','module','../shared/eventDispatcher','sessio
 	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  
 	*/
 	var Multi = function (options) {
-		this.io = options.io;
 		this.server = options.server;
 		this.sessionOptions = options.session;
 	};
@@ -3397,7 +3404,7 @@ define('multi',['require','exports','module','../shared/eventDispatcher','sessio
 	Multi.prototype.joinSession = function (sessionToken) {
 		var multi = this;
 		var deferred = Q.defer();
-		var socket = this.io.connect(this.server, {
+		var socket = io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {
@@ -3466,7 +3473,7 @@ define('multi',['require','exports','module','../shared/eventDispatcher','sessio
 
 		var multi = this;
 		var deferred = Q.defer();
-		var socket = this.io.connect(this.server, {
+		var socket = io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {

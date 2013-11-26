@@ -1,3 +1,9 @@
+requirejs.config({
+	paths: {
+		'socket.io': '/socket.io/socket.io.js'
+	}
+});
+
 /*
 Screen of the snake game that shows all the action.
 This snake game allows one presenter and two to four controller.
@@ -8,7 +14,6 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 	var SESSION_TOKEN = 'snake-multiplayer';
 
 	var multiOptions = {
-		io: socketio,
 		server: 'http://tinelaptopsony/',
 		session: {
 			minPlayerNeeded: 3,

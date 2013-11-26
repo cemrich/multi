@@ -34,6 +34,9 @@ module.exports = function(grunt) {
 					baseUrl: 'multi/client',
 					out: 'public/js/lib/multi.js',
 					name: 'multi',
+					paths: {
+						'socket.io': 'empty:'
+					},
 					wrap: {
 						end: 'define(["multi"], function(index) { return index; });'
 					},

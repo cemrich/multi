@@ -3,9 +3,14 @@
 * multiscreen games.
 * @module client/multi
 * @example
-* 
+* // configure where multi can find your client side socket.io lib
+requirejs.config({
+  paths: {
+    'socket.io': '/socket.io/socket.io.js'
+  }
+});
+
 var multiOptions = {
-  io: socketio,
   server: 'http://mySocketioServer/'
 };
 
@@ -13,6 +18,8 @@ var multiOptions = {
 var multi = multiModule.init(multiOptions);
 multi.createSession().then(onSession, onSessionFailed).done();
 */
+
+
 
 define(function(require, exports, module) {
 
@@ -22,6 +29,8 @@ define(function(require, exports, module) {
 	var errors = require('../shared/errors');
 	var util = require('../shared/util');
 	var Q = require('../lib/q');
+	var io = require('socket.io');
+
 	Q.stopUnhandledRejectionTracking();
 
 	var instance = null;
@@ -29,7 +38,6 @@ define(function(require, exports, module) {
 
 	/**
 	* @typedef {Object} module:client/multi~MultiOptions
-	* @property {socketio}        io        ready to use socket.io module
 	* @property                   server    full url of a running socket.io server
 	* @property {SessionOptions}  [session] default options for session creation
 	*/
@@ -53,7 +61,6 @@ define(function(require, exports, module) {
 	* @param {module:client/multi~MultiOptions} options to tweak this instances behaviour  
 	*/
 	var Multi = function (options) {
-		this.io = options.io;
 		this.server = options.server;
 		this.sessionOptions = options.session;
 	};
@@ -170,7 +177,7 @@ define(function(require, exports, module) {
 	Multi.prototype.joinSession = function (sessionToken) {
 		var multi = this;
 		var deferred = Q.defer();
-		var socket = this.io.connect(this.server, {
+		var socket = io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {
@@ -239,7 +246,7 @@ define(function(require, exports, module) {
 
 		var multi = this;
 		var deferred = Q.defer();
-		var socket = this.io.connect(this.server, {
+		var socket = io.connect(this.server, {
 				'force new connection': true
 			});
 		socket.on('connect', function () {

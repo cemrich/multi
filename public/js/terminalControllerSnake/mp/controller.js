@@ -1,4 +1,11 @@
 /*jshint maxparams: 6 */
+
+requirejs.config({
+	paths: {
+		'socket.io': '/socket.io/socket.io.js'
+	}
+});
+
 /*
 Dumb game controller for the snake.
 */
@@ -7,7 +14,6 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 
 	var SESSION_TOKEN = 'snake-multiplayer';
 	var multiOptions = {
-		io: socketio,
 		server: 'http://tinelaptopsony/'
 	};
 

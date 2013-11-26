@@ -1,5 +1,12 @@
 /* global role */
 
+requirejs.config({
+	paths: {
+		'socket.io': '/socket.io/socket.io.js'
+	}
+});
+
+
 /*
 One player snake as minimal example.
 One screen as controller, one sreen as presenter.
@@ -13,7 +20,6 @@ requirejs(['../../lib/multi', '/socket.io/socket.io.js', '../sound', '../layout'
 	// TODO: allow some of the callbacks to be passed through options
 	// is this possible with promises, too?
 	var multiOptions = {
-		io: socketio,
 		server: 'http://tinelaptopsony/',
 		session: {
 			minPlayerNeeded: 2,
