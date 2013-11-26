@@ -551,31 +551,26 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 /**
 * Collection of util functions.
 * @module shared/util
-* @private
-* @ignore
 */
 
-define('../shared/util',['require','exports','module'],function(require, exports, module) {
+define('../shared/util',['require','exports','module','socket.io'],function(require, exports, module) {
 
 	/**
 	* Inherit the prototype methods from one constructor into another.
 	* <br/><br/>
-	* From the node.js util package. See {@link https://github.com/joyent/node/blob/master/lib/util.js#L566 https://github.com/joyent/node/blob/master/lib/util.js}
+	* From the socket.io util package. See {@link https://github.com/LearnBoost/socket.io-client}
 	*
 	* @param {function} ctor Constructor function which needs to inherit the
 	* prototype.
 	* @param {function} superCtor Constructor function to inherit prototype from.
+	* @example
+	* var ChildClass = function () {
+	*   SuperClass.apply(this, arguments);
+	*   this.name = 'childClass';
+	* };
+	* util.inherits(ChildClass, SuperClass);
 	*/
-	exports.inherits = function(ctor, superCtor) {
-		ctor.prototype = Object.create(superCtor.prototype, {
-			constructor: {
-				value: ctor,
-				enumerable: false,
-				writable: true,
-				configurable: true
-			}
-		});
-	};
+	exports.inherits = require('socket.io').util.inherit;
 
 	/* Function.bind-polyfill from 
 	* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility
@@ -3232,9 +3227,9 @@ return Q;
 * @example
 * // configure where multi can find your client side socket.io lib
 requirejs.config({
-	paths: {
-		'socket.io': '/socket.io/socket.io.js'
-	}
+  paths: {
+    'socket.io': '/socket.io/socket.io.js'
+  }
 });
 
 var multiOptions = {
