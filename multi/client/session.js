@@ -5,7 +5,7 @@
 
 define(function(require, exports, module) {
 
-	var EventDispatcher = require('events').EventEmitter;
+	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var playerModule = require('./player');
 
@@ -51,7 +51,7 @@ define(function(require, exports, module) {
 	*/
 	var Session = function (myself, socket, sessionData) {
 
-		EventDispatcher.call(this);
+		EventEmitter.call(this);
 		var session = this;
 
 		/**
@@ -123,7 +123,7 @@ define(function(require, exports, module) {
 		socket.on('playerJoined', this.onPlayerConnected.bind(this));
 	};
 
-	util.inherits(Session, EventDispatcher);
+	util.inherits(Session, EventEmitter);
 
 	/**
 	 * @return {integer} number of currently connected players including myself

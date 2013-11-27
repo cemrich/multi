@@ -5,7 +5,7 @@
  * @private
  */
 
-var EventDispatcher = require('events').EventEmitter;
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var token = require('./token');
 
@@ -87,7 +87,7 @@ var Session = function (io, options) {
 
 	this.freeNumbers = [];
 
-	EventDispatcher.call(this);
+	EventEmitter.call(this);
 
 	if (options !== undefined && options.scriptName !== undefined) {
 		var gameModule = require('../../' + options.scriptName);
@@ -95,7 +95,7 @@ var Session = function (io, options) {
 	}
 };
 
-util.inherits(Session, EventDispatcher);
+util.inherits(Session, EventEmitter);
 
 /**
  * Some client decided that the player policy should change

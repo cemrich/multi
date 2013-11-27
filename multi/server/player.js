@@ -5,7 +5,7 @@
  * @private
  */
 
-var EventDispatcher = require('events').EventEmitter;
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var WatchJS = require('../lib/watch');
 
@@ -87,7 +87,7 @@ var Player = function (socket, playerParams) {
 	 */
 	this.height = playerParams.height || 0;
 
-	EventDispatcher.call(this);
+	EventEmitter.call(this);
 
 	// listeners
 	this.onAttributesChange = this.onAttributesChange.bind(this);
@@ -97,7 +97,7 @@ var Player = function (socket, playerParams) {
 };
 
 /* class methods */
-util.inherits(Player, EventDispatcher);
+util.inherits(Player, EventEmitter);
 
 /**
  * Any player send a player message. is it mine?

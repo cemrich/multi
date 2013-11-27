@@ -5,7 +5,7 @@
  
 define(function(require, exports, module) {
 
-	var EventDispatcher = require('events').EventEmitter;
+	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var WatchJS = require('../lib/watch');
 
@@ -26,7 +26,7 @@ define(function(require, exports, module) {
 	*/
 	var Player = function (socket) {
 
-		EventDispatcher.call(this);
+		EventEmitter.call(this);
 
 		/** 
 		 * communication socket for this player
@@ -93,7 +93,7 @@ define(function(require, exports, module) {
 		WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
 	};
 
-	util.inherits(Player, EventDispatcher);
+	util.inherits(Player, EventEmitter);
 
 	/**
 	 * Called when any player left its session.

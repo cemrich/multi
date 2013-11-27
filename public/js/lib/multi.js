@@ -517,7 +517,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
  
 define('player',['require','exports','module','events','util','../lib/watch'],function(require, exports, module) {
 
-	var EventDispatcher = require('events').EventEmitter;
+	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var WatchJS = require('../lib/watch');
 
@@ -538,7 +538,7 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 	*/
 	var Player = function (socket) {
 
-		EventDispatcher.call(this);
+		EventEmitter.call(this);
 
 		/** 
 		 * communication socket for this player
@@ -605,7 +605,7 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 		WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
 	};
 
-	util.inherits(Player, EventDispatcher);
+	util.inherits(Player, EventEmitter);
 
 	/**
 	 * Called when any player left its session.
@@ -743,7 +743,7 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 
 define('session',['require','exports','module','events','util','./player'],function(require, exports, module) {
 
-	var EventDispatcher = require('events').EventEmitter;
+	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var playerModule = require('./player');
 
@@ -789,7 +789,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 	*/
 	var Session = function (myself, socket, sessionData) {
 
-		EventDispatcher.call(this);
+		EventEmitter.call(this);
 		var session = this;
 
 		/**
@@ -861,7 +861,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 		socket.on('playerJoined', this.onPlayerConnected.bind(this));
 	};
 
-	util.inherits(Session, EventDispatcher);
+	util.inherits(Session, EventEmitter);
 
 	/**
 	 * @return {integer} number of currently connected players including myself
@@ -3150,7 +3150,7 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','../lib/q','socket.io'],function(require, exports, module) {
 
-	var EventDispatcher = require('events').EventEmitter;
+	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var sessionModule = require('./session');
 	var color = require('../shared/color');
@@ -3463,7 +3463,7 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	/**
 	 * @type module:client/events.EventEmitter
 	 */
-	exports.EventDispatcher = EventDispatcher;
+	exports.EventEmitter = EventEmitter;
 
 	/**
 	 * @type module:client/util

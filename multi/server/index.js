@@ -14,7 +14,7 @@
  * @see {@link http://nodejs.org/docs/latest/api/events.html}
  */
 
-var EventDispatcher = require('events').EventEmitter;
+var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var sessionModule = require('./session');
 var playerModule = require('./player');
@@ -31,7 +31,7 @@ var instance = null;
 */
 var Multi = function (server) {
 
-	EventDispatcher.call(this);
+	EventEmitter.call(this);
 
 	var multi = this;
 	var io = require('socket.io').listen(server);
@@ -89,7 +89,7 @@ var Multi = function (server) {
 
 };
 
-util.inherits(Multi, EventDispatcher);
+util.inherits(Multi, EventEmitter);
 
 /**
  * Fired, when a client requested to create a new session

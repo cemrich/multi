@@ -23,7 +23,7 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 define(function(require, exports, module) {
 
-	var EventDispatcher = require('events').EventEmitter;
+	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var sessionModule = require('./session');
 	var color = require('../shared/color');
@@ -336,7 +336,7 @@ define(function(require, exports, module) {
 	/**
 	 * @type module:client/events.EventEmitter
 	 */
-	exports.EventDispatcher = EventDispatcher;
+	exports.EventEmitter = EventEmitter;
 
 	/**
 	 * @type module:client/util
