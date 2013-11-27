@@ -199,6 +199,16 @@ Player.prototype.pack = function () {
 
 
 /* exports */
+
+/**
+ * Compare function to sort an array of players by 
+ * {@link module:server/player~Player#number player numbers}.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+ */
+exports.compare = function (p1, p2) {
+	return p1.number - p2.number;
+};
+
 /**
  * Creates a new player.
  * @param {socket.io-socket} socket        communication socket for the new player

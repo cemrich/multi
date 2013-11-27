@@ -7,6 +7,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var playerModule = require('./player');
 var token = require('./token');
 
 /**
@@ -186,6 +187,21 @@ Session.prototype.pack = function() {
  */
 Session.prototype.getPlayerCount = function () {
 	return Object.keys(this.players).length;
+};
+
+/**
+ * @returns {Array.<module:server/player~Player>} an array of all 
+ * players currently connected to this session.
+ * The array is sorted by 
+ * {@link module:server/player~Player#number player numbers} 
+ * from small to high.
+ */
+Session.prototype.getPlayerArray = function () {
+	var playerArray = [];
+	for(var i in this.players) {
+		playerArray.push(this.players[i]);
+	}
+	return playerArray.sort(playerModule.compare);
 };
 
 /**

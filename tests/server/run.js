@@ -27,3 +27,10 @@ testrunner.run({
 	tests: 'tests/server/multi.js',
 	log: log
 }, null);
+
+testrunner.run({
+	deps: {path: 'multi/server/session', namespace: 'sessionModule'},
+	code: 'multi/server/session.js',
+	tests: 'tests/server/session.js',
+	log: log
+}, null);
