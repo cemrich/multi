@@ -4,7 +4,10 @@ requirejs.config({
 	}
 });
 
-requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'], function (multiModule, socketio) {
+requirejs(['../lib/multi', '../lib/jquery-2.0.0.min'], function (multiModule) {
+
+	var canvas = document.getElementById('canvas');
+	var context = canvas.getContext('2d');
 
 	var multiOptions = {
 		server: 'http://tinelaptopsony/',
@@ -52,6 +55,15 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 	}
 
 	function onSession(session) {
+
+		function onDraw(event) {
+			var owner = session.getPlayerById(event.data.playerId);
+			if (owner) {
+				context.fillStyle = owner.attributes.color;
+				context.fillRect(event.data.x-1, event.data.y-1, 3, 3);
+			}
+		}
+	
 		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);
@@ -65,6 +77,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 			session.message('startGame');
 		});
 		session.on('startGame', onStartGame);
+		session.myself.on('draw', onDraw);
 		session.on('finished', onGameFinished);
 	}
 
@@ -79,7 +92,7 @@ requirejs(['../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min']
 
 	var multi = multiModule.init(multiOptions);
 	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
-	$('#game canvas').css('width', window.innerWidth);
-	$('#game canvas').css('height', window.innerHeight);
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 
 });
