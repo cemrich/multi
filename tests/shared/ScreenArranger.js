@@ -1,4 +1,4 @@
-/* global sessionModule, screen, test, ok, equal */
+/* global sessionModule, screen, test, ok, equal, deepEqual */
 
 test('test ScreenArranger setup', function () {
 	var session = sessionModule.create();
@@ -63,4 +63,32 @@ test('test getPlayerAtCoords', function () {
 
 	p = arranger.getPlayerAtCoords(200, 150);
 	equal(p, null, '(200|150) hits no player');
+});
+
+test('test localToGlobal', function () {
+	var session = sessionModule.create();
+	var arranger = new screen.ScreenArranger(session);
+	var p0 = addPlayer(session, 400, 100);
+	var p1 = addPlayer(session, 200, 200);
+
+	var pos = arranger.localToGlobal(p0, 50, 50);
+	deepEqual(pos, { x: 50, y: 50 }, 'local of first player equals global');
+
+	pos = arranger.localToGlobal(p1, 50, 50);
+	deepEqual(pos, { x: 450, y: 50 }, 'gloabl of second player has an offset of (400|0)');
+});
+
+test('test globalToLocal', function () {
+	var session = sessionModule.create();
+	var arranger = new screen.ScreenArranger(session);
+	var p0 = addPlayer(session, 400, 100);
+	var p1 = addPlayer(session, 200, 200);
+
+	var local = arranger.globalToLocal(50, 50);
+	var expected = { player: p0, x: 50, y: 50 };
+	deepEqual(local, expected, 'local of first player equals global');
+
+	local = arranger.globalToLocal(450, 50);
+	expected = { player: p1, x: 50, y: 50 };
+	deepEqual(local, expected, '(450|50) should return second player at (50|50)');
 });

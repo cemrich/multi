@@ -6,22 +6,35 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 
 /**
- * 
  * @module
+ * @private
  */
 define(function(require, exports, module) {
 
-	/**
-	 * @class
-	 */
 	var ScreenArranger = function (session) {
 		this.session = session;
 		this.screens = {};
 		this.width = 0;
 		this.height = 0;
+
 		this.arrange();
 		session.on('playerJoined', this.onPlayerJoined.bind(this));
 		session.on('playerLeft', this.onPlayerLeft.bind(this));
+	};
+
+	ScreenArranger.prototype.localToGlobal = function (player, x, y) {
+		var screen = this.screens[player.id];
+		var globalX = screen.left + x;
+		var globalY = screen.top + y;
+		return {x: globalX, y: globalY };
+	};
+
+	ScreenArranger.prototype.globalToLocal = function (x, y) {
+		var player = this.getPlayerAtCoords(x, y);
+		var screen = this.screens[player.id];
+		var localX = x - screen.left;
+		var localY = y - screen.top;
+		return {player: player, x: localX, y: localY };
 	};
 
 	ScreenArranger.prototype.isScreenHit = function (screen, x, y) {
