@@ -150,6 +150,25 @@ Player.prototype.updateAttributes = function (attributesObject) {
 };
 
 /**
+ * Sends the given message to all client instances of this player.
+ * @example
+ * // on any client
+ * player.on('ping', function (event) {
+ *   // outputs 'bar'
+ *   console.log(event.data.foo);
+ * });
+ * // on server, instance of same player
+ * player.message('ping', { foo: 'bar' });
+ * @param {string} type    type of message that should be send
+ * @param {object} [data]  message data that should be send
+ */
+Player.prototype.message = function (type, data) {
+	this.socket.emit('playerMessage',
+		{ id: this.id, type: type, data: data }
+	);
+};
+
+/**
  * Prepares this player for sending it via socket message
  * while avoiding circular dependencies.
  * @return {object} packed player object (without socket)

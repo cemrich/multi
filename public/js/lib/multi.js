@@ -932,7 +932,23 @@ define('session',['require','exports','module','events','util','./player'],funct
 			}
 		}
 		if (this.myself.number === number) {
-			return this.myself.number;
+			return this.myself;
+		}
+		return null;
+	};
+
+	/**
+	 * @returns {module:client/player~Player} the player with the
+	 * given {@link module:client/player~Player#id id} 
+	 * (even if this is myself) or null if no player with this id 
+	 * exists
+	 */
+	Session.prototype.getPlayerById = function (id) {
+		if (this.players.hasOwnProperty(id)) {
+			return this.players[id];
+		}
+		if (this.myself.id === id) {
+			return this.myself;
 		}
 		return null;
 	};
