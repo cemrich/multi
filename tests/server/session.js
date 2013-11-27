@@ -1,4 +1,4 @@
-/* global sessionModule, test, ok, equal */
+/* global sessionModule, test, equal, deepEqual */
 
 test('test getPlayerArray', function (assert) {
 	var session = sessionModule.create();

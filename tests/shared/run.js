@@ -27,3 +27,13 @@ testrunner.run({
 	tests: 'tests/shared/errors.js',
 	log: log
 }, null);
+
+testrunner.run({
+	deps: [
+		{path: 'multi/server/session.js', namespace: 'sessionModule'},
+		{path: 'multi/shared/screen.js', namespace: 'screen'}
+	],
+	code: 'multi/shared/screen.js',
+	tests: 'tests/shared/ScreenArranger.js',
+	log: log
+}, null);
