@@ -22,8 +22,8 @@ var log = {
 };
 
 testrunner.run({
-	deps: {path: 'multi/shared/eventDispatcher', namespace: 'EventDispatcher'},
-	code: 'multi/shared/eventDispatcher.js',
-	tests: 'tests/shared/eventDispatcher.js',
+	deps: {path: 'multi/shared/errors', namespace: 'errors'},
+	code: 'multi/shared/errors.js',
+	tests: 'tests/shared/errors.js',
 	log: log
 }, null);
