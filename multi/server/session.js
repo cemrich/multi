@@ -5,9 +5,9 @@
  * @private
  */
 
+var EventDispatcher = require('events').EventEmitter;
 var util = require('util');
 var token = require('./token');
-var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
  * @typedef {Object} SessionOptions
@@ -22,7 +22,7 @@ var EventDispatcher = require('../shared/eventDispatcher');
 
 /**
  * @classdesc A game session that connects and manages multiple players.
- * @mixes EventDispatcher
+ * @mixes external:EventEmitter
  * @class
  * @protected
  * @param {socket.io} io  ready to use and listening socket.io instance
@@ -112,7 +112,7 @@ Session.prototype.onChangePlayerJoining = function (data) {
  */
 Session.prototype.onSessionMessage = function (data) {
 	this.sendToPlayers('sessionMessage', { type: data.type, data: data.data });
-	this.dispatchEvent(data.type, { type: data.type, data: data.data });
+	this.emit(data.type, { type: data.type, data: data.data });
 };
 
 /**
@@ -241,9 +241,9 @@ Session.prototype.addPlayer = function (player) {
 	player.socket.on('changePlayerJoining', this.onChangePlayerJoining.bind(this));
 
 	// inform others about this player
-	this.dispatchEvent('playerJoined', { player: player });
+	this.emit('playerJoined', { player: player });
 	if (this.getPlayerCount() === this.minPlayerNeeded) {
-		this.dispatchEvent('aboveMinPlayerNeeded');
+		this.emit('aboveMinPlayerNeeded');
 	}
 };
 
@@ -256,13 +256,13 @@ Session.prototype.addPlayer = function (player) {
 Session.prototype.removePlayer = function (player) {
 	this.freeNumbers.push(player.number);
 	delete this.players[player.id];
-	this.dispatchEvent('playerLeft', { player: player });
+	this.emit('playerLeft', { player: player });
 	this.sendToPlayers('playerLeft', { playerId: player.id });
 	if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
-		this.dispatchEvent('belowMinPlayerNeeded');
+		this.emit('belowMinPlayerNeeded');
 	}
 	if (this.getPlayerCount() === 0) {
-		this.dispatchEvent('destroyed');
+		this.emit('destroyed');
 		this.removeAllListeners();
 	}
 };

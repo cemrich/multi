@@ -23,11 +23,11 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 define(function(require, exports, module) {
 
-	var EventDispatcher = require('../shared/eventDispatcher');
-	var sessionModule = require('session');
+	var EventDispatcher = require('events').EventEmitter;
+	var util = require('util');
+	var sessionModule = require('./session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
-	var util = require('../shared/util');
 	var Q = require('../lib/q');
 	var io = require('socket.io');
 
@@ -334,12 +334,12 @@ define(function(require, exports, module) {
 	exports.JoiningDisabledError = errors.JoiningDisabledError;
 
 	/**
-	 * @type EventDispatcher
+	 * @type module:client/events.EventEmitter
 	 */
 	exports.EventDispatcher = EventDispatcher;
 
 	/**
-	 * @type module:shared/util
+	 * @type module:client/util
 	 */
 	exports.util = util;
 

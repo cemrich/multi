@@ -5,9 +5,9 @@
  
 define(function(require, exports, module) {
 
-	var EventDispatcher = require('../shared/eventDispatcher');
+	var EventDispatcher = require('events').EventEmitter;
+	var util = require('util');
 	var WatchJS = require('../lib/watch');
-	var util = require('../shared/util');
 
 	/**
 	* @classdesc This player class represents a device connected
@@ -17,7 +17,7 @@ define(function(require, exports, module) {
 	* @inner
 	* @class
 	* @protected
-	* @mixes EventDispatcher
+	* @mixes module:client/events.EventEmitter
 	* @memberof module:client/player
 	* @fires module:client/player~Player#attributesChanged
 	* @fires module:client/player~Player#disconnected
@@ -102,7 +102,7 @@ define(function(require, exports, module) {
 	Player.prototype.onPlayerLeft = function (data) {
 		if (data.playerId === this.id) {
 			// I do not longer exist - inform...
-			this.dispatchEvent('disconnected');
+			this.emit('disconnected');
 			// ... and remove listeners
 			this.removeAllListeners();
 			this.socket.removeListener('playerMessage', this.onPlayerMessage);
@@ -118,7 +118,7 @@ define(function(require, exports, module) {
 	 */
 	Player.prototype.onPlayerMessage = function (data) {
 		if (data.id === this.id) {
-			this.dispatchEvent(data.type, { type: data.type, data: data.data } );
+			this.emit(data.type, { type: data.type, data: data.data } );
 		}
 	};
 
@@ -134,7 +134,7 @@ define(function(require, exports, module) {
 				if (!this.attributes.hasOwnProperty(i) ||
 						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
 					this.attributes[i] = data.attributes[i];
-					this.dispatchEvent('attributesChanged',
+					this.emit('attributesChanged',
 						{ key: i, value: data.attributes[i]});
 				}
 			}

@@ -9,11 +9,11 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * Collection of Error classes that multi uses to communicate that
  * something went wrong.
  * @private
- * @module errors
+ * @module shared/errors
  */
 define(function(require, exports, module) {
 
-	var util = require('./util');
+	var util = require('util');
 
 	/**
 	 * The built in error object.
@@ -24,7 +24,7 @@ define(function(require, exports, module) {
 	/**
 	 * @classdesc Generic framewok error.
 	 * @class
-	 * @memberof module:errors
+	 * @memberof module:shared/errors
 	 * @mixes external:Error
 	 */
 	var MultiError = exports.MultiError = function () {
@@ -38,7 +38,7 @@ define(function(require, exports, module) {
 	 * @classdesc The session you were looking for was not found
 	 * on the server. Most likely the token has been misspelled.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.NoSuchSessionError = function () {
 		MultiError.call(this, 'the requested session does not exist');
@@ -53,7 +53,7 @@ define(function(require, exports, module) {
 	 * create this session more than once. Closing any open tabs
 	 * connected to this session may solve your problem.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.TokenAlreadyExistsError = function () {
 		MultiError.call(this, 'a session with this token does already exist');
@@ -67,7 +67,7 @@ define(function(require, exports, module) {
 	 * connected as defined in 
 	 * {@link module:client/session~Session#maxPlayerAllowed maxPlayerAllowed}.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.SessionFullError = function () {
 		MultiError.call('the requested session is full');
@@ -81,7 +81,7 @@ define(function(require, exports, module) {
 	 * socket.io settings are wrong or the internet connection
 	 * dropped.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.NoConnectionError = function () {
 		MultiError.call(this, 'no connection to server');
@@ -94,7 +94,7 @@ define(function(require, exports, module) {
 	 * from the url. You may want to check if the current url has
 	 * the format http://myGameUrl/some/game#myToken
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.NoSessionTokenFoundError = function () {
 		MultiError.call(this, 'no session token found in url');
@@ -107,7 +107,7 @@ define(function(require, exports, module) {
 	 * this session. Maybe someone called 
 	 * {@link module:client/session~Session#disablePlayerJoining}.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.JoiningDisabledError = function () {
 		MultiError.call(this, 'player joining is currently disabled');

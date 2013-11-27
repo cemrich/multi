@@ -1,12 +1,6 @@
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-if (typeof define !== 'function') { var define = require('amdefine')(module); }
-
 /**
-* Collection of util functions.
-* @module shared/util
+* Collection of util functions and required polyfills.
+* @module client/util
 */
 
 define(function(require, exports, module) {
@@ -27,6 +21,7 @@ define(function(require, exports, module) {
 	* util.inherits(ChildClass, SuperClass);
 	*/
 	exports.inherits = require('socket.io').util.inherit;
+
 
 	/* Function.bind-polyfill from 
 	* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility

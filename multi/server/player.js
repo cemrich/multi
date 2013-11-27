@@ -5,9 +5,9 @@
  * @private
  */
 
+var EventDispatcher = require('events').EventEmitter;
 var util = require('util');
 var WatchJS = require('../lib/watch');
-var EventDispatcher = require('../shared/eventDispatcher');
 
 
 /**
@@ -23,7 +23,7 @@ var EventDispatcher = require('../shared/eventDispatcher');
  * to a session. Every player will be mirrored to all connected
  * devices.
  *
- * @mixes EventDispatcher
+ * @mixes external:EventEmitter
  * @fires module:server/player~Player#attributesChanged
  * @fires module:server/player~Player#disconnected
  * @class
@@ -105,7 +105,7 @@ util.inherits(Player, EventDispatcher);
  */
 Player.prototype.onPlayerMessage = function (data) {
 	if (data.id === this.id) {
-		this.dispatchEvent(data.type, { type: data.type, data: data.data });
+		this.emit(data.type, { type: data.type, data: data.data });
 	}
 };
 
@@ -114,7 +114,7 @@ Player.prototype.onPlayerMessage = function (data) {
  * @private
  */
 Player.prototype.onDisconnect = function () {
-	this.dispatchEvent('disconnected');
+	this.emit('disconnected');
 	// remove all listeners
 	this.socket.removeAllListeners();
 	this.removeAllListeners();
@@ -133,7 +133,7 @@ Player.prototype.onDisconnect = function () {
  */
 Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
 	//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-	this.dispatchEvent('attributesChanged');
+	this.emit('attributesChanged');
 };
 
 /**

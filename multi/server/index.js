@@ -7,12 +7,18 @@
 * @module server/multi
 */
 
+/**
+ * The Node.js EventEmitter you can find under 
+ * require('events').EventEmitter
+ * @external EventEmitter
+ * @see {@link http://nodejs.org/docs/latest/api/events.html}
+ */
 
-var EventDispatcher = require('../shared/eventDispatcher');
+var EventDispatcher = require('events').EventEmitter;
+var util = require('util');
 var sessionModule = require('./session');
 var playerModule = require('./player');
 var color = require('../shared/color');
-var util = require('util');
 
 var instance = null;
 
@@ -20,7 +26,7 @@ var instance = null;
 * @inner
 * @class
 * @protected
-* @mixes EventDispatcher
+* @mixes external:EventEmitter
 * @fires module:server/multi~Multi#sessionCreated
 */
 var Multi = function (server) {
@@ -70,7 +76,7 @@ var Multi = function (server) {
 					reason: 'tokenAlreadyExists'
 				});
 			} else {
-				multi.dispatchEvent('sessionCreated', { session: session });
+				multi.emit('sessionCreated', { session: session });
 				var player = playerModule.create(socket, event.playerParams);
 				player.role = 'presenter';
 				player.number = session.getNextFreePlayerNumber();

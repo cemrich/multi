@@ -1,111 +1,79 @@
 
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
+/**
+* Simple wrapper, so you can require('events') on client side
+* without using browserify.
+* @module client/events
 */
 
-
-define('../shared/eventDispatcher',['require','exports','module'],function(require, exports, module) {
+define('events',['require','exports','module','socket.io'],function(require, exports, module) {
 
 	/**
-	 * @classdesc Simple event dispatcher from
-	 * {@link http://motionharvest.com/2013/02/01/custom-events/}
+	 * @classdesc EventEmitter from from socket.io
 	 * @mixin
 	 * @class
+	 * @see {@link https://github.com/LearnBoost/socket.io-client/blob/master/lib/emitter.js}
 	 */
-	exports.EventDispatcher = function () {
-		/** 
-		 * Map of all currently added callback functions mapped 
-		 * to their corresponding events.
-		 * @private
-		 */
-		this.events = {};
-	};
+	exports.EventEmitter = require('socket.io').EventEmitter;
 
-	/**
-	 * Adds a callback function to the given event.
-	 * @param {string}                                      key
-	 *  event that should trigger the callback
-	 * @param {EventDispatcher.eventCallback} func
-	 *  callback that should be called when event is fired
-	 */
-	exports.EventDispatcher.prototype.on = function (key, func) {
-		if (!this.events.hasOwnProperty(key)) {
-			this.events[key] = [];
-		}
-		this.events[key].push(func);
-	};
-
-	/**
-	 * Removes a callback function from the given event.
-	 * @param {string}                                      key
-	 *  event that should trigger the callback
-	 * @param {EventDispatcher.eventCallback} [func]
-	 *  callback that should be removed. If none provided all callbacks 
-	 *  will be removed.
-	 */
-	exports.EventDispatcher.prototype.off = function (key, func) {
-		if (this.events.hasOwnProperty(key)) {
-			if (func === undefined) {
-				delete this.events[key];
-			} else {
-				for (var i in this.events[key]) {
-					if (this.events[key][i] === func) {
-						this.events[key].splice(i, 1);
-					}
-				}
-			}
-		}
-	};
-
-	/**
-	 * Removes all callbacks ever registered on any event.
-	 */
-	exports.EventDispatcher.prototype.removeAllListeners = function () {
-		this.events = {};
-	};
-
-	/**
-	 * Adds a callback function to the given event. The callback
-	 * is only called one and then removed from the given event.
-	 * @param {string}                                      key
-	 *  event that should trigger the callback
-	 * @param {EventDispatcher.eventCallback} func
-	 *  callback that should be called when event is fired
-	 */
-	exports.EventDispatcher.prototype.once = function (key, func) {
-		var that = this;
-		function callback(dataObj) {
-			that.off(key, callback);
-			func(dataObj);
-		}
-		this.on(key, callback);
-	};
-
-	/**
-	 * Fires the given event and calls all its associated callbacks.
-	 * @param {string} key           event that should be triggered
-	 * @param {object} [dataObj={}]  any object containing more event 
-	 * information you wish to add
-	 */
-	exports.EventDispatcher.prototype.dispatchEvent = function (key, dataObj) {
-		if (this.events.hasOwnProperty(key)) {
-			dataObj = dataObj || {};
-			dataObj.currentTarget = this;
-			for (var i in this.events[key]) {
-				this.events[key][i](dataObj);
-			}
-		}
-	};
-
-	/**
-	 * Generic event callback.
-	 * @callback EventDispatcher.eventCallback
-	 * @param {object} event  object containing event information
-	 */
-
-	return exports.EventDispatcher;
  });
+/**
+* Collection of util functions and required polyfills.
+* @module client/util
+*/
+
+define('util',['require','exports','module','socket.io'],function(require, exports, module) {
+
+	/**
+	* Inherit the prototype methods from one constructor into another.
+	* <br/><br/>
+	* From the socket.io util package. See {@link https://github.com/LearnBoost/socket.io-client}
+	*
+	* @param {function} ctor Constructor function which needs to inherit the
+	* prototype.
+	* @param {function} superCtor Constructor function to inherit prototype from.
+	* @example
+	* var ChildClass = function () {
+	*   SuperClass.apply(this, arguments);
+	*   this.name = 'childClass';
+	* };
+	* util.inherits(ChildClass, SuperClass);
+	*/
+	exports.inherits = require('socket.io').util.inherit;
+
+
+	/* Function.bind-polyfill from 
+	* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility
+	* This is needed to support older browsers without proper
+	* ECMAScript 5.1 support. Especially PhantomJS that's running
+	* the tests of this project will throw errors without this
+	* polyfill.
+	* See https://groups.google.com/forum/#!msg/phantomjs/r0hPOmnCUpc/uxusqsl2LNoJ
+	*/
+	if (!Function.prototype.bind) {
+		Function.prototype.bind = function (oThis) {
+			if (typeof this !== 'function') {
+				// closest thing possible to the ECMAScript 5 internal IsCallable function
+				throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
+			}
+
+			var aArgs = Array.prototype.slice.call(arguments, 1);
+			var fToBind = this;
+			var FNOP = function () {};
+			var fBound = function () {
+				var isValid = this instanceof FNOP && oThis;
+				return fToBind.apply(isValid ? this : oThis,
+					aArgs.concat(Array.prototype.slice.call(arguments))
+				);
+			};
+
+			FNOP.prototype = this.prototype;
+			fBound.prototype = new FNOP();
+
+			return fBound;
+		};
+	}
+
+});
 /**
  * DEVELOPED BY
  * GIL LOPES BUENO
@@ -542,79 +510,16 @@ define('../shared/eventDispatcher',['require','exports','module'],function(requi
 
 }));
 
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-/**
-* Collection of util functions.
-* @module shared/util
-*/
-
-define('../shared/util',['require','exports','module','socket.io'],function(require, exports, module) {
-
-	/**
-	* Inherit the prototype methods from one constructor into another.
-	* <br/><br/>
-	* From the socket.io util package. See {@link https://github.com/LearnBoost/socket.io-client}
-	*
-	* @param {function} ctor Constructor function which needs to inherit the
-	* prototype.
-	* @param {function} superCtor Constructor function to inherit prototype from.
-	* @example
-	* var ChildClass = function () {
-	*   SuperClass.apply(this, arguments);
-	*   this.name = 'childClass';
-	* };
-	* util.inherits(ChildClass, SuperClass);
-	*/
-	exports.inherits = require('socket.io').util.inherit;
-
-	/* Function.bind-polyfill from 
-	* https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind#Compatibility
-	* This is needed to support older browsers without proper
-	* ECMAScript 5.1 support. Especially PhantomJS that's running
-	* the tests of this project will throw errors without this
-	* polyfill.
-	* See https://groups.google.com/forum/#!msg/phantomjs/r0hPOmnCUpc/uxusqsl2LNoJ
-	*/
-	if (!Function.prototype.bind) {
-		Function.prototype.bind = function (oThis) {
-			if (typeof this !== 'function') {
-				// closest thing possible to the ECMAScript 5 internal IsCallable function
-				throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
-			}
-
-			var aArgs = Array.prototype.slice.call(arguments, 1);
-			var fToBind = this;
-			var FNOP = function () {};
-			var fBound = function () {
-				var isValid = this instanceof FNOP && oThis;
-				return fToBind.apply(isValid ? this : oThis,
-					aArgs.concat(Array.prototype.slice.call(arguments))
-				);
-			};
-
-			FNOP.prototype = this.prototype;
-			fBound.prototype = new FNOP();
-
-			return fBound;
-		};
-	}
-
-});
 /**
  * @module client/player
  * @private
  */
  
-define('player',['require','exports','module','../shared/eventDispatcher','../lib/watch','../shared/util'],function(require, exports, module) {
+define('player',['require','exports','module','events','util','../lib/watch'],function(require, exports, module) {
 
-	var EventDispatcher = require('../shared/eventDispatcher');
+	var EventDispatcher = require('events').EventEmitter;
+	var util = require('util');
 	var WatchJS = require('../lib/watch');
-	var util = require('../shared/util');
 
 	/**
 	* @classdesc This player class represents a device connected
@@ -624,7 +529,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../li
 	* @inner
 	* @class
 	* @protected
-	* @mixes EventDispatcher
+	* @mixes module:client/events.EventEmitter
 	* @memberof module:client/player
 	* @fires module:client/player~Player#attributesChanged
 	* @fires module:client/player~Player#disconnected
@@ -709,7 +614,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../li
 	Player.prototype.onPlayerLeft = function (data) {
 		if (data.playerId === this.id) {
 			// I do not longer exist - inform...
-			this.dispatchEvent('disconnected');
+			this.emit('disconnected');
 			// ... and remove listeners
 			this.removeAllListeners();
 			this.socket.removeListener('playerMessage', this.onPlayerMessage);
@@ -725,7 +630,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../li
 	 */
 	Player.prototype.onPlayerMessage = function (data) {
 		if (data.id === this.id) {
-			this.dispatchEvent(data.type, { type: data.type, data: data.data } );
+			this.emit(data.type, { type: data.type, data: data.data } );
 		}
 	};
 
@@ -741,7 +646,7 @@ define('player',['require','exports','module','../shared/eventDispatcher','../li
 				if (!this.attributes.hasOwnProperty(i) ||
 						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
 					this.attributes[i] = data.attributes[i];
-					this.dispatchEvent('attributesChanged',
+					this.emit('attributesChanged',
 						{ key: i, value: data.attributes[i]});
 				}
 			}
@@ -836,11 +741,11 @@ define('player',['require','exports','module','../shared/eventDispatcher','../li
  * @private
  */
 
-define('session',['require','exports','module','../shared/eventDispatcher','./player','../shared/util'],function(require, exports, module) {
+define('session',['require','exports','module','events','util','./player'],function(require, exports, module) {
 
-	var EventDispatcher = require('../shared/eventDispatcher');
+	var EventDispatcher = require('events').EventEmitter;
+	var util = require('util');
 	var playerModule = require('./player');
-	var util = require('../shared/util');
 
 
 	/* 
@@ -866,7 +771,7 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	* @inner
 	* @class
 	* @protected
-	* @mixes EventDispatcher
+	* @mixes module:client/events.EventEmitter
 	* @memberof module:client/session
 	*
 	* @fires module:client/session~Session#playerJoined
@@ -946,12 +851,12 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 
 		// add socket listeners
 		socket.on('disconnect', function (data) {
-			session.dispatchEvent('destroyed');
+			session.emit('destroyed');
 			session.socket.removeAllListeners();
 			session.removeAllListeners();
 		});
 		socket.on('sessionMessage', function (data) {
-			session.dispatchEvent(data.type, data);
+			session.emit(data.type, data);
 		});
 		socket.on('playerJoined', this.onPlayerConnected.bind(this));
 	};
@@ -978,9 +883,9 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 			session.onPlayerDisconnected(player);
 		});
 
-		session.dispatchEvent('playerJoined', { player: player });
+		session.emit('playerJoined', { player: player });
 		if (session.getPlayerCount() === session.minPlayerNeeded) {
-			session.dispatchEvent('aboveMinPlayerNeeded');
+			session.emit('aboveMinPlayerNeeded');
 		}
 	};
 
@@ -990,10 +895,10 @@ define('session',['require','exports','module','../shared/eventDispatcher','./pl
 	 */
 	Session.prototype.onPlayerDisconnected = function (player) {
 		delete this.players[player.id];
-		this.dispatchEvent('playerLeft', { player: player });
+		this.emit('playerLeft', { player: player });
 
 		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
-			this.dispatchEvent('belowMinPlayerNeeded');
+			this.emit('belowMinPlayerNeeded');
 		}
 	};
 
@@ -1175,11 +1080,11 @@ define('../shared/color',['require','exports','module'],function(require, export
  * Collection of Error classes that multi uses to communicate that
  * something went wrong.
  * @private
- * @module errors
+ * @module shared/errors
  */
-define('../shared/errors',['require','exports','module','./util'],function(require, exports, module) {
+define('../shared/errors',['require','exports','module','util'],function(require, exports, module) {
 
-	var util = require('./util');
+	var util = require('util');
 
 	/**
 	 * The built in error object.
@@ -1190,7 +1095,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	/**
 	 * @classdesc Generic framewok error.
 	 * @class
-	 * @memberof module:errors
+	 * @memberof module:shared/errors
 	 * @mixes external:Error
 	 */
 	var MultiError = exports.MultiError = function () {
@@ -1204,7 +1109,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	 * @classdesc The session you were looking for was not found
 	 * on the server. Most likely the token has been misspelled.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.NoSuchSessionError = function () {
 		MultiError.call(this, 'the requested session does not exist');
@@ -1219,7 +1124,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	 * create this session more than once. Closing any open tabs
 	 * connected to this session may solve your problem.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.TokenAlreadyExistsError = function () {
 		MultiError.call(this, 'a session with this token does already exist');
@@ -1233,7 +1138,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	 * connected as defined in 
 	 * {@link module:client/session~Session#maxPlayerAllowed maxPlayerAllowed}.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.SessionFullError = function () {
 		MultiError.call('the requested session is full');
@@ -1247,7 +1152,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	 * socket.io settings are wrong or the internet connection
 	 * dropped.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.NoConnectionError = function () {
 		MultiError.call(this, 'no connection to server');
@@ -1260,7 +1165,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	 * from the url. You may want to check if the current url has
 	 * the format http://myGameUrl/some/game#myToken
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.NoSessionTokenFoundError = function () {
 		MultiError.call(this, 'no session token found in url');
@@ -1273,7 +1178,7 @@ define('../shared/errors',['require','exports','module','./util'],function(requi
 	 * this session. Maybe someone called 
 	 * {@link module:client/session~Session#disablePlayerJoining}.
 	 * @class
-	 * @mixes module:errors.MultiError
+	 * @mixes module:shared/errors.MultiError
 	 */
 	exports.JoiningDisabledError = function () {
 		MultiError.call(this, 'player joining is currently disabled');
@@ -3243,13 +3148,13 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 
 
-define('multi',['require','exports','module','../shared/eventDispatcher','session','../shared/color','../shared/errors','../shared/util','../lib/q','socket.io'],function(require, exports, module) {
+define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','../lib/q','socket.io'],function(require, exports, module) {
 
-	var EventDispatcher = require('../shared/eventDispatcher');
-	var sessionModule = require('session');
+	var EventDispatcher = require('events').EventEmitter;
+	var util = require('util');
+	var sessionModule = require('./session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
-	var util = require('../shared/util');
 	var Q = require('../lib/q');
 	var io = require('socket.io');
 
@@ -3556,12 +3461,12 @@ define('multi',['require','exports','module','../shared/eventDispatcher','sessio
 	exports.JoiningDisabledError = errors.JoiningDisabledError;
 
 	/**
-	 * @type EventDispatcher
+	 * @type module:client/events.EventEmitter
 	 */
 	exports.EventDispatcher = EventDispatcher;
 
 	/**
-	 * @type module:shared/util
+	 * @type module:client/util
 	 */
 	exports.util = util;
 

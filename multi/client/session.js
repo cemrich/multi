@@ -5,9 +5,9 @@
 
 define(function(require, exports, module) {
 
-	var EventDispatcher = require('../shared/eventDispatcher');
+	var EventDispatcher = require('events').EventEmitter;
+	var util = require('util');
 	var playerModule = require('./player');
-	var util = require('../shared/util');
 
 
 	/* 
@@ -33,7 +33,7 @@ define(function(require, exports, module) {
 	* @inner
 	* @class
 	* @protected
-	* @mixes EventDispatcher
+	* @mixes module:client/events.EventEmitter
 	* @memberof module:client/session
 	*
 	* @fires module:client/session~Session#playerJoined
@@ -113,12 +113,12 @@ define(function(require, exports, module) {
 
 		// add socket listeners
 		socket.on('disconnect', function (data) {
-			session.dispatchEvent('destroyed');
+			session.emit('destroyed');
 			session.socket.removeAllListeners();
 			session.removeAllListeners();
 		});
 		socket.on('sessionMessage', function (data) {
-			session.dispatchEvent(data.type, data);
+			session.emit(data.type, data);
 		});
 		socket.on('playerJoined', this.onPlayerConnected.bind(this));
 	};
@@ -145,9 +145,9 @@ define(function(require, exports, module) {
 			session.onPlayerDisconnected(player);
 		});
 
-		session.dispatchEvent('playerJoined', { player: player });
+		session.emit('playerJoined', { player: player });
 		if (session.getPlayerCount() === session.minPlayerNeeded) {
-			session.dispatchEvent('aboveMinPlayerNeeded');
+			session.emit('aboveMinPlayerNeeded');
 		}
 	};
 
@@ -157,10 +157,10 @@ define(function(require, exports, module) {
 	 */
 	Session.prototype.onPlayerDisconnected = function (player) {
 		delete this.players[player.id];
-		this.dispatchEvent('playerLeft', { player: player });
+		this.emit('playerLeft', { player: player });
 
 		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
-			this.dispatchEvent('belowMinPlayerNeeded');
+			this.emit('belowMinPlayerNeeded');
 		}
 	};
 
