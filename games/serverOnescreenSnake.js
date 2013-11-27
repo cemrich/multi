@@ -1,4 +1,5 @@
 var multiModule = require('../multi/server');
+var ScreenArranger = require('../multi/shared/screen').ScreenArranger;
 
 
 exports.Game = function (session) {
@@ -7,36 +8,46 @@ exports.Game = function (session) {
 
 	function Snake (owner, display) {
 		this.owner = owner;
-		this.display = display;
-		this.x = Math.round(display.width / 2);
-		this.y = Math.round(display.height / 2) + owner.number*5;
+
+		// start at center of display (global coords)
+		var localX = Math.round(display.width / 2);
+		var localY = Math.round(display.height / 2);
+		this.pos = arranger.localToGlobal(display, localX, localY);
+
 		snakes.push(this);
 
 		this.move = function () {
-			this.x++;
+			this.pos.x += 10;
+			if (this.pos.x >= arranger.width) {
+				this.pos.x = 0;
+			}
 		};
 	};
 
 	function move() {
 		snakes.forEach(function (snake) {
 			snake.move();
-			snake.display.message('draw', { playerId: snake.owner.id, x: snake.x, y: snake.y });
+			var local = arranger.globalToLocal(snake.pos.x, snake.pos.y);
+			local.player.message('draw', { playerId: snake.owner.id, x: local.x, y: local.y });
 		});
 	}
 
 	function onPlayerJoined(event) {
 		// TODO: cannot send messages here
 		event.player.attributes.color = multiModule.color.random();
-		new Snake(event.player, event.player);
 	}
 
 	function onStartGame() {
+		for (var i in session.players) {
+			new Snake(session.players[i], session.players[i]);
+		}
 		setInterval(function () {
 			move();
 		}, 500);
 		// session.message('finished');
 	}
 
+	var arranger = new ScreenArranger(session);
 	session.on('playerJoined', onPlayerJoined);
 	session.on('startGame', onStartGame);
 
