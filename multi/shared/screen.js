@@ -61,12 +61,13 @@ define(function(require, exports, module) {
 	 * @param  {integer} y  current global y position in pixel
 	 * @param  {integer} step  number of pisels you want to move
 	 * @return {object}  the new global position after moving step pixels
-	 *  to the right. Values greater than the total width will be set to zero.
+	 *  to the right. Values greater than the total width will continue
+	 *  on the left side.
 	 */
 	exports.ScreenArranger.prototype.getRight = function (x, y, step) {
 		var newX = x + step;
 		if (newX >= this.width) {
-			newX = 0;
+			newX = this.width - newX;
 		}
 		return { x: newX, y: y };
 	};
