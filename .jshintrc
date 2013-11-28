@@ -1,4 +1,5 @@
 {
+	"strict": false,
 	"camelcase": true,
 	"curly": true,
 	"eqeqeq": true,

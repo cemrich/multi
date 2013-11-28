@@ -1,3 +1,5 @@
+/* global exports */
+
 var multiModule = require('../multi/server');
 
 

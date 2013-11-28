@@ -1,3 +1,5 @@
+/* global exports */
+
 var multiModule = require('../multi/server');
 var ScreenArranger = require('../multi/shared/screen').ScreenArranger;
 
@@ -14,22 +16,20 @@ exports.Game = function (session) {
 		var localY = Math.round(display.height / 2);
 		this.pos = arranger.localToGlobal(display, localX, localY);
 
-		snakes.push(this);
-
 		this.move = function () {
 			this.pos = arranger.getRight(this.pos, 10);
 		};
-	};
+	}
 
 	function move() {
 		snakes.forEach(function (snake) {
 			snake.move();
 			var local = arranger.globalToLocal(snake.pos.x, snake.pos.y);
 			if (local !== null) {
-				local.player.message('draw', { 
-					playerId: snake.owner.id, 
-					x: local.x, 
-					y: local.y 
+				local.player.message('draw', {
+					playerId: snake.owner.id,
+					x: local.x,
+					y: local.y
 				});
 			}
 		});
@@ -42,7 +42,7 @@ exports.Game = function (session) {
 
 	function onStartGame() {
 		for (var i in session.players) {
-			new Snake(session.players[i], session.players[i]);
+			snakes.push(new Snake(session.players[i], session.players[i]));
 		}
 		setInterval(function () {
 			move();
