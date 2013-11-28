@@ -17,10 +17,7 @@ exports.Game = function (session) {
 		snakes.push(this);
 
 		this.move = function () {
-			this.pos.x += 10;
-			if (this.pos.x >= arranger.width) {
-				this.pos.x = 0;
-			}
+			this.pos = arranger.getRight(this.pos, 10);
 		};
 	};
 
@@ -28,7 +25,13 @@ exports.Game = function (session) {
 		snakes.forEach(function (snake) {
 			snake.move();
 			var local = arranger.globalToLocal(snake.pos.x, snake.pos.y);
-			local.player.message('draw', { playerId: snake.owner.id, x: local.x, y: local.y });
+			if (local !== null) {
+				local.player.message('draw', { 
+					playerId: snake.owner.id, 
+					x: local.x, 
+					y: local.y 
+				});
+			}
 		});
 	}
 

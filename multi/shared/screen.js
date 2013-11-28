@@ -57,15 +57,33 @@ define(function(require, exports, module) {
 	};
 
 	/**
+	 * @param  {object} position  current global position in pixel (x and y)
+	 * @param  {integer} step  number of pisels you want to move
+	 * @return {object}  the new global position after moving step pixels
+	 *  to the right. Values greater than the total width will be set to zero.
+	 */
+	exports.ScreenArranger.prototype.getRight = function (position, step) {
+		var newX = position.x + step;
+		if (newX >= this.width) {
+			newX = 0;
+		}
+		return { x: newX, y: position.y };
+	};
+
+	/**
 	 * Converts local pixel coordinates to global ones.
 	 * @param  {module:server/player~Player|module:client/player~Player} player 
 	 * player instance the local coordinates refer to
 	 * @param  {integer} x  local x position in pixel
 	 * @param  {integer} y  local y position in pixel
-	 * @return {object}  { x: globalX, y: globalY }
+	 * @return {object}  { x: globalX, y: globalY } or null if the given
+	 *  player is no part of this arranger
 	 */
 	exports.ScreenArranger.prototype.localToGlobal = function (player, x, y) {
 		var screen = this.screens[player.id];
+		if (screen === null) {
+			return null;
+		}
 		var globalX = screen.left + x;
 		var globalY = screen.top + y;
 		return {x: globalX, y: globalY };
@@ -77,9 +95,13 @@ define(function(require, exports, module) {
 	 * @param  {integer} x  global x position in pixel
 	 * @param  {integer} y  global y position in pixel
 	 * @return {object}  { player: localPlayer, x: localX, y: localY }
+	 *  or null if there is no player hitting the given coordinates
 	 */
 	exports.ScreenArranger.prototype.globalToLocal = function (x, y) {
 		var player = this.getPlayerAtCoords(x, y);
+		if (player === null) {
+			return null;
+		}
 		var screen = this.screens[player.id];
 		var localX = x - screen.left;
 		var localY = y - screen.top;
