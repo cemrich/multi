@@ -17,7 +17,7 @@ exports.Game = function (session) {
 		this.pos = arranger.localToGlobal(display, localX, localY);
 
 		this.move = function () {
-			this.pos = arranger.getRight(this.pos, 10);
+			this.pos = arranger.getRight(this.pos.x, this.pos.y, 10);
 		};
 	}
 
