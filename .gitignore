@@ -3,3 +3,5 @@ node_modules
 documentation
 
 /notepad_arbeitsbereich.txt
+/*.sublime-workspace
+/*.sublime-project
