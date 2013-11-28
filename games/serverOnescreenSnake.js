@@ -15,9 +15,20 @@ exports.Game = function (session) {
 		var localX = Math.round(display.width / 2);
 		var localY = Math.round(display.height / 2);
 		this.pos = arranger.localToGlobal(display, localX, localY);
+		this.dir = 0;
 
 		this.move = function () {
-			this.pos = arranger.getRight(this.pos.x, this.pos.y, 10);
+			if (Math.random() > 0.8) {
+				this.dir = Math.floor(Math.random()*4);
+			}
+			var getPosFunc = null;
+			switch (this.dir) {
+				case 0: getPosFunc = arranger.getUp; break;
+				case 1: getPosFunc = arranger.getRight; break;
+				case 2: getPosFunc = arranger.getDown; break;
+				case 3: getPosFunc = arranger.getLeft; break;
+			}
+			this.pos = getPosFunc.bind(arranger)(this.pos.x, this.pos.y, 10);
 		};
 	}
 
