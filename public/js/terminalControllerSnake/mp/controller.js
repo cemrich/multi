@@ -10,7 +10,8 @@ requirejs.config({
 Dumb game controller for the snake.
 */
 
-define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound', '../layout', './scoreboard'], function (multiModule, socketio, Joystick, sound, layout, scoreboard) {
+define(['../../lib/multi', '/socket.io/socket.io.js', '../../lib/joystick', '../sound', '../layout', './scoreboard'], 
+	function (multiModule, socketio, Joystick, sound, layout, scoreboard) {
 
 	var SESSION_TOKEN = 'snake-multiplayer';
 	var multiOptions = {
@@ -25,7 +26,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../joystick', '../sound',
 	// joined session successfully
 	function onSession(session) {
 
-		var joystick = new Joystick(30, onDirectionChange, $('#marker'));
+		var joystick = new Joystick(30, onDirectionChange, $('#marker'), $('html'));
 		layout.showSection('#waiting');
 		$('#waiting .start').click(onStartClick);
 		$('button.exit').click(onExitClick);

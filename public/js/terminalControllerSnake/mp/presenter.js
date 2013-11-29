@@ -83,7 +83,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 		function onBelowMinPlayerNeeded() {
 			// we don't have enough players any longer
 			if (game) {
-				game.off('stop', onGameFinished);
+				game.removeListener('stop', onGameFinished);
 				game.stop();
 			}
 			layout.showSection('#waiting');
@@ -92,7 +92,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 		function onSessionDestroyed() {
 			// something went wrong - my session does not longer exist
 			if (game) {
-				game.off('stop', onGameFinished);
+				game.removeListener('stop', onGameFinished);
 				game.stop();
 			}
 			sound.onDisconnect();

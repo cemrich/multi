@@ -12,7 +12,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 
 	var Game = function (session) {
 
-		multi.EventDispatcher.call(this);
+		multi.EventEmitter.call(this);
 
 		var controller = session.getPlayerByNumber(1);
 		this.snake = new Snake(jaws, grid, controller);
@@ -21,14 +21,14 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 		this.interval = null;
 	};
 
-	multi.util.inherits(Game, multi.EventDispatcher);
+	multi.util.inherits(Game, multi.EventEmitter);
 
 	// jaws setup callback
 	Game.prototype.setup = function() {
 		jaws.clear();
 		this.snake.setup();
 		this.points.setup();
-		this.dispatchEvent('start');
+		this.emit('start');
 	};
 
 	// jaws gametick callback for game logic
@@ -70,7 +70,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 	Game.prototype.stop = function () {
 		clearInterval(this.interval);
 		jaws.game_loop.stop();
-		this.dispatchEvent('stop');
+		this.emit('stop');
 	};
 
 	return Game;

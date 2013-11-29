@@ -38,7 +38,7 @@ define(['./game', '../sound', '../layout'], function (Game, sound, layout) {
 		function onBelowMinPlayerNeeded() {
 			// we don't have enough players any longer
 			sound.onDisconnect();
-			game.off('stop', onGameFinished);
+			game.removeListener('stop', onGameFinished);
 			game.stop();
 			layout.showSection('#waiting');
 		}

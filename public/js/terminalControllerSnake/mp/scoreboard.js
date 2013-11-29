@@ -45,8 +45,8 @@ define(['../../lib/jquery-2.0.0.min'], function () {
 			player.on('attributesChanged', attributesChanged);
 			player.on('disconnected', onDisconnected);
 			playerEle.bind('stop', function() {
-				player.off('attributesChanged', attributesChanged);
-				player.off('disconnected', onDisconnected);
+				player.removeListener('attributesChanged', attributesChanged);
+				player.removeListener('disconnected', onDisconnected);
 			});
 		}
 	}

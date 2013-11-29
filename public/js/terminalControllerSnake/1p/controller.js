@@ -2,11 +2,12 @@
 Dumb game controller for the snake.
 */
 
-define(['../joystick', '../sound', '../layout'], function (Joystick, sound, layout) {
+define(['../../lib/joystick', '../sound', '../layout'],
+	function (Joystick, sound, layout) {
 
 	function start(session) {
 
-		var joystick = new Joystick(30, onDirectionChange, $('#marker'));
+		var joystick = new Joystick(30, onDirectionChange, $('#marker'), $('html'));
 
 		function onDirectionChange(direction) {
 			$('#marker').attr('class', 'dir' + direction);
@@ -46,7 +47,6 @@ define(['../joystick', '../sound', '../layout'], function (Joystick, sound, layo
 			session.disconnectMyself();
 		}
 
-		console.log(session.myself.attributes.color);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 		startGame();
 

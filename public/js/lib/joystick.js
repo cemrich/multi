@@ -1,12 +1,29 @@
-/*
-Module for this joystick-like thingy that's part of the controller.
-*/
-
+/**
+ * Module for an on-screen Joystick that supports both
+ * touch and klick events.
+ * @module
+ */
 define(function () {
 
-	function Joystick(threshold, directionCallback, container) {
+	/**
+	 * This is an on-screen joystick supporting both touch
+	 * and click events and four directions.
+	 * @class
+	 * @param {integer} threshold  distance from the joysticks center 
+	 *  in pixel that's needed to trigger a direction change.
+	 * @param {function} directionCallback  function that should be called when
+	 *  the direction has changed. The new direction is passed as an integer:
+	 *  up=0, right=1, down=2, left=3
+	 * @param {jQueryElement} container  dom element containing a marker that's
+	 *  shown when the user starts touching or dragging (with the css class
+	 *  'down') and a marker that indicates the current direction (with the css
+	 *  class 'move')
+	 * @param {jQueryElement} eventArea  dom element that contains the area in
+	 *  which the user can use the joystick (e.g. $('html'))
+	 */
+	function Joystick(threshold, directionCallback, container, eventArea) {
 
-		var eventEmitter = $('html');
+		var eventEmitter = eventArea;
 		var downMarker = container.find('.down');
 		var moveMarker = container.find('.move');
 		var direction = null;
@@ -73,11 +90,17 @@ define(function () {
 
 		// PUBLIC
 
+		/**
+		 * Registers all necessary events so this joystick can be used.
+		 */
 		this.start = function () {
 			direction = null;
 			eventEmitter.on('touchstart mousedown', onDown);
 		};
 
+		/**
+		 * Unregisters all events so this joystick stops working.
+		 */
 		this.stop = function () {
 			eventEmitter.off('touchstart mousedown', onDown);
 			downMarker.hide();
