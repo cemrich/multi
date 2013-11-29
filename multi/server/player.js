@@ -33,6 +33,11 @@ var SyncedObject = require('../shared/SyncedObject');
  */
 var Player = function (socket, playerParams) {
 
+	/**
+	 * wrapper for this players attributes
+	 * @type {SyncedObject}
+	 * @private
+	 */
 	this.syncedAttributes = new SyncedObject();
 	/** 
 	 * communication socket for this player
@@ -94,7 +99,7 @@ var Player = function (socket, playerParams) {
 	this.onAttributesChanged = this.onAttributesChanged.bind(this);
 	this.socket.on('disconnect', this.onDisconnect.bind(this));
 	this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
-	this.syncedAttributes.on('attributesChanged', this.onAttributesChanged);
+	this.syncedAttributes.on('changed', this.onAttributesChanged);
 	this.syncedAttributes.startWatching();
 };
 
@@ -125,10 +130,7 @@ Player.prototype.onDisconnect = function () {
 
 /** 
  * Called when the user attributes have been changed.
- * @param {string} prop      property that has been changed
- * @param {string} action    what has been done to the property
- * @param          newvalue  new value of the changed property
- * @param          oldvalue  old value of the changed property
+ * @param {SyncedObject.Changeset} changeset
  * @private
  */
 Player.prototype.onAttributesChanged = function (changeset) {
@@ -185,6 +187,7 @@ Player.prototype.pack = function () {
  /**
  * Fired when the {@link module:server/player~Player#attributes attributes} 
  * of this player have been changed by the server or any client.
+ * The event is a {@link SyncedObject.Changeset} object.
  * @event module:server/player~Player#attributesChanged
  */
 

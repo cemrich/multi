@@ -28,6 +28,11 @@ define(function(require, exports, module) {
 
 		EventEmitter.call(this);
 
+		/**
+		 * wrapper for this players attributes
+		 * @type {SyncedObject}
+		 * @private
+		 */
 		this.syncedAttributes = new SyncedObject();
 		/** 
 		 * communication socket for this player
@@ -91,7 +96,7 @@ define(function(require, exports, module) {
 		this.socket.on('playerMessage', this.onPlayerMessage);
 		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
 		this.socket.on('playerLeft', this.onPlayerLeft);
-		this.syncedAttributes.on('attributesChanged', this.onAttributesChanged);
+		this.syncedAttributes.on('changed', this.onAttributesChanged);
 		this.syncedAttributes.startWatching();
 	};
 
@@ -142,10 +147,7 @@ define(function(require, exports, module) {
 
 	/** 
 	 * Called when the user attributes have been changed.
-	 * @param {string} prop      property that has been changed
-	 * @param {string} action    what has been done to the property
-	 * @param          newvalue  new value of the changed property
-	 * @param          oldvalue  old value of the changed property
+	 * @param {SyncedObject.Changeset} changeset
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {

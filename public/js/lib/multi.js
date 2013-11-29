@@ -523,11 +523,39 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 
+	/**
+	 * @typedef Changeset
+	 * This object describes changes made to the attributes inside the wrapped
+	 * object.
+	 * @memberOf SyncedObject
+	 * @property {Object.<string, *>} changed  any changed top level attributes:
+	 * their new value mapped to their name
+	 * @property {Array.<string>} removed  names of all top level
+	 * attributes that have been deleted
+	 */
 
+	/**
+	 * @classdesc This class wraps an object and detects when it is changed from
+	 * the outside world.
+	 * @example
+	 * var synced = new SyncedObject();
+	 * synced.on('changed', function (changeset) {
+	 *   console.log(changeset.changed); // { 'foo': 'bar' }
+	 * });
+	 * synced.data.foo = 'bar';
+	 * @class SyncedObject
+	 * @mixes external:EventEmitter
+	 */
 	var SyncedObject = function () {
 
 		EventEmitter.call(this);
 
+		/**
+		 * The wrapped data object. Changes to it's top level attributes are
+		 * detected and a {@link event:SyncedObject#changed} event is fired
+		 * in this case.
+		 * @type {Object}
+		 */
 		this.data = {};
 		this.onAttributesChange = this.onAttributesChange.bind(this);
 
@@ -535,21 +563,47 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 
 	util.inherits(SyncedObject, EventEmitter);
 
-
+	/**
+	 * Starts detecting changes to the wrapped object.
+	 * @memberOf SyncedObject
+	 */
 	SyncedObject.prototype.startWatching = function () {
 		WatchJS.watch(this.data, this.onAttributesChange, 0, true);
 	};
 
+	/**
+	 * Stops detecting changes to the wrapped object. You can resume watching
+	 * @memberOf SyncedObject
+	 * again any time.
+	 */
 	SyncedObject.prototype.stopWatching = function () {
 			WatchJS.unwatch(this.data, this.onAttributesChange);
 	};
 
+	/**
+	 * Applies the given changeset to the wrapped object without fireing 
+	 * a {@link SyncedObject#event:changed changed} event.
+	 * @param  {SyncedObject.Changeset} changeset  changes that should be
+	 *  applied to the wrapped object
+	 * @memberOf SyncedObject
+	 */
 	SyncedObject.prototype.applyChangesetSilently = function (changeset) {
 		this.stopWatching();
 		this.applyChangeset(changeset);
 		this.startWatching();
 	};
 
+	/**
+	 * Applies the given changeset to the wrapped object. Note that this
+	 * method fires a {@link SyncedObject#event:changed changed} event if any 
+	 * attribute does change. If you don't want to receive this event, use 
+	 * {@link SyncedObject#applyChangesetSilently applyChangesetSilently} 
+	 * instead.
+	 * @fires  SyncedObject#changed
+	 * @param  {SyncedObject.Changeset} changeset  changes that should be
+	 *  applied to the wrapped object
+	 * @memberOf SyncedObject
+	 */
 	SyncedObject.prototype.applyChangeset = function (changeset) {
 		var propertyName;
 		if (changeset.hasOwnProperty('changed')) {
@@ -565,6 +619,14 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 		}
 	};
 
+	/** 
+	 * @param {string} property  property that has been changed
+	 * @param {string} action    what has been done to the property
+	 * @param          newValue  new value of the changed property
+	 * @param          oldValue  old value of the changed property
+	 * @see                      https://github.com/melanke/Watch.JS
+	 * @private
+	 */
 	SyncedObject.prototype.onAttributesChange = function (property, action, newValue, oldValue) {
 		var changed = {};
 		var removed = [];
@@ -592,9 +654,14 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 			changeset.removed = removed;
 		}
 
-		this.emit('attributesChanged', changeset);
+		this.emit('changed', changeset);
 	};
 
+	/**
+	 * Fired when any top level attribute of the wrapped object has changed.
+	 * @event SyncedObject#changed
+	 * @property {SyncedObject.Changeset} changeset  what has changed exactly?
+	 */
 
 	exports = SyncedObject;
 	return exports;
@@ -630,6 +697,11 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 
 		EventEmitter.call(this);
 
+		/**
+		 * wrapper for this players attributes
+		 * @type {SyncedObject}
+		 * @private
+		 */
 		this.syncedAttributes = new SyncedObject();
 		/** 
 		 * communication socket for this player
@@ -693,7 +765,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		this.socket.on('playerMessage', this.onPlayerMessage);
 		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
 		this.socket.on('playerLeft', this.onPlayerLeft);
-		this.syncedAttributes.on('attributesChanged', this.onAttributesChanged);
+		this.syncedAttributes.on('changed', this.onAttributesChanged);
 		this.syncedAttributes.startWatching();
 	};
 
@@ -744,10 +816,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 
 	/** 
 	 * Called when the user attributes have been changed.
-	 * @param {string} prop      property that has been changed
-	 * @param {string} action    what has been done to the property
-	 * @param          newvalue  new value of the changed property
-	 * @param          oldvalue  old value of the changed property
+	 * @param {SyncedObject.Changeset} changeset
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
