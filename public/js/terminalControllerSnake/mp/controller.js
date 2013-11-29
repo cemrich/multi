@@ -10,7 +10,7 @@ requirejs.config({
 Dumb game controller for the snake.
 */
 
-define(['../../lib/multi', '/socket.io/socket.io.js', '../../lib/joystick', '../sound', '../layout', './scoreboard'], 
+define(['../../lib/multi', '/socket.io/socket.io.js', '../../lib/joystick', '../sound', '../layout', './scoreboard'],
 	function (multiModule, socketio, Joystick, sound, layout, scoreboard) {
 
 	var SESSION_TOKEN = 'snake-multiplayer';

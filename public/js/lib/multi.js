@@ -510,16 +510,106 @@ define('util',['require','exports','module','socket.io'],function(require, expor
 
 }));
 
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+define('../shared/SyncedObject',['require','exports','module','../lib/watch','events','util'],function(require, exports, module) {
+
+	var WatchJS = require('../lib/watch');
+	var EventEmitter = require('events').EventEmitter;
+	var util = require('util');
+
+
+	var SyncedObject = function () {
+
+		EventEmitter.call(this);
+
+		this.data = {};
+		this.onAttributesChange = this.onAttributesChange.bind(this);
+
+	};
+
+	util.inherits(SyncedObject, EventEmitter);
+
+
+	SyncedObject.prototype.startWatching = function () {
+		WatchJS.watch(this.data, this.onAttributesChange, 0, true);
+	};
+
+	SyncedObject.prototype.stopWatching = function () {
+			WatchJS.unwatch(this.data, this.onAttributesChange);
+	};
+
+	SyncedObject.prototype.applyChangesetSilently = function (changeset) {
+		this.stopWatching();
+		this.applyChangeset(changeset);
+		this.startWatching();
+	};
+
+	SyncedObject.prototype.applyChangeset = function (changeset) {
+		var propertyName;
+		if (changeset.hasOwnProperty('changed')) {
+			for (propertyName in changeset.changed) {
+				this.data[propertyName] = changeset.changed[propertyName];
+			}
+		}
+		if (changeset.hasOwnProperty('removed')) {
+			for (var i in changeset.removed) {
+				propertyName = changeset.removed[i];
+				delete this.data[propertyName];
+			}
+		}
+	};
+
+	SyncedObject.prototype.onAttributesChange = function (property, action, newValue, oldValue) {
+		var changed = {};
+		var removed = [];
+
+		if (property === 'root' && action === 'differentattr') {
+			// some attributes have been added or deleted
+			for (var i in newValue.added) {
+				var propertyName = newValue.added[i];
+				changed[propertyName] = this.data[propertyName];
+			}
+			for (var j in newValue.removed) {
+				removed.push(newValue.removed[j]);
+			}
+		} else if (action === 'set' &&
+				JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+			// one attribute has changed
+			changed[property] = newValue;
+		}
+
+		var changeset = {};
+		if (Object.keys(changed).length > 0) {
+			changeset.changed = changed;
+		}
+		if (Object.keys(removed).length > 0) {
+			changeset.removed = removed;
+		}
+
+		this.emit('attributesChanged', changeset);
+	};
+
+
+	exports = SyncedObject;
+	return exports;
+
+});
 /**
  * @module client/player
  * @private
  */
  
-define('player',['require','exports','module','events','util','../lib/watch'],function(require, exports, module) {
+define('player',['require','exports','module','events','util','../shared/SyncedObject'],function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
-	var WatchJS = require('../lib/watch');
+	var SyncedObject = require('../shared/SyncedObject');
 
 	/**
 	* @classdesc This player class represents a device connected
@@ -540,6 +630,7 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 
 		EventEmitter.call(this);
 
+		this.syncedAttributes = new SyncedObject();
 		/** 
 		 * communication socket for this player
 		 * @type {socket.io-socket}
@@ -571,7 +662,7 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 		 * event.
 		 * @type {object}
 		 */
-		this.attributes = {};
+		this.attributes = this.syncedAttributes.data;
 		/**
 		 * Unique player-number inside this session beginning with 0.
 		 * Free numbers from disconnected players will be reused to
@@ -597,12 +688,13 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 		this.onPlayerMessage = this.onPlayerMessage.bind(this);
 		this.onPlayerAttributesChanged = this.onPlayerAttributesChanged.bind(this);
 		this.onPlayerLeft = this.onPlayerLeft.bind(this);
-		this.onAttributesChange = this.onAttributesChange.bind(this);
+		this.onAttributesChanged = this.onAttributesChanged.bind(this);
 
 		this.socket.on('playerMessage', this.onPlayerMessage);
 		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
 		this.socket.on('playerLeft', this.onPlayerLeft);
-		WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
+		this.syncedAttributes.on('attributesChanged', this.onAttributesChanged);
+		this.syncedAttributes.startWatching();
 	};
 
 	util.inherits(Player, EventEmitter);
@@ -620,7 +712,7 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 			this.socket.removeListener('playerMessage', this.onPlayerMessage);
 			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged);
 			this.socket.removeListener('playerLeft', this.onPlayerLeft);
-			WatchJS.unwatch(this.attributes, this.onAttributesChange);
+			this.syncedAttributes.stopWatching();
 		}
 	};
 
@@ -641,16 +733,12 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 	 */
 	Player.prototype.onPlayerAttributesChanged = function (data) {
 		if (data.id === this.id) {
-			WatchJS.unwatch(this.attributes, this.onAttributesChange);
-			for (var i in data.attributes) {
-				if (!this.attributes.hasOwnProperty(i) ||
-						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
-					this.attributes[i] = data.attributes[i];
-					this.emit('attributesChanged',
-						{ key: i, value: data.attributes[i]});
+			this.syncedAttributes.applyChangesetSilently(data.changeset);
+			if (data.changeset.hasOwnProperty('changed')) {
+				for (var i in data.changeset.changed) {
+					this.emit('attributesChanged', { key: i, value: this.attributes[i]});
 				}
 			}
-			WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
 		}
 	};
 
@@ -662,10 +750,9 @@ define('player',['require','exports','module','events','util','../lib/watch'],fu
 	 * @param          oldvalue  old value of the changed property
 	 * @private
 	 */
-	Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
-		//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+	Player.prototype.onAttributesChanged = function (changeset) {
 		this.socket.emit('playerAttributesClientChanged',
-			{ id: this.id, attributes: this.attributes }
+			{ id: this.id, changeset: changeset }
 		);
 	};
 

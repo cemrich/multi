@@ -86,12 +86,12 @@ define(function(require, exports, module) {
 		this.onPlayerMessage = this.onPlayerMessage.bind(this);
 		this.onPlayerAttributesChanged = this.onPlayerAttributesChanged.bind(this);
 		this.onPlayerLeft = this.onPlayerLeft.bind(this);
-		this.onAttributesChange = this.onAttributesChange.bind(this);
+		this.onAttributesChanged = this.onAttributesChanged.bind(this);
 
 		this.socket.on('playerMessage', this.onPlayerMessage);
 		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
 		this.socket.on('playerLeft', this.onPlayerLeft);
-		this.syncedAttributes.on('attributesChange', this.onAttributesChange);
+		this.syncedAttributes.on('attributesChanged', this.onAttributesChanged);
 		this.syncedAttributes.startWatching();
 	};
 
@@ -131,16 +131,12 @@ define(function(require, exports, module) {
 	 */
 	Player.prototype.onPlayerAttributesChanged = function (data) {
 		if (data.id === this.id) {
-			this.syncedAttributes.stopWatching();
-			for (var i in data.attributes) {
-				if (!this.attributes.hasOwnProperty(i) ||
-						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
-					this.attributes[i] = data.attributes[i];
-					this.emit('attributesChanged',
-						{ key: i, value: data.attributes[i]});
+			this.syncedAttributes.applyChangesetSilently(data.changeset);
+			if (data.changeset.hasOwnProperty('changed')) {
+				for (var i in data.changeset.changed) {
+					this.emit('attributesChanged', { key: i, value: this.attributes[i]});
 				}
 			}
-			this.syncedAttributes.startWatching();
 		}
 	};
 
@@ -152,10 +148,9 @@ define(function(require, exports, module) {
 	 * @param          oldvalue  old value of the changed property
 	 * @private
 	 */
-	Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
-		//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
+	Player.prototype.onAttributesChanged = function (changeset) {
 		this.socket.emit('playerAttributesClientChanged',
-			{ id: this.id, attributes: this.attributes }
+			{ id: this.id, changeset: changeset }
 		);
 	};
 

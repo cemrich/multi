@@ -29,12 +29,60 @@ define(function(require, exports, module) {
 	};
 
 	SyncedObject.prototype.stopWatching = function () {
-			WatchJS.unwatch(this.attributes, this.onAttributesChange);
+			WatchJS.unwatch(this.data, this.onAttributesChange);
 	};
 
-	SyncedObject.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
-		this.emit('attributesChange');
+	SyncedObject.prototype.applyChangesetSilently = function (changeset) {
+		this.stopWatching();
+		this.applyChangeset(changeset);
+		this.startWatching();
 	};
+
+	SyncedObject.prototype.applyChangeset = function (changeset) {
+		var propertyName;
+		if (changeset.hasOwnProperty('changed')) {
+			for (propertyName in changeset.changed) {
+				this.data[propertyName] = changeset.changed[propertyName];
+			}
+		}
+		if (changeset.hasOwnProperty('removed')) {
+			for (var i in changeset.removed) {
+				propertyName = changeset.removed[i];
+				delete this.data[propertyName];
+			}
+		}
+	};
+
+	SyncedObject.prototype.onAttributesChange = function (property, action, newValue, oldValue) {
+		var changed = {};
+		var removed = [];
+
+		if (property === 'root' && action === 'differentattr') {
+			// some attributes have been added or deleted
+			for (var i in newValue.added) {
+				var propertyName = newValue.added[i];
+				changed[propertyName] = this.data[propertyName];
+			}
+			for (var j in newValue.removed) {
+				removed.push(newValue.removed[j]);
+			}
+		} else if (action === 'set' &&
+				JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+			// one attribute has changed
+			changed[property] = newValue;
+		}
+
+		var changeset = {};
+		if (Object.keys(changed).length > 0) {
+			changeset.changed = changed;
+		}
+		if (Object.keys(removed).length > 0) {
+			changeset.removed = removed;
+		}
+
+		this.emit('attributesChanged', changeset);
+	};
+
 
 	exports = SyncedObject;
 	return exports;

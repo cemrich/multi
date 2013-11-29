@@ -91,10 +91,10 @@ var Player = function (socket, playerParams) {
 	EventEmitter.call(this);
 
 	// listeners
-	this.onAttributesChange = this.onAttributesChange.bind(this);
+	this.onAttributesChanged = this.onAttributesChanged.bind(this);
 	this.socket.on('disconnect', this.onDisconnect.bind(this));
 	this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
-	this.syncedAttributes.on('attributesChange', this.onAttributesChange);
+	this.syncedAttributes.on('attributesChanged', this.onAttributesChanged);
 	this.syncedAttributes.startWatching();
 };
 
@@ -131,9 +131,8 @@ Player.prototype.onDisconnect = function () {
  * @param          oldvalue  old value of the changed property
  * @private
  */
-Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue) {
-	//console.log(prop+" - action: "+action+" - new: "+newvalue+", old: "+oldvalue);
-	this.emit('attributesChanged');
+Player.prototype.onAttributesChanged = function (changeset) {
+	this.emit('attributesChanged', changeset);
 };
 
 /**
@@ -143,10 +142,8 @@ Player.prototype.onAttributesChange = function (prop, action, newvalue, oldvalue
  * new attributes
  * @fires module:server/player~Player#attributesChanged
  */
-Player.prototype.updateAttributes = function (attributesObject) {
-	for (var i in attributesObject) {
-		this.attributes[i] = attributesObject[i];
-	}
+Player.prototype.updateAttributes = function (changeset) {
+	this.syncedAttributes.applyChangeset(changeset);
 };
 
 /**

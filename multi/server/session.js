@@ -132,7 +132,7 @@ Session.prototype.onPlayerMessage = function (data) {
 Session.prototype.onPlayerAttributesClientChanged = function (data) {
 	var player = this.players[data.id];
 	if (typeof player !== 'undefined') {
-		player.updateAttributes(data.attributes);
+		player.updateAttributes(data.changeset);
 	}
 };
 
@@ -247,9 +247,9 @@ Session.prototype.addPlayer = function (player) {
 	player.on('disconnected', function(event) {
 		session.removePlayer(player);
 	});
-	player.on('attributesChanged', function () {
+	player.on('attributesChanged', function (changeset) {
 		session.sendToPlayers('playerAttributesChanged',
-			{ id: player.id, attributes: player.attributes });
+			{ id: player.id, changeset: changeset });
 	});
 	player.socket.on('playerAttributesClientChanged', this.onPlayerAttributesClientChanged.bind(this));
 	player.socket.on('sessionMessage', this.onSessionMessage.bind(this));
@@ -313,7 +313,6 @@ exports.create = function(io, options) {
 	sessions[session.token] = session;
 	session.on('destroyed', function() {
 		delete sessions[session.token];
-		console.log('session destroyed:', session.token);
 	});
 	return session;
 };
