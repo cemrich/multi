@@ -69,7 +69,7 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		}
 
 		function onDirectionChange(direction) {
-			console.log(direction);
+			session.myself.attributes.direction = direction;
 		}
 	
 		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));

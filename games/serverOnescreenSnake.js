@@ -14,15 +14,13 @@ exports.Game = function (session) {
 		// start at center of display (global coords)
 		var localX = Math.round(display.width / 2);
 		var localY = Math.round(display.height / 2);
+
 		this.pos = arranger.localToGlobal(display, localX, localY);
-		this.dir = 0;
 
 		this.move = function () {
-			if (Math.random() > 0.8) {
-				this.dir = Math.floor(Math.random()*4);
-			}
 			var getPosFunc = null;
-			switch (this.dir) {
+			var dir = owner.attributes.direction || 0;
+			switch (dir) {
 				case 0: getPosFunc = arranger.getUp; break;
 				case 1: getPosFunc = arranger.getRight; break;
 				case 2: getPosFunc = arranger.getDown; break;
