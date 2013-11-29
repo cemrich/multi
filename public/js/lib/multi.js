@@ -994,7 +994,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 	 * @fires module:client/session~Session#destroyed
 	 */
 	Session.prototype.disconnectMyself = function () {
-		this.socket.socket.disconnect();
+		this.socket.disconnect();
 	};
 
 

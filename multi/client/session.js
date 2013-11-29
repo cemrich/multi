@@ -256,7 +256,7 @@ define(function(require, exports, module) {
 	 * @fires module:client/session~Session#destroyed
 	 */
 	Session.prototype.disconnectMyself = function () {
-		this.socket.socket.disconnect();
+		this.socket.disconnect();
 	};
 
 
