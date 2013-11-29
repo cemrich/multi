@@ -4,10 +4,12 @@ requirejs.config({
 	}
 });
 
-requirejs(['../lib/multi', '../lib/jquery-2.0.0.min'], function (multiModule) {
+requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
+	function (multiModule, Joystick) {
 
 	var canvas = document.getElementById('canvas');
 	var context = canvas.getContext('2d');
+	var joystick = null;
 
 	var multiOptions = {
 		server: 'http://tinelaptopsony/',
@@ -48,10 +50,12 @@ requirejs(['../lib/multi', '../lib/jquery-2.0.0.min'], function (multiModule) {
 
 	function onStartGame() {
 		showSection('game');
+		joystick.start();
 	}
 
 	function onGameFinished() {
 		showSection('joined');
+		joystick.stop();
 	}
 
 	function onSession(session) {
@@ -63,7 +67,12 @@ requirejs(['../lib/multi', '../lib/jquery-2.0.0.min'], function (multiModule) {
 				context.fillRect(event.data.x-1, event.data.y-1, 3, 3);
 			}
 		}
+
+		function onDirectionChange(direction) {
+			console.log(direction);
+		}
 	
+		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));
 		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);
@@ -83,6 +92,9 @@ requirejs(['../lib/multi', '../lib/jquery-2.0.0.min'], function (multiModule) {
 
 	function onSessionDestroyed() {
 		onError('session has been destroyed');
+		if (joystick !== null) {
+			joystick.stop();
+		}
 	}
 
 	function onSessionFailed(error) {

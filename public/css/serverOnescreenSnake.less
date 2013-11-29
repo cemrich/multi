@@ -21,3 +21,24 @@ canvas {
 		box-flex: 1;
 	}
 }
+
+.joystick {
+	& > div {
+		position: absolute;
+		left: 0;
+		width: 0;
+		display: none;
+	}
+	.down {
+		width: 20px;
+		height: 20px;
+		margin: -10px 0 0 -10px;
+		background-color: black;
+	}
+	.move {
+		width: 10px;
+		height: 10px;
+		margin: -5px 0 0 -5px;
+		background-color: black;
+	}
+}
