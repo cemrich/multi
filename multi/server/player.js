@@ -7,7 +7,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var WatchJS = require('../lib/watch');
+var SyncedObject = require('../shared/SyncedObject');
 
 
 /**
@@ -33,6 +33,7 @@ var WatchJS = require('../lib/watch');
  */
 var Player = function (socket, playerParams) {
 
+	this.syncedAttributes = new SyncedObject();
 	/** 
 	 * communication socket for this player
 	 * @type {socket.io-socket}
@@ -65,7 +66,7 @@ var Player = function (socket, playerParams) {
 	 * event.
 	 * @type {object}
 	 */
-	this.attributes = { };
+	this.attributes = this.syncedAttributes.data;
 	/**
 	 * Unique player-number inside this session beginning with 0.
 	 * Free numbers from disconnected players will be reused to
@@ -93,7 +94,8 @@ var Player = function (socket, playerParams) {
 	this.onAttributesChange = this.onAttributesChange.bind(this);
 	this.socket.on('disconnect', this.onDisconnect.bind(this));
 	this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
-	WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
+	this.syncedAttributes.on('attributesChange', this.onAttributesChange);
+	this.syncedAttributes.startWatching();
 };
 
 /* class methods */
@@ -118,9 +120,7 @@ Player.prototype.onDisconnect = function () {
 	// remove all listeners
 	this.socket.removeAllListeners();
 	this.removeAllListeners();
-	try {
-		WatchJS.unwatch(this.attributes, this.onAttributesChange);
-	} catch (error) {}
+	this.syncedAttributes.stopWatching();
 };
 
 /** 

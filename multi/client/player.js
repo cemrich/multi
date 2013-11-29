@@ -7,7 +7,7 @@ define(function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
-	var WatchJS = require('../lib/watch');
+	var SyncedObject = require('../shared/SyncedObject');
 
 	/**
 	* @classdesc This player class represents a device connected
@@ -28,6 +28,7 @@ define(function(require, exports, module) {
 
 		EventEmitter.call(this);
 
+		this.syncedAttributes = new SyncedObject();
 		/** 
 		 * communication socket for this player
 		 * @type {socket.io-socket}
@@ -59,7 +60,7 @@ define(function(require, exports, module) {
 		 * event.
 		 * @type {object}
 		 */
-		this.attributes = {};
+		this.attributes = this.syncedAttributes.data;
 		/**
 		 * Unique player-number inside this session beginning with 0.
 		 * Free numbers from disconnected players will be reused to
@@ -90,7 +91,8 @@ define(function(require, exports, module) {
 		this.socket.on('playerMessage', this.onPlayerMessage);
 		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
 		this.socket.on('playerLeft', this.onPlayerLeft);
-		WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
+		this.syncedAttributes.on('attributesChange', this.onAttributesChange);
+		this.syncedAttributes.startWatching();
 	};
 
 	util.inherits(Player, EventEmitter);
@@ -108,7 +110,7 @@ define(function(require, exports, module) {
 			this.socket.removeListener('playerMessage', this.onPlayerMessage);
 			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged);
 			this.socket.removeListener('playerLeft', this.onPlayerLeft);
-			WatchJS.unwatch(this.attributes, this.onAttributesChange);
+			this.syncedAttributes.stopWatching();
 		}
 	};
 
@@ -129,7 +131,7 @@ define(function(require, exports, module) {
 	 */
 	Player.prototype.onPlayerAttributesChanged = function (data) {
 		if (data.id === this.id) {
-			WatchJS.unwatch(this.attributes, this.onAttributesChange);
+			this.syncedAttributes.stopWatching();
 			for (var i in data.attributes) {
 				if (!this.attributes.hasOwnProperty(i) ||
 						JSON.stringify(this.attributes[i]) !== JSON.stringify(data.attributes[i])) {
@@ -138,7 +140,7 @@ define(function(require, exports, module) {
 						{ key: i, value: data.attributes[i]});
 				}
 			}
-			WatchJS.watch(this.attributes, this.onAttributesChange, 0, true);
+			this.syncedAttributes.startWatching();
 		}
 	};
 
