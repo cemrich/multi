@@ -29,6 +29,13 @@ testrunner.run({
 }, null);
 
 testrunner.run({
+	deps: {path: 'multi/shared/SyncedObject', namespace: 'SyncedObject'},
+	code: 'multi/shared/SyncedObject.js',
+	tests: 'tests/shared/SyncedObject.js',
+	log: log
+}, null);
+
+testrunner.run({
 	deps: [
 		{path: 'multi/server/session.js', namespace: 'sessionModule'},
 		{path: 'multi/shared/screen.js', namespace: 'screen'}
