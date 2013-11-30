@@ -37,26 +37,47 @@ define(function(require, exports, module) {
 	var SyncedObject = function () {
 
 		EventEmitter.call(this);
-
-		/**
-		 * The wrapped data object. Changes to it's top level attributes are
-		 * detected and a {@link event:SyncedObject#changed} event is fired
-		 * in this case.
-		 * @type {Object}
-		 */
-		this.data = {};
+		this._data = {};
 		this.onAttributesChange = this.onAttributesChange.bind(this);
-
 	};
 
 	util.inherits(SyncedObject, EventEmitter);
+
+	/**
+	 * The wrapped data object. Changes to it's top level attributes are
+	 * detected and a {@link SyncedObject#event:changed changed} event is
+	 * fired in this case.
+	 * @type {Object}
+	 * @name data
+	 * @instance
+	 * @memberOf SyncedObject
+	 */
+	Object.defineProperty(SyncedObject.prototype, 'data', {
+		get: function() {
+			return this._data;
+		},
+		set: function(val) {
+			if (typeof val === 'object') {
+				// remove
+				for (var j in this._data) {
+					if (!val.propertyIsEnumerable(j)) {
+						delete this._data[j];
+					}
+				}
+				// add
+				for (var i in val) {
+					this._data[i] = val[i];
+				}
+			}
+		}
+	});
 
 	/**
 	 * Starts detecting changes to the wrapped object.
 	 * @memberOf SyncedObject
 	 */
 	SyncedObject.prototype.startWatching = function () {
-		WatchJS.watch(this.data, this.onAttributesChange, 0, true);
+		WatchJS.watch(this._data, this.onAttributesChange, 0, true);
 	};
 
 	/**
@@ -65,7 +86,7 @@ define(function(require, exports, module) {
 	 * again any time.
 	 */
 	SyncedObject.prototype.stopWatching = function () {
-		WatchJS.unwatch(this.data, this.onAttributesChange);
+		WatchJS.unwatch(this._data, this.onAttributesChange);
 	};
 
 	/**
@@ -96,13 +117,13 @@ define(function(require, exports, module) {
 		var propertyName;
 		if (changeset.hasOwnProperty('changed')) {
 			for (propertyName in changeset.changed) {
-				this.data[propertyName] = changeset.changed[propertyName];
+				this._data[propertyName] = changeset.changed[propertyName];
 			}
 		}
 		if (changeset.hasOwnProperty('removed')) {
 			for (var i in changeset.removed) {
 				propertyName = changeset.removed[i];
-				delete this.data[propertyName];
+				delete this._data[propertyName];
 			}
 		}
 	};
@@ -123,7 +144,7 @@ define(function(require, exports, module) {
 			// some attributes have been added or deleted
 			for (var i in newValue.added) {
 				var propertyName = newValue.added[i];
-				changed[propertyName] = this.data[propertyName];
+				changed[propertyName] = this._data[propertyName];
 			}
 			for (var j in newValue.removed) {
 				removed.push(newValue.removed[j]);
