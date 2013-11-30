@@ -34,7 +34,8 @@ define(function () {
 		var sheet = new this.jaws.Animation({
 			sprite_sheet: '../../img/snake.png',
 			frame_size: [20, 20],
-			frame_duration: 500});
+			frame_duration: 500
+		});
 		this.anim = sheet.slice(3, 5);
 		this.addNew();
 		this.addNew();

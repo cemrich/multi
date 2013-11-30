@@ -35,7 +35,8 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 		var snakeAnim = new this.jaws.Animation({
 			sprite_sheet: '../../img/snake.png',
 			frame_size: [20, 20],
-			frame_duration: 500});
+			frame_duration: 500
+		});
 		var rgb = this.player.attributes.color;
 		if (typeof rgb !== 'undefined') {
 			snakeAnim.frames.forEach(function (canvas) {
@@ -73,24 +74,24 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 			this.direction = this.directionObject.direction;
 		}
 		switch (this.direction) {
-			case 0: // up
-				this.head.y -= this.grid.tileSize;
-				this.head.rotateTo(-90);
-				break;
-			case 1: // right
-				this.head.x += this.grid.tileSize;
-				this.head.rotateTo(0);
-				break;
-			case 2: // down
-				this.head.y += this.grid.tileSize;
-				this.head.rotateTo(90);
-				break;
-			case 3: // left
-				this.head.x -= this.grid.tileSize;
-				this.head.rotateTo(180);
-				break;
-			default:
-				break;
+		case 0: // up
+			this.head.y -= this.grid.tileSize;
+			this.head.rotateTo(-90);
+			break;
+		case 1: // right
+			this.head.x += this.grid.tileSize;
+			this.head.rotateTo(0);
+			break;
+		case 2: // down
+			this.head.y += this.grid.tileSize;
+			this.head.rotateTo(90);
+			break;
+		case 3: // left
+			this.head.x -= this.grid.tileSize;
+			this.head.rotateTo(180);
+			break;
+		default:
+			break;
 		}
 	};
 

@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
 if ('development' === app.get('env')) {
-  app.use(express.errorHandler());
+	app.use(express.errorHandler());
 }
 
 // routes
@@ -38,8 +38,8 @@ app.get('/snakemp/presenter', routes.terminalControllerSnakeMpPresenter);
 app.get('/snakemp', routes.terminalControllerSnakeMpPlayer);
 app.get('/snake1s', routes.serverOnescreenSnake);
 
-server.listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+server.listen(app.get('port'), function() {
+	console.log('Express server listening on port ' + app.get('port'));
 });
 
 // initialize multi

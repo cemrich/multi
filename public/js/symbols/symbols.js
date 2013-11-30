@@ -45,18 +45,18 @@ requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-
 		var imgURL = img.attr('src');
 
 		$.get(imgURL, function(data) {
-				// Get the SVG tag, ignore the rest
-				var svg = $(data).find('svg');
+			// Get the SVG tag, ignore the rest
+			var svg = $(data).find('svg');
 
-				// Add replaced image's classes to the new SVG
-				var imgClass = img.attr('class');
-				svg = svg.attr('class', imgClass);
+			// Add replaced image's classes to the new SVG
+			var imgClass = img.attr('class');
+			svg = svg.attr('class', imgClass);
 
-				// Remove any invalid XML tags as per http://validator.w3.org
-				svg = svg.removeAttr('xmlns:a');
+			// Remove any invalid XML tags as per http://validator.w3.org
+			svg = svg.removeAttr('xmlns:a');
 
-				// Replace image with new SVG
-				img.replaceWith(svg);
+			// Replace image with new SVG
+			img.replaceWith(svg);
 		}, 'xml');
 	});
 

@@ -13,6 +13,7 @@
 	"trailing": true,
 	"maxparams": 5,
 	"maxdepth": 4,
+	"indent": 1,
 
 	"browser": true,
 	"devel": true,

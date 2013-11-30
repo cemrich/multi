@@ -65,7 +65,7 @@ define(function(require, exports, module) {
 	 * again any time.
 	 */
 	SyncedObject.prototype.stopWatching = function () {
-			WatchJS.unwatch(this.data, this.onAttributesChange);
+		WatchJS.unwatch(this.data, this.onAttributesChange);
 	};
 
 	/**

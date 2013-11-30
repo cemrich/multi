@@ -18,15 +18,21 @@ exports.Game = function (session) {
 		this.pos = arranger.localToGlobal(display, localX, localY);
 
 		this.move = function () {
-			var getPosFunc = null;
 			var dir = owner.attributes.direction || 0;
 			switch (dir) {
-				case 0: getPosFunc = arranger.getUp; break;
-				case 1: getPosFunc = arranger.getRight; break;
-				case 2: getPosFunc = arranger.getDown; break;
-				case 3: getPosFunc = arranger.getLeft; break;
+			case 0:
+				this.pos = arranger.getUp(this.pos.x, this.pos.y, 10);
+				break;
+			case 1:
+				this.pos = arranger.getRight(this.pos.x, this.pos.y, 10);
+				break;
+			case 2:
+				this.pos = arranger.getDown(this.pos.x, this.pos.y, 10);
+				break;
+			case 3:
+				this.pos = arranger.getLeft(this.pos.x, this.pos.y, 10);
+				break;
 			}
-			this.pos = getPosFunc.bind(arranger)(this.pos.x, this.pos.y, 10);
 		};
 	}
 

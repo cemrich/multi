@@ -14,4 +14,4 @@ define(function(require, exports, module) {
 	 */
 	exports.EventEmitter = require('socket.io').EventEmitter;
 
- });
+});
