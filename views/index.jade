@@ -1,7 +1,61 @@
 extends layout
 
 block content
+
+	link(rel='stylesheet', href='/css/index.css')
+
 	h1 Welcome to multi
-	| Visit 
-	a(href='/example1') example1 
-	| for playing
+	h2 A framework for webbased multiscreen games
+	p 
+		| Congrats, your server seems to be up and running. 
+		| Now check out some of the example games:
+
+	ul.gamelist
+		li
+			img(src='img/gameThumbs/session_generation_symbol_pattern.svg')
+			h3 Symbols
+			a(href='/symbols') /symbols 
+			p 
+				| Create new sessions and connect other devices to them.
+				| No need to type session IDs on your phone - just select
+				| some symbols.
+
+		li
+			img(src='img/gameThumbs/multip-bigscreen.svg')
+			h3 Like-a-tron
+			a(href='/snake1s') /snake1s
+			p 
+				| Connect many devices to build one big screen. On this screen
+				| you can play a tron-like racing game.
+
+		li
+			img(src='img/gameThumbs/onep-controller.svg')
+			h3 One player snake
+			a(href='/snake1p/presenter') /snake1p/presenter
+			br
+			a(href='/snake1p') /snake1p
+			p 
+				| Use your smartphone to control a simple snake game. The 
+				| presenter application can be started only once - use a 
+				| bigger screen like your desktop computer.
+
+		li
+			img(src='img/gameThumbs/multip-controller.svg')
+			h3 Multi player snake
+			a(href='/snakemp/presenter') /snakemp/presenter
+			br
+			a(href='/snakemp') /snakemp
+			p 
+				| Use up to four smartphones to control a multi player snake game. 
+				| The presenter application can be started only once - use a 
+				| bigger screen like your desktop computer.
+
+	h3 IP
+	| All examples assume, that the machine currently running the multi examples
+	| is reachable under the IP 192.168.0.100. You can change this IP by
+	| modifying the example scripts under 
+	em /public/js/[gameDir]
+
+	h3 Documentation
+	p The documentation can be found under 
+		em /documentation/index.html

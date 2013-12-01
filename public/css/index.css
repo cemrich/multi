@@ -1,0 +1,32 @@
+html {
+  font-family: sans-serif;
+}
+body {
+  padding: 0 1em;
+  max-width: 500px;
+  margin: auto;
+  border: 1px solid #cccccc;
+}
+.gamelist {
+  list-style-type: none;
+  list-style-position: outside;
+  padding: 0;
+}
+.gamelist li {
+  margin: 0 -1em;
+  padding: 1em;
+  border-top: 1px solid #cccccc;
+}
+.gamelist li:nth-child(odd) {
+  background-color: #eeeeee;
+}
+.gamelist li:nth-child(even) {
+  background-color: #dddddd;
+}
+.gamelist li h3 {
+  color: #2385bc;
+}
+.gamelist li img {
+  width: 170px;
+  float: left;
+}
