@@ -14,7 +14,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 	var SESSION_TOKEN = 'snake-multiplayer';
 
 	var multiOptions = {
-		server: 'http://tinelaptopsony/',
+		server: '192.168.0.100',
 		session: {
 			minPlayerNeeded: 3,
 			maxPlayerAllowed: 5,

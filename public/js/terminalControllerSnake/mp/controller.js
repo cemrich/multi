@@ -15,7 +15,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../../lib/joystick', '../
 
 	var SESSION_TOKEN = 'snake-multiplayer';
 	var multiOptions = {
-		server: 'http://tinelaptopsony/'
+		server: '192.168.0.100'
 	};
 
 	// init and try to connect

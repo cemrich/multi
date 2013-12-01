@@ -20,7 +20,7 @@ requirejs(['../../lib/multi', '/socket.io/socket.io.js', '../sound', '../layout'
 	// TODO: allow some of the callbacks to be passed through options
 	// is this possible with promises, too?
 	var multiOptions = {
-		server: 'http://tinelaptopsony/',
+		server: '192.168.0.100',
 		session: {
 			minPlayerNeeded: 2,
 			maxPlayerAllowed: 2,

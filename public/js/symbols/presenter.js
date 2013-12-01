@@ -30,6 +30,9 @@ define(function(require, exports, module) {
 			$(symbol).attr('class', 'icon');
 		}
 
+		$('#new a.session-url').text(window.location);
+		$('#new a.session-url').attr('href', window.location);
+
 		session.on('playerJoined', onPlayerConnected);
 		session.on('destroyed', function () {
 			alert('Opps - you have no connection. Try a reload when your connection returns.');

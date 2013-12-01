@@ -8,7 +8,7 @@ requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-
 		function (sound, multiModule, socketio) {
 
 	var multiOptions = {
-		server: 'http://tinelaptopsony/',
+		server: '192.168.0.100',
 		session: {
 			scriptName: 'games/symbols',
 			token: {

@@ -12,7 +12,7 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 	var joystick = null;
 
 	var multiOptions = {
-		server: 'http://tinelaptopsony/',
+		server: '192.168.0.100',
 		session: {
 			scriptName: 'games/serverOnescreenSnake.js'
 		}
