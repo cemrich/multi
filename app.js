@@ -19,7 +19,7 @@ app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(app.router);
-app.use(express.favicon('public/favicon.ico'));
+app.use(express.favicon());
 app.use(require('less-middleware')({ src: __dirname + '/public' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -27,6 +27,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 if ('development' === app.get('env')) {
 	app.use(express.errorHandler());
 }
+
+app.use(function(req, res, next) {
+	res.status(404);
+	res.redirect('/');
+});
 
 // routes
 app.get('/', routes.index);
