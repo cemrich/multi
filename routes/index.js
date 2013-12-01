@@ -1,3 +1,5 @@
+/* global exports */
+
 /**
 * @module Routes
 */
@@ -12,10 +14,6 @@ exports.index = function(req, res){
 
 
 // GAMES
-
-exports.example1 = function(req, res){
-	res.render('games/example1');
-};
 
 exports.symbols = function(req, res) {
 	res.render('games/symbols');

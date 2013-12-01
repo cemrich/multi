@@ -31,7 +31,6 @@ if ('development' === app.get('env')) {
 // routes
 app.get('/', routes.index);
 // game routes
-app.get('/example1', routes.example1);
 app.get('/symbols', routes.symbols);
 app.get('/snake1p/presenter', routes.terminalControllerSnake1pPresenter);
 app.get('/snake1p', routes.terminalControllerSnake1pPlayer);
