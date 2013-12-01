@@ -7,13 +7,21 @@
 ### How it works ###
 Before starting run `npm install` in your terminal.
 
-To start the application run `node app` in your terminal and visit http://localhost
+To start the application run `node app` in your terminal and visit http://localhost. The application tries to bind to port 80 - so this command may require root permission on unix systems.
 
 For development run `grunt jsdoc` to generate documentation and `grunt watch` to jshint all javascript files and run tests on file change.
 
+### Bundled libraries ###
+Multi comes with bundled libraries on client and server side:
+
+- [q promises library](https://github.com/kriskowal/q) - The MIT License ([MIT])
+- [watchJS](https://github.com/melanke/Watch.JS) - The MIT License ([MIT])
+
+[MIT]: http://opensource.org/licenses/MIT
+
 ### Licence ###
 
-The MIT License (MIT)
+The MIT License ([MIT])
 
 Copyright (c) 2013 cemrich
 
