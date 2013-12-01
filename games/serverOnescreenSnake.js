@@ -8,6 +8,13 @@ exports.Game = function (session) {
 
 	var snakes = [];
 
+	function Segment(startX, startY) {
+		this.startX = startX;
+		this.startY = startY;
+		this.x = startX;
+		this.y = startY;
+	}
+
 	function Snake (owner) {
 		this.owner = owner;
 
@@ -18,7 +25,11 @@ exports.Game = function (session) {
 
 		this.speed = 5;
 		this.pos = arranger.localToGlobal(display, localX, localY);
+		this.lastPos = null;
 		this.dir = -1;
+		this.lastDir = -1;
+		this.curSegment = new Segment(this.pos.x, this.pos.y);
+		this.segments = [this.curSegment];
 
 		this.update = function () {
 			this.move();
@@ -26,6 +37,8 @@ exports.Game = function (session) {
 		};
 
 		this.move = function () {
+			this.lastDir = this.dir;
+			this.lastPos = this.pos;
 			this.dir = owner.attributes.direction || 0;
 			switch (this.dir) {
 			case 0:
@@ -41,6 +54,17 @@ exports.Game = function (session) {
 				this.pos = arranger.getLeft(this.pos.x, this.pos.y, this.speed);
 				break;
 			}
+
+			if (this.dir !== this.lastDir) {
+				// direction changed - start a new segment
+				this.curSegment = new Segment(this.lastPos.x, this.lastPos.y);
+				this.segments.push(this.curSegment);
+			}
+			// TODO: local screen boundary - create a new segment
+
+			// update current segment
+			this.curSegment.x = this.pos.x;
+			this.curSegment.y = this.pos.y;
 		};
 
 		this.updateDisplay = function () {
