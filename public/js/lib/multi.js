@@ -15,7 +15,7 @@ define('events',['require','exports','module','socket.io'],function(require, exp
 	 */
 	exports.EventEmitter = require('socket.io').EventEmitter;
 
- });
+});
 /**
 * Collection of util functions and required polyfills.
 * @module client/util
@@ -549,26 +549,47 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 	var SyncedObject = function () {
 
 		EventEmitter.call(this);
-
-		/**
-		 * The wrapped data object. Changes to it's top level attributes are
-		 * detected and a {@link event:SyncedObject#changed} event is fired
-		 * in this case.
-		 * @type {Object}
-		 */
-		this.data = {};
+		this._data = {};
 		this.onAttributesChange = this.onAttributesChange.bind(this);
-
 	};
 
 	util.inherits(SyncedObject, EventEmitter);
+
+	/**
+	 * The wrapped data object. Changes to it's top level attributes are
+	 * detected and a {@link SyncedObject#event:changed changed} event is
+	 * fired in this case.
+	 * @type {Object}
+	 * @name data
+	 * @instance
+	 * @memberOf SyncedObject
+	 */
+	Object.defineProperty(SyncedObject.prototype, 'data', {
+		get: function() {
+			return this._data;
+		},
+		set: function(val) {
+			if (typeof val === 'object') {
+				// remove
+				for (var j in this._data) {
+					if (!val.propertyIsEnumerable(j)) {
+						delete this._data[j];
+					}
+				}
+				// add
+				for (var i in val) {
+					this._data[i] = val[i];
+				}
+			}
+		}
+	});
 
 	/**
 	 * Starts detecting changes to the wrapped object.
 	 * @memberOf SyncedObject
 	 */
 	SyncedObject.prototype.startWatching = function () {
-		WatchJS.watch(this.data, this.onAttributesChange, 0, true);
+		WatchJS.watch(this._data, this.onAttributesChange, 0, true);
 	};
 
 	/**
@@ -577,7 +598,7 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 	 * again any time.
 	 */
 	SyncedObject.prototype.stopWatching = function () {
-			WatchJS.unwatch(this.data, this.onAttributesChange);
+		WatchJS.unwatch(this._data, this.onAttributesChange);
 	};
 
 	/**
@@ -608,13 +629,13 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 		var propertyName;
 		if (changeset.hasOwnProperty('changed')) {
 			for (propertyName in changeset.changed) {
-				this.data[propertyName] = changeset.changed[propertyName];
+				this._data[propertyName] = changeset.changed[propertyName];
 			}
 		}
 		if (changeset.hasOwnProperty('removed')) {
 			for (var i in changeset.removed) {
 				propertyName = changeset.removed[i];
-				delete this.data[propertyName];
+				delete this._data[propertyName];
 			}
 		}
 	};
@@ -635,7 +656,7 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 			// some attributes have been added or deleted
 			for (var i in newValue.added) {
 				var propertyName = newValue.added[i];
-				changed[propertyName] = this.data[propertyName];
+				changed[propertyName] = this._data[propertyName];
 			}
 			for (var j in newValue.removed) {
 				removed.push(newValue.removed[j]);
@@ -691,9 +712,9 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	* @fires module:client/player~Player#attributesChanged
 	* @fires module:client/player~Player#disconnected
 	*
-	* @param socket ready to use socket.io socket
+	* @param messageBus ........
 	*/
-	var Player = function (socket) {
+	var Player = function (messageBus) {
 
 		EventEmitter.call(this);
 
@@ -703,12 +724,8 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		 * @private
 		 */
 		this.syncedAttributes = new SyncedObject();
-		/** 
-		 * communication socket for this player
-		 * @type {socket.io-socket}
-		 * @private
-		 */
-		this.socket = socket;
+
+		this.bus = messageBus;
 		/** 
 		 * unique id for this player
 		 * @type {string}
@@ -762,9 +779,9 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		this.onPlayerLeft = this.onPlayerLeft.bind(this);
 		this.onAttributesChanged = this.onAttributesChanged.bind(this);
 
-		this.socket.on('playerMessage', this.onPlayerMessage);
-		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
-		this.socket.on('playerLeft', this.onPlayerLeft);
+		this.bus.register('playerMessage', this.onPlayerMessage);
+		this.bus.register('playerAttributesChanged', this.onPlayerAttributesChanged);
+		this.bus.register('playerLeft', this.onPlayerLeft);
 		this.syncedAttributes.on('changed', this.onAttributesChanged);
 		this.syncedAttributes.startWatching();
 	};
@@ -781,9 +798,9 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 			this.emit('disconnected');
 			// ... and remove listeners
 			this.removeAllListeners();
-			this.socket.removeListener('playerMessage', this.onPlayerMessage);
-			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged);
-			this.socket.removeListener('playerLeft', this.onPlayerLeft);
+			this.bus.unregister('playerMessage', this.onPlayerMessage);
+			this.bus.unregister('playerAttributesChanged', this.onPlayerAttributesChanged);
+			this.bus.unregister('playerLeft', this.onPlayerLeft);
 			this.syncedAttributes.stopWatching();
 		}
 	};
@@ -820,7 +837,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.socket.emit('playerAttributesClientChanged',
+		this.bus.send('playerAttributesClientChanged',
 			{ id: this.id, changeset: changeset }
 		);
 	};
@@ -839,7 +856,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	* @param {object} [data]  message data that should be send
 	*/
 	Player.prototype.message = function (type, data) {
-		this.socket.emit('playerMessage',
+		this.bus.send('playerMessage',
 			{ id: this.id, type: type, data: data }
 		);
 	};
@@ -875,8 +892,8 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	* Unpacks a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
-	exports.fromPackedData = function (data, socket) {
-		var player = new Player(socket);
+	exports.fromPackedData = function (data, messageBus) {
+		var player = new Player(messageBus);
 		for (var i in data) {
 			if (i === 'attributes') {
 				for (var j in data[i]) {
@@ -893,15 +910,79 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 
 });
 /**
+ * @module client/messages
+ * @private
+ */
+ 
+define('messages',['require','exports','module','events'],function(require, exports, module) {
+
+	var EventEmitter = require('events').EventEmitter;
+
+	exports.MessageBus = function (socket) {
+		var messageBus = this;
+
+		this.emitter = new EventEmitter();
+		this.socket = socket;
+
+		socket.on('disconnect', function (data) {
+			messageBus.onSocketMessage('disconnect', data);
+		});
+		socket.on('sessionMessage', function (data) {
+			messageBus.onSocketMessage('sessionMessage', data);
+		});
+		socket.on('playerJoined', function (data) {
+			messageBus.onSocketMessage('playerJoined', data);
+		});
+		socket.on('playerMessage', function (data) {
+			messageBus.onSocketMessage('playerMessage', data);
+		});
+		socket.on('playerAttributesChanged', function (data) {
+			messageBus.onSocketMessage('playerAttributesChanged', data);
+		});
+		socket.on('playerLeft', function (data) {
+			messageBus.onSocketMessage('playerLeft', data);
+		});
+	};
+
+	exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData) {
+		console.log(messageName, messageData);
+		this.emitter.emit(messageName, messageData);
+	};
+
+	exports.MessageBus.prototype.send = function (messageName, messageData) {
+		this.socket.emit(messageName, messageData);
+	};
+
+	exports.MessageBus.prototype.register = function (messageName, callback) {
+		this.emitter.on(messageName, callback);
+	};
+
+	exports.MessageBus.prototype.unregister = function (messageName, callback) {
+		this.emitter.removeListener(messageName, callback);
+	};
+
+	exports.MessageBus.prototype.unregisterAll = function (messageName) {
+		this.emitter.removeAllListeners(messageName);
+	};
+
+	exports.MessageBus.prototype.disconnect = function () {
+		this.socket.disconnect();
+	};
+
+	return exports;
+
+});
+/**
  * @module client/session
  * @private
  */
 
-define('session',['require','exports','module','events','util','./player'],function(require, exports, module) {
+define('session',['require','exports','module','events','util','./player','./messages'],function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var playerModule = require('./player');
+	var MessageBus = require('./messages').MessageBus;
 
 
 	/* 
@@ -938,12 +1019,11 @@ define('session',['require','exports','module','events','util','./player'],funct
 	*
 	* @param {module:client/player~Player} myself  the player instance that 
 	* represents my own client.
-	* @param {socket} socket  a socket.io socket already connected to 
-	* the server
+	* @param {} messageBus ........
 	* @param {object} sessionData  data object from the server that
 	* describes this session
 	*/
-	var Session = function (myself, socket, sessionData) {
+	var Session = function (myself, messageBus, sessionData) {
 
 		EventEmitter.call(this);
 		var session = this;
@@ -954,13 +1034,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 		 * @readonly
 		 */
 		this.myself = myself;
-		/**
-		 * A socket.io socket connected to the server. This will
-		 * be used to send and receive messages for managing this
-		 * session.
-		 * @private
-		 */
-		this.socket = socket;
+		this.bus = messageBus;
 		/**
 		 * Dictionary of all players except myself currently 
 		 * connected to this session; mapped on their ids.
@@ -1005,16 +1079,16 @@ define('session',['require','exports','module','events','util','./player'],funct
 		 */
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
-		// add socket listeners
-		socket.on('disconnect', function (data) {
+		// add messages listeners
+		this.bus.register('disconnect', function (data) {
 			session.emit('destroyed');
-			session.socket.removeAllListeners();
+			session.bus.unregisterAll();
 			session.removeAllListeners();
 		});
-		socket.on('sessionMessage', function (data) {
+		this.bus.register('sessionMessage', function (data) {
 			session.emit(data.type, data);
 		});
-		socket.on('playerJoined', this.onPlayerConnected.bind(this));
+		this.bus.register('playerJoined', this.onPlayerConnected.bind(this));
 	};
 
 	util.inherits(Session, EventEmitter);
@@ -1032,7 +1106,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 	 */
 	Session.prototype.onPlayerConnected = function (playerData) {
 		var session = this;
-		var player = playerModule.fromPackedData(playerData, this.socket);
+		var player = playerModule.fromPackedData(playerData, this.bus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
@@ -1115,7 +1189,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.socket.emit('changePlayerJoining', { enablePlayerJoining: false });
+		this.bus.send('changePlayerJoining', { enablePlayerJoining: false });
 	};
 
 	/**
@@ -1123,7 +1197,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.socket.emit('changePlayerJoining', { enablePlayerJoining: true });
+		this.bus.send('changePlayerJoining', { enablePlayerJoining: true });
 	};
 
 	/**
@@ -1140,7 +1214,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 	* session.message('ping', { foo: 'bar' });
 	*/
 	Session.prototype.message = function (type, data) {
-		this.socket.emit('sessionMessage', { type: type, data: data });
+		this.bus.send('sessionMessage', { type: type, data: data });
 	};
 
 	/**
@@ -1150,7 +1224,7 @@ define('session',['require','exports','module','events','util','./player'],funct
 	 * @fires module:client/session~Session#destroyed
 	 */
 	Session.prototype.disconnectMyself = function () {
-		this.socket.disconnect();
+		this.bus.disconnect();
 	};
 
 
@@ -1207,8 +1281,9 @@ define('session',['require','exports','module','events','util','./player'],funct
 	* @returns {module:client/session~Session}
 	*/
 	exports.fromPackedData = function (data, socket) {
-		var myself = playerModule.fromPackedData(data.player, socket);
-		var session = new Session(myself, socket, data.session);
+		var messageBus = new MessageBus(socket);
+		var myself = playerModule.fromPackedData(data.player, messageBus);
+		var session = new Session(myself, messageBus, data.session);
 		return session;
 	};
 
@@ -1240,7 +1315,7 @@ define('../shared/color',['require','exports','module'],function(require, export
 
 	return exports;
 
- });
+});
 /* 
 * To use this with require.js AND the node.js module system (on server and client side).
 * see https://github.com/jrburke/amdefine
@@ -1360,7 +1435,7 @@ define('../shared/errors',['require','exports','module','util'],function(require
 
 	return exports;
 
- });
+});
 // vim:ts=4:sts=4:sw=4:
 /*!
  *
@@ -3458,7 +3533,6 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 *
 	 * @example
 	 * var multiOptions = {
-	 *  io: socketio,
 	 *  server: 'http://mySocketioServer/'
 	 * };
 	 *

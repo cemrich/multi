@@ -6,6 +6,7 @@
  */
 
 var EventEmitter = require('events').EventEmitter;
+var MessageBus = require('./messages').MessageBus;
 var util = require('util');
 var playerModule = require('./player');
 var token = require('./token');
@@ -66,6 +67,8 @@ var Session = function (io, options) {
 	 */
 	this.token = tokenFunction.apply(this, tokenFunctionArgs);
 
+	this.messageBus = new MessageBus(io, this.token);
+
 	/**
 	 * Dictionary of all players currently connected
 	 * to this session mapped on their ids.
@@ -73,13 +76,6 @@ var Session = function (io, options) {
 	 * @readonly
 	 */
 	this.players = {};
-
-	/**
-	 * Ready to use and listening socket.io instance
-	 * @type {socket.io}
-	 * @private
-	 */
-	this.io = io;
 	/**
 	 * if false no more clients are allowed to join this session
 	 * @private
@@ -89,6 +85,11 @@ var Session = function (io, options) {
 	this.freeNumbers = [];
 
 	EventEmitter.call(this);
+
+	this.messageBus.register('playerAttributesClientChanged', this.onPlayerAttributesClientChanged.bind(this));
+	this.messageBus.register('sessionMessage', this.onSessionMessage.bind(this));
+	this.messageBus.register('playerMessage', this.onPlayerMessage.bind(this));
+	this.messageBus.register('changePlayerJoining', this.onChangePlayerJoining.bind(this));
 
 	if (options !== undefined && options.scriptName !== undefined) {
 		var gameModule = require('../../' + options.scriptName);
@@ -161,7 +162,7 @@ Session.prototype.message = function (type, data) {
  * @private
  */
 Session.prototype.sendToPlayers = function (eventName, eventData) {
-	this.io.sockets.in(this.token).emit(eventName, eventData);
+	this.messageBus.send(eventName, eventData);
 };
 
 /**
@@ -240,7 +241,7 @@ Session.prototype.addPlayer = function (player) {
 	this.sendToPlayers('playerJoined', player.pack());
 
 	// add to collections
-	player.socket.join(this.token);
+	this.messageBus.addSocket(player.socket);
 	this.players[player.id] = player;
 
 	// add listeners
@@ -251,10 +252,6 @@ Session.prototype.addPlayer = function (player) {
 		session.sendToPlayers('playerAttributesChanged',
 			{ id: player.id, changeset: changeset });
 	});
-	player.socket.on('playerAttributesClientChanged', this.onPlayerAttributesClientChanged.bind(this));
-	player.socket.on('sessionMessage', this.onSessionMessage.bind(this));
-	player.socket.on('playerMessage', this.onPlayerMessage.bind(this));
-	player.socket.on('changePlayerJoining', this.onChangePlayerJoining.bind(this));
 
 	// inform others about this player
 	this.emit('playerJoined', { player: player });
