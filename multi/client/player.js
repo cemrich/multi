@@ -22,9 +22,9 @@ define(function(require, exports, module) {
 	* @fires module:client/player~Player#attributesChanged
 	* @fires module:client/player~Player#disconnected
 	*
-	* @param socket ready to use socket.io socket
+	* @param messageBus ........
 	*/
-	var Player = function (socket) {
+	var Player = function (messageBus) {
 
 		EventEmitter.call(this);
 
@@ -34,12 +34,8 @@ define(function(require, exports, module) {
 		 * @private
 		 */
 		this.syncedAttributes = new SyncedObject();
-		/** 
-		 * communication socket for this player
-		 * @type {socket.io-socket}
-		 * @private
-		 */
-		this.socket = socket;
+
+		this.bus = messageBus;
 		/** 
 		 * unique id for this player
 		 * @type {string}
@@ -93,9 +89,9 @@ define(function(require, exports, module) {
 		this.onPlayerLeft = this.onPlayerLeft.bind(this);
 		this.onAttributesChanged = this.onAttributesChanged.bind(this);
 
-		this.socket.on('playerMessage', this.onPlayerMessage);
-		this.socket.on('playerAttributesChanged', this.onPlayerAttributesChanged);
-		this.socket.on('playerLeft', this.onPlayerLeft);
+		this.bus.register('playerMessage', this.onPlayerMessage);
+		this.bus.register('playerAttributesChanged', this.onPlayerAttributesChanged);
+		this.bus.register('playerLeft', this.onPlayerLeft);
 		this.syncedAttributes.on('changed', this.onAttributesChanged);
 		this.syncedAttributes.startWatching();
 	};
@@ -112,9 +108,9 @@ define(function(require, exports, module) {
 			this.emit('disconnected');
 			// ... and remove listeners
 			this.removeAllListeners();
-			this.socket.removeListener('playerMessage', this.onPlayerMessage);
-			this.socket.removeListener('playerAttributesChanged', this.onPlayerAttributesChanged);
-			this.socket.removeListener('playerLeft', this.onPlayerLeft);
+			this.bus.unregister('playerMessage', this.onPlayerMessage);
+			this.bus.unregister('playerAttributesChanged', this.onPlayerAttributesChanged);
+			this.bus.unregister('playerLeft', this.onPlayerLeft);
 			this.syncedAttributes.stopWatching();
 		}
 	};
@@ -151,7 +147,7 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.socket.emit('playerAttributesClientChanged',
+		this.bus.send('playerAttributesClientChanged',
 			{ id: this.id, changeset: changeset }
 		);
 	};
@@ -170,7 +166,7 @@ define(function(require, exports, module) {
 	* @param {object} [data]  message data that should be send
 	*/
 	Player.prototype.message = function (type, data) {
-		this.socket.emit('playerMessage',
+		this.bus.send('playerMessage',
 			{ id: this.id, type: type, data: data }
 		);
 	};
@@ -206,8 +202,8 @@ define(function(require, exports, module) {
 	* Unpacks a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
-	exports.fromPackedData = function (data, socket) {
-		var player = new Player(socket);
+	exports.fromPackedData = function (data, messageBus) {
+		var player = new Player(messageBus);
 		for (var i in data) {
 			if (i === 'attributes') {
 				for (var j in data[i]) {

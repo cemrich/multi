@@ -159,7 +159,6 @@ define(function(require, exports, module) {
 	 *
 	 * @example
 	 * var multiOptions = {
-	 *  io: socketio,
 	 *  server: 'http://mySocketioServer/'
 	 * };
 	 *

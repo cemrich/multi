@@ -8,6 +8,7 @@ define(function(require, exports, module) {
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var playerModule = require('./player');
+	var MessageBus = require('./messages').MessageBus;
 
 
 	/* 
@@ -44,12 +45,11 @@ define(function(require, exports, module) {
 	*
 	* @param {module:client/player~Player} myself  the player instance that 
 	* represents my own client.
-	* @param {socket} socket  a socket.io socket already connected to 
-	* the server
+	* @param {} messageBus ........
 	* @param {object} sessionData  data object from the server that
 	* describes this session
 	*/
-	var Session = function (myself, socket, sessionData) {
+	var Session = function (myself, messageBus, sessionData) {
 
 		EventEmitter.call(this);
 		var session = this;
@@ -60,13 +60,7 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.myself = myself;
-		/**
-		 * A socket.io socket connected to the server. This will
-		 * be used to send and receive messages for managing this
-		 * session.
-		 * @private
-		 */
-		this.socket = socket;
+		this.bus = messageBus;
 		/**
 		 * Dictionary of all players except myself currently 
 		 * connected to this session; mapped on their ids.
@@ -111,16 +105,16 @@ define(function(require, exports, module) {
 		 */
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
-		// add socket listeners
-		socket.on('disconnect', function (data) {
+		// add messages listeners
+		this.bus.register('disconnect', function (data) {
 			session.emit('destroyed');
-			session.socket.removeAllListeners();
+			session.bus.unregisterAll();
 			session.removeAllListeners();
 		});
-		socket.on('sessionMessage', function (data) {
+		this.bus.register('sessionMessage', function (data) {
 			session.emit(data.type, data);
 		});
-		socket.on('playerJoined', this.onPlayerConnected.bind(this));
+		this.bus.register('playerJoined', this.onPlayerConnected.bind(this));
 	};
 
 	util.inherits(Session, EventEmitter);
@@ -138,7 +132,7 @@ define(function(require, exports, module) {
 	 */
 	Session.prototype.onPlayerConnected = function (playerData) {
 		var session = this;
-		var player = playerModule.fromPackedData(playerData, this.socket);
+		var player = playerModule.fromPackedData(playerData, this.bus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
@@ -221,7 +215,7 @@ define(function(require, exports, module) {
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.socket.emit('changePlayerJoining', { enablePlayerJoining: false });
+		this.bus.send('changePlayerJoining', { enablePlayerJoining: false });
 	};
 
 	/**
@@ -229,7 +223,7 @@ define(function(require, exports, module) {
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.socket.emit('changePlayerJoining', { enablePlayerJoining: true });
+		this.bus.send('changePlayerJoining', { enablePlayerJoining: true });
 	};
 
 	/**
@@ -246,7 +240,7 @@ define(function(require, exports, module) {
 	* session.message('ping', { foo: 'bar' });
 	*/
 	Session.prototype.message = function (type, data) {
-		this.socket.emit('sessionMessage', { type: type, data: data });
+		this.bus.send('sessionMessage', { type: type, data: data });
 	};
 
 	/**
@@ -256,7 +250,7 @@ define(function(require, exports, module) {
 	 * @fires module:client/session~Session#destroyed
 	 */
 	Session.prototype.disconnectMyself = function () {
-		this.socket.disconnect();
+		this.bus.disconnect();
 	};
 
 
@@ -313,8 +307,9 @@ define(function(require, exports, module) {
 	* @returns {module:client/session~Session}
 	*/
 	exports.fromPackedData = function (data, socket) {
-		var myself = playerModule.fromPackedData(data.player, socket);
-		var session = new Session(myself, socket, data.session);
+		var messageBus = new MessageBus(socket);
+		var myself = playerModule.fromPackedData(data.player, messageBus);
+		var session = new Session(myself, messageBus, data.session);
 		return session;
 	};
 
