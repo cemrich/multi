@@ -86,7 +86,6 @@ var Session = function (io, options) {
 
 	EventEmitter.call(this);
 
-	this.messageBus.register('playerAttributesClientChanged', this.onPlayerAttributesClientChanged.bind(this));
 	this.messageBus.register('sessionMessage', this.onSessionMessage.bind(this));
 	this.messageBus.register('changePlayerJoining', this.onChangePlayerJoining.bind(this));
 
@@ -112,20 +111,7 @@ Session.prototype.onChangePlayerJoining = function (data) {
  * @private
  */
 Session.prototype.onSessionMessage = function (data) {
-	this.sendToPlayers('sessionMessage', { type: data.type, data: data.data });
 	this.emit(data.type, { type: data.type, data: data.data });
-};
-
-/**
- * Some players attributes were changed on the client side. 
- * Apply the changes to the affected player.
- * @private
- */
-Session.prototype.onPlayerAttributesClientChanged = function (data) {
-	var player = this.players[data.id];
-	if (typeof player !== 'undefined') {
-		player.updateAttributes(data.changeset);
-	}
 };
 
 /**
@@ -142,18 +128,7 @@ Session.prototype.onPlayerAttributesClientChanged = function (data) {
 * session.message('ping', { foo: 'bar' });
 */
 Session.prototype.message = function (type, data) {
-	this.sendToPlayers('sessionMessage', { type: type, data: data });
-};
-
-/**
- * Relays a given event to all players currently connected
- * to this session. 
- * @param {string} eventName       name of the event
- * @param {object} [eventData={}]  optional event data
- * @private
- */
-Session.prototype.sendToPlayers = function (eventName, eventData) {
-	this.messageBus.send(eventName, eventData);
+	this.messageBus.send('sessionMessage', { type: type, data: data });
 };
 
 /**
@@ -229,7 +204,7 @@ Session.prototype.addPlayer = function (player) {
 	var session = this;
 
 	// inform clients expect added player about this player
-	this.sendToPlayers('playerJoined', player.pack());
+	this.messageBus.send('playerJoined', player.pack());
 
 	// add to collections
 	this.messageBus.addSocket(player.socket);
@@ -238,10 +213,6 @@ Session.prototype.addPlayer = function (player) {
 	// add listeners
 	player.on('disconnected', function(event) {
 		session.removePlayer(player);
-	});
-	player.on('attributesChanged', function (changeset) {
-		session.sendToPlayers('playerAttributesChanged',
-			{ id: player.id, changeset: changeset });
 	});
 
 	// inform others about this player
@@ -261,7 +232,7 @@ Session.prototype.removePlayer = function (player) {
 	this.freeNumbers.push(player.number);
 	delete this.players[player.id];
 	this.emit('playerLeft', { player: player });
-	this.sendToPlayers('playerLeft', { playerId: player.id });
+	this.messageBus.send('playerLeft', { playerId: player.id });
 	if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
 		this.emit('belowMinPlayerNeeded');
 	}

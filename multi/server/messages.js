@@ -20,18 +20,22 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 		messageBus.onSocketMessage('playerAttributesClientChanged', data);
 	});
 	socket.on('sessionMessage', function (data) {
-		messageBus.onSocketMessage('sessionMessage', data);
+		messageBus.onSocketMessage('sessionMessage', data, true);
 	});
 	socket.on('playerMessage', function (data) {
-		messageBus.onSocketMessage('playerMessage', data);
+		messageBus.onSocketMessage('playerMessage', data, true);
 	});
 	socket.on('changePlayerJoining', function (data) {
 		messageBus.onSocketMessage('changePlayerJoining', data);
 	});
 };
 
-exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData) {
+exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData, redestribute) {
 	console.log(messageName, messageData);
+	// redestribute by default
+	if (redestribute === true) {
+		this.send(messageName, messageData);
+	}
 	this.emitter.emit(messageName, messageData);
 };
 
