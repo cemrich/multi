@@ -100,7 +100,7 @@ var Player = function (socket, messageBus, playerParams) {
 	this.onAttributesChanged = this.onAttributesChanged.bind(this);
 	this.socket.on('disconnect', this.onDisconnect.bind(this));
 	this.messageBus.register('playerMessage', this.onPlayerMessage.bind(this));
-	this.messageBus.register('playerAttributesClientChanged', this.onAttributesClientChanged.bind(this));
+	this.messageBus.register('playerAttributesChanged', this.onAttributesChangedOnClient.bind(this));
 	this.syncedAttributes.on('changed', this.onAttributesChanged);
 	this.syncedAttributes.startWatching();
 };
@@ -135,7 +135,7 @@ Player.prototype.onDisconnect = function () {
  * Apply the changes.
  * @private
  */
-Player.prototype.onAttributesClientChanged = function (data) {
+Player.prototype.onAttributesChangedOnClient = function (data) {
 	if (data.id === this.id) {
 		this.updateAttributes(data.changeset);
 	}

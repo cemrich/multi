@@ -837,7 +837,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.bus.sendToServer('playerAttributesClientChanged',
+		this.bus.sendToServer('playerAttributesChanged',
 			{ id: this.id, changeset: changeset }
 		);
 	};
@@ -946,15 +946,27 @@ define('messages',['require','exports','module','events'],function(require, expo
 
 	exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData) {
 		console.log(messageName, messageData);
-		this.emitter.emit(messageName, messageData);
+		if (typeof messageData !== 'undefined' && messageData.hasOwnProperty('data')) {
+			this.emitter.emit(messageName, messageData.data);
+		} else {
+			this.emitter.emit(messageName, messageData);
+		}
 	};
 
 	exports.MessageBus.prototype.sendToServer = function (messageName, messageData) {
-		this.socket.emit(messageName, { data: messageData });
+		console.log('sentToServer', messageName, messageData);
+		this.socket.emit(messageName, {
+			data: messageData,
+			from: {}
+		});
 	};
 
 	exports.MessageBus.prototype.send = function (messageName, messageData) {
-		this.socket.emit(messageName, { data: messageData, redistribute: true });
+		this.socket.emit(messageName, {
+			data: messageData,
+			from: {},
+			redistribute: true
+		});
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, callback) {
