@@ -11,11 +11,6 @@ exports.MessageBus = function (io, token) {
 	this.io = io;
 	this.token = token;
 	this.emitter = new EventEmitter();
-
-	//this.sockets = this.io.sockets.in(this.token);
-	//sockets.on('playerAttributesClientChanged', function (data) {
-
-	//});
 };
 
 exports.MessageBus.prototype.addSocket = function (socket) {
@@ -40,10 +35,12 @@ exports.MessageBus.prototype.onSocketMessage = function (messageName, messageDat
 	this.emitter.emit(messageName, messageData);
 };
 
+// sends to ALL sockets in this session
 exports.MessageBus.prototype.send = function (messageName, messageData) {
 	this.io.sockets.in(this.token).emit(messageName, messageData);
 };
 
+// receives events from ALL sockets in this session
 exports.MessageBus.prototype.register = function (messageName, callback) {
 	this.emitter.on(messageName, callback);
 };

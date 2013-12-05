@@ -31,7 +31,7 @@ var SyncedObject = require('../shared/SyncedObject');
  * @param {socket.io-socket} socket  communication socket for the new player
  * @param {module:server/player~PlayerParams} playerParams
  */
-var Player = function (socket, playerParams) {
+var Player = function (socket, messageBus, playerParams) {
 
 	/**
 	 * wrapper for this players attributes
@@ -45,6 +45,7 @@ var Player = function (socket, playerParams) {
 	 * @private
 	 */
 	this.socket = socket;
+	this.messageBus = messageBus;
 	/** 
 	 * unique id for this player
 	 * @type {string}
@@ -98,7 +99,7 @@ var Player = function (socket, playerParams) {
 	// listeners
 	this.onAttributesChanged = this.onAttributesChanged.bind(this);
 	this.socket.on('disconnect', this.onDisconnect.bind(this));
-	this.socket.on('playerMessage', this.onPlayerMessage.bind(this));
+	this.messageBus.register('playerMessage', this.onPlayerMessage.bind(this));
 	this.syncedAttributes.on('changed', this.onAttributesChanged);
 	this.syncedAttributes.startWatching();
 };
@@ -112,6 +113,7 @@ util.inherits(Player, EventEmitter);
  */
 Player.prototype.onPlayerMessage = function (data) {
 	if (data.id === this.id) {
+		this.messageBus.send('playerMessage', { id: data.id, type: data.type, data: data.data });
 		this.emit(data.type, { type: data.type, data: data.data });
 	}
 };
@@ -162,7 +164,7 @@ Player.prototype.updateAttributes = function (changeset) {
  * @param {object} [data]  message data that should be send
  */
 Player.prototype.message = function (type, data) {
-	this.socket.emit('playerMessage',
+	this.messageBus.send('playerMessage',
 		{ id: this.id, type: type, data: data }
 	);
 };
@@ -215,6 +217,6 @@ exports.compare = function (p1, p2) {
  * @param {module:server/player~PlayerParams} playerParams
  * @returns {module:server/player~Player}  newly created player
  */
-exports.create = function(socket, playerParams) {
-	return new Player(socket, playerParams);
+exports.create = function(socket, messageBus, playerParams) {
+	return new Player(socket, messageBus, playerParams);
 };

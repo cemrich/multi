@@ -59,7 +59,7 @@ var Multi = function (server) {
 						reason: 'joiningDisabled'
 					});
 				} else {
-					var player = playerModule.create(socket, event.playerParams);
+					var player = playerModule.create(socket, session.messageBus, event.playerParams);
 					player.role = 'player';
 					player.number = session.getNextFreePlayerNumber();
 					socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
@@ -77,7 +77,7 @@ var Multi = function (server) {
 				});
 			} else {
 				multi.emit('sessionCreated', { session: session });
-				var player = playerModule.create(socket, event.playerParams);
+				var player = playerModule.create(socket, session.messageBus, event.playerParams);
 				player.role = 'presenter';
 				player.number = session.getNextFreePlayerNumber();
 				socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });

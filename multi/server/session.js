@@ -88,7 +88,6 @@ var Session = function (io, options) {
 
 	this.messageBus.register('playerAttributesClientChanged', this.onPlayerAttributesClientChanged.bind(this));
 	this.messageBus.register('sessionMessage', this.onSessionMessage.bind(this));
-	this.messageBus.register('playerMessage', this.onPlayerMessage.bind(this));
 	this.messageBus.register('changePlayerJoining', this.onChangePlayerJoining.bind(this));
 
 	if (options !== undefined && options.scriptName !== undefined) {
@@ -115,14 +114,6 @@ Session.prototype.onChangePlayerJoining = function (data) {
 Session.prototype.onSessionMessage = function (data) {
 	this.sendToPlayers('sessionMessage', { type: data.type, data: data.data });
 	this.emit(data.type, { type: data.type, data: data.data });
-};
-
-/**
- * Some player emitted a message. Distribute to _all_ clients. 
- * @private
- */
-Session.prototype.onPlayerMessage = function (data) {
-	this.sendToPlayers('playerMessage', { id: data.id, type: data.type, data: data.data });
 };
 
 /**
