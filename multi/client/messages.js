@@ -38,8 +38,12 @@ define(function(require, exports, module) {
 		this.emitter.emit(messageName, messageData);
 	};
 
+	exports.MessageBus.prototype.sendToServer = function (messageName, messageData) {
+		this.socket.emit(messageName, { data: messageData });
+	};
+
 	exports.MessageBus.prototype.send = function (messageName, messageData) {
-		this.socket.emit(messageName, messageData);
+		this.socket.emit(messageName, { data: messageData, redistribute: true });
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, callback) {

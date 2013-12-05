@@ -837,7 +837,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.bus.send('playerAttributesClientChanged',
+		this.bus.sendToServer('playerAttributesClientChanged',
 			{ id: this.id, changeset: changeset }
 		);
 	};
@@ -949,8 +949,12 @@ define('messages',['require','exports','module','events'],function(require, expo
 		this.emitter.emit(messageName, messageData);
 	};
 
+	exports.MessageBus.prototype.sendToServer = function (messageName, messageData) {
+		this.socket.emit(messageName, { data: messageData });
+	};
+
 	exports.MessageBus.prototype.send = function (messageName, messageData) {
-		this.socket.emit(messageName, messageData);
+		this.socket.emit(messageName, { data: messageData, redistribute: true });
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, callback) {
@@ -1189,7 +1193,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.bus.send('changePlayerJoining', { enablePlayerJoining: false });
+		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: false });
 	};
 
 	/**
@@ -1197,7 +1201,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.bus.send('changePlayerJoining', { enablePlayerJoining: true });
+		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: true });
 	};
 
 	/**

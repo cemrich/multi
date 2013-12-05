@@ -20,23 +20,22 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 		messageBus.onSocketMessage('playerAttributesClientChanged', data);
 	});
 	socket.on('sessionMessage', function (data) {
-		messageBus.onSocketMessage('sessionMessage', data, true);
+		messageBus.onSocketMessage('sessionMessage', data);
 	});
 	socket.on('playerMessage', function (data) {
-		messageBus.onSocketMessage('playerMessage', data, true);
+		messageBus.onSocketMessage('playerMessage', data);
 	});
 	socket.on('changePlayerJoining', function (data) {
 		messageBus.onSocketMessage('changePlayerJoining', data);
 	});
 };
 
-exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData, redestribute) {
+exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData) {
 	console.log(messageName, messageData);
-	// redestribute by default
-	if (redestribute === true) {
-		this.send(messageName, messageData);
+	if (messageData.redistribute === true) {
+		this.send(messageName, messageData.data);
 	}
-	this.emitter.emit(messageName, messageData);
+	this.emitter.emit(messageName, messageData.data);
 };
 
 // sends to ALL sockets in this session

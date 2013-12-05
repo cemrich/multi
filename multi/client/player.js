@@ -147,7 +147,7 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.bus.send('playerAttributesClientChanged',
+		this.bus.sendToServer('playerAttributesClientChanged',
 			{ id: this.id, changeset: changeset }
 		);
 	};

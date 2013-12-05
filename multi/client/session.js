@@ -215,7 +215,7 @@ define(function(require, exports, module) {
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.bus.send('changePlayerJoining', { enablePlayerJoining: false });
+		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: false });
 	};
 
 	/**
@@ -223,7 +223,7 @@ define(function(require, exports, module) {
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.bus.send('changePlayerJoining', { enablePlayerJoining: true });
+		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: true });
 	};
 
 	/**
