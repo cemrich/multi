@@ -128,7 +128,7 @@ Session.prototype.onSessionMessage = function (data) {
 * session.message('ping', { foo: 'bar' });
 */
 Session.prototype.message = function (type, data) {
-	this.messageBus.send('sessionMessage', { type: type, data: data });
+	this.messageBus.send('sessionMessage', { type: type, data: data }, 'session');
 };
 
 /**
@@ -204,7 +204,7 @@ Session.prototype.addPlayer = function (player) {
 	var session = this;
 
 	// inform clients expect added player about this player
-	this.messageBus.send('playerJoined', player.pack());
+	this.messageBus.send('playerJoined', player.pack(), 'session');
 
 	// add to collections
 	this.messageBus.addSocket(player.socket);
@@ -232,7 +232,7 @@ Session.prototype.removePlayer = function (player) {
 	this.freeNumbers.push(player.number);
 	delete this.players[player.id];
 	this.emit('playerLeft', { player: player });
-	this.messageBus.send('playerLeft', { playerId: player.id });
+	this.messageBus.send('playerLeft', { playerId: player.id }, 'session');
 	if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
 		this.emit('belowMinPlayerNeeded');
 	}

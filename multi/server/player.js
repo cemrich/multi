@@ -148,7 +148,9 @@ Player.prototype.onAttributesChangedOnClient = function (data) {
  */
 Player.prototype.onAttributesChanged = function (changeset) {
 	this.messageBus.send('playerAttributesChanged',
-			{ id: this.id, changeset: changeset });
+		{ id: this.id, changeset: changeset },
+		this.id
+	);
 	this.emit('attributesChanged', changeset);
 };
 
@@ -178,7 +180,8 @@ Player.prototype.updateAttributes = function (changeset) {
  */
 Player.prototype.message = function (type, data) {
 	this.messageBus.send('playerMessage',
-		{ id: this.id, type: type, data: data }
+		{ id: this.id, type: type, data: data },
+		this.id
 	);
 };
 

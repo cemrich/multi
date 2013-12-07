@@ -838,7 +838,8 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
 		this.bus.sendToServer('playerAttributesChanged',
-			{ id: this.id, changeset: changeset }
+			{ id: this.id, changeset: changeset },
+			this.id
 		);
 	};
 
@@ -925,46 +926,35 @@ define('messages',['require','exports','module','events'],function(require, expo
 		this.socket = socket;
 
 		socket.on('disconnect', function (data) {
-			messageBus.onSocketMessage('disconnect', data);
+			messageBus.onSocketMessage({
+				name: 'disconnect',
+				data: data
+			});
 		});
-		socket.on('sessionMessage', function (data) {
-			messageBus.onSocketMessage('sessionMessage', data);
-		});
-		socket.on('playerJoined', function (data) {
-			messageBus.onSocketMessage('playerJoined', data);
-		});
-		socket.on('playerMessage', function (data) {
-			messageBus.onSocketMessage('playerMessage', data);
-		});
-		socket.on('playerAttributesChanged', function (data) {
-			messageBus.onSocketMessage('playerAttributesChanged', data);
-		});
-		socket.on('playerLeft', function (data) {
-			messageBus.onSocketMessage('playerLeft', data);
+		socket.on('multi', function (data) {
+			messageBus.onSocketMessage(data);
 		});
 	};
 
-	exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData) {
-		console.log(messageName, messageData);
-		if (typeof messageData !== 'undefined' && messageData.hasOwnProperty('data')) {
-			this.emitter.emit(messageName, messageData.data);
-		} else {
-			this.emitter.emit(messageName, messageData);
-		}
+	exports.MessageBus.prototype.onSocketMessage = function (message) {
+		console.log(JSON.stringify(message));
+		this.emitter.emit(message.name, message.data);
 	};
 
-	exports.MessageBus.prototype.sendToServer = function (messageName, messageData) {
+	exports.MessageBus.prototype.sendToServer = function (messageName, messageData, instance) {
 		console.log('sentToServer', messageName, messageData);
-		this.socket.emit(messageName, {
+		this.socket.emit('multi', {
+			name: messageName,
 			data: messageData,
-			from: {}
+			from: { instance: instance }
 		});
 	};
 
-	exports.MessageBus.prototype.send = function (messageName, messageData) {
-		this.socket.emit(messageName, {
+	exports.MessageBus.prototype.send = function (messageName, messageData, instance) {
+		this.socket.emit('multi', {
+			name: messageName,
 			data: messageData,
-			from: {},
+			from: { instance: instance },
 			redistribute: true
 		});
 	};
@@ -1205,7 +1195,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: false });
+		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: false }, 'session');
 	};
 
 	/**
@@ -1213,7 +1203,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: true });
+		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: true }, 'session');
 	};
 
 	/**
@@ -1230,7 +1220,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	* session.message('ping', { foo: 'bar' });
 	*/
 	Session.prototype.message = function (type, data) {
-		this.bus.send('sessionMessage', { type: type, data: data });
+		this.bus.send('sessionMessage', { type: type, data: data }, 'session');
 	};
 
 	/**

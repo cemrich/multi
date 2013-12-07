@@ -16,40 +16,32 @@ exports.MessageBus = function (io, token) {
 exports.MessageBus.prototype.addSocket = function (socket) {
 	var messageBus = this;
 	socket.join(this.token);
-	socket.on('playerAttributesChanged', function (data) {
-		messageBus.onSocketMessage('playerAttributesChanged', data, socket);
-	});
-	socket.on('sessionMessage', function (data) {
-		messageBus.onSocketMessage('sessionMessage', data, socket);
-	});
-	socket.on('playerMessage', function (data) {
-		messageBus.onSocketMessage('playerMessage', data, socket);
-	});
-	socket.on('changePlayerJoining', function (data) {
-		messageBus.onSocketMessage('changePlayerJoining', data, socket);
+	socket.on('multi', function (data) {
+		messageBus.onSocketMessage(data, socket);
 	});
 };
 
-exports.MessageBus.prototype.onSocketMessage = function (messageName, messageData, socket) {
-	console.log(messageName, messageData);
-	messageData.from.owner = socket.id;
-	if (messageData.redistribute === true) {
-		this._send(messageName, messageData);
+exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
+	console.log(message);
+	message.from.owner = socket.id;
+	if (message.redistribute === true) {
+		this._send(message);
 		// TODO: make it possible to exclude sender:
 		// socket.broadcast.to(this.token).emit(messageName, messageData);
 	}
-	this.emitter.emit(messageName, messageData.data);
+	this.emitter.emit(message.name, message.data);
 };
 
 // sends to ALL sockets in this session
-exports.MessageBus.prototype._send = function (messageName, messageData) {
-	this.io.sockets.in(this.token).emit(messageName, messageData);
+exports.MessageBus.prototype._send = function (message) {
+	this.io.sockets.in(this.token).emit('multi', message);
 };
 
 // sends to ALL sockets in this session
-exports.MessageBus.prototype.send = function (messageName, messageData) {
-	this._send(messageName, {
-		from: { owner: 'server' },
+exports.MessageBus.prototype.send = function (messageName, messageData, instance) {
+	this._send({
+		name: messageName,
+		from: { owner: 'server', instance: instance },
 		data: messageData
 	});
 };
