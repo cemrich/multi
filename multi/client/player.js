@@ -24,7 +24,7 @@ define(function(require, exports, module) {
 	*
 	* @param messageBus ........
 	*/
-	var Player = function (messageBus) {
+	var Player = function (id, messageBus) {
 
 		EventEmitter.call(this);
 
@@ -41,7 +41,7 @@ define(function(require, exports, module) {
 		 * @type {string}
 		 * @readonly
 		 */
-		this.id = null;
+		this.id = id;
 		/**
 		 * Role that is fulfilled by this
 		 * player. Either 'presenter' or 'player'.
@@ -84,15 +84,13 @@ define(function(require, exports, module) {
 		this.height = null;
 
 		// listeners
-		this.onPlayerMessage = this.onPlayerMessage.bind(this);
-		this.onPlayerAttributesChanged = this.onPlayerAttributesChanged.bind(this);
-		this.onPlayerLeft = this.onPlayerLeft.bind(this);
-		this.onAttributesChanged = this.onAttributesChanged.bind(this);
-
-		this.bus.register('playerMessage', this.onPlayerMessage);
-		this.bus.register('playerAttributesChanged', this.onPlayerAttributesChanged);
-		this.bus.register('playerLeft', this.onPlayerLeft);
-		this.syncedAttributes.on('changed', this.onAttributesChanged);
+		this.messageRegister = this.bus.register('playerMessage',
+			this.id, this.onPlayerMessage.bind(this));
+		this.attributeRegister = this.bus.register('playerAttributesChanged',
+			this.id, this.onPlayerAttributesChanged.bind(this));
+		this.leftRegister = this.bus.register('disconnected',
+			this.id, this.onDisconnected.bind(this));
+		this.syncedAttributes.on('changed', this.onAttributesChanged.bind(this));
 		this.syncedAttributes.startWatching();
 	};
 
@@ -102,27 +100,24 @@ define(function(require, exports, module) {
 	 * Called when any player left its session.
 	 * @private
 	 */
-	Player.prototype.onPlayerLeft = function (data) {
-		if (data.playerId === this.id) {
-			// I do not longer exist - inform...
-			this.emit('disconnected');
-			// ... and remove listeners
-			this.removeAllListeners();
-			this.bus.unregister('playerMessage', this.onPlayerMessage);
-			this.bus.unregister('playerAttributesChanged', this.onPlayerAttributesChanged);
-			this.bus.unregister('playerLeft', this.onPlayerLeft);
-			this.syncedAttributes.stopWatching();
-		}
+	Player.prototype.onDisconnected = function (message) {
+		// I do not longer exist - inform...
+		this.emit('disconnected');
+		// ... and remove listeners
+		this.removeAllListeners();
+		this.bus.unregister(this.messageRegister);
+		this.bus.unregister(this.attributeRegister);
+		this.bus.unregister(this.leftRegister);
+		this.syncedAttributes.stopWatching();
 	};
 
 	/**
 	 * Called when this socket receives a message for any player.
 	 * @private
 	 */
-	Player.prototype.onPlayerMessage = function (data) {
-		if (data.id === this.id) {
-			this.emit(data.type, { type: data.type, data: data.data } );
-		}
+	Player.prototype.onPlayerMessage = function (message) {
+		var data = message.data;
+		this.emit(data.type, { type: data.type, data: data.data } );
 	};
 
 	/**
@@ -130,13 +125,12 @@ define(function(require, exports, module) {
 	 * on server side.
 	 * @private
 	 */
-	Player.prototype.onPlayerAttributesChanged = function (data) {
-		if (data.id === this.id) {
-			this.syncedAttributes.applyChangesetSilently(data.changeset);
-			if (data.changeset.hasOwnProperty('changed')) {
-				for (var i in data.changeset.changed) {
-					this.emit('attributesChanged', { key: i, value: this.attributes[i]});
-				}
+	Player.prototype.onPlayerAttributesChanged = function (message) {
+		var data = message.data;
+		this.syncedAttributes.applyChangesetSilently(data.changeset);
+		if (data.changeset.hasOwnProperty('changed')) {
+			for (var i in data.changeset.changed) {
+				this.emit('attributesChanged', { key: i, value: this.attributes[i]});
 			}
 		}
 	};
@@ -168,7 +162,8 @@ define(function(require, exports, module) {
 	*/
 	Player.prototype.message = function (type, data) {
 		this.bus.send('playerMessage',
-			{ id: this.id, type: type, data: data }
+			{ id: this.id, type: type, data: data },
+			this.id
 		);
 	};
 
@@ -204,7 +199,7 @@ define(function(require, exports, module) {
 	* @returns {module:client/player~Player}
 	*/
 	exports.fromPackedData = function (data, messageBus) {
-		var player = new Player(messageBus);
+		var player = new Player(data.id, messageBus);
 		for (var i in data) {
 			if (i === 'attributes') {
 				for (var j in data[i]) {

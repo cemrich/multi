@@ -5,17 +5,16 @@
  
 define(function(require, exports, module) {
 
-	var EventEmitter = require('events').EventEmitter;
-
 	exports.MessageBus = function (socket) {
 		var messageBus = this;
 
-		this.emitter = new EventEmitter();
 		this.socket = socket;
+		this.listeners = [];
 
 		socket.on('disconnect', function (data) {
 			messageBus.onSocketMessage({
 				name: 'disconnect',
+				from: { instance: 'session' },
 				data: data
 			});
 		});
@@ -25,12 +24,14 @@ define(function(require, exports, module) {
 	};
 
 	exports.MessageBus.prototype.onSocketMessage = function (message) {
-		console.log(JSON.stringify(message));
-		this.emitter.emit(message.name, message.data);
+		// console.log(JSON.stringify(message));
+		var listeners = this.listeners;
+		for (var i in listeners) {
+			listeners[i](message);
+		}
 	};
 
 	exports.MessageBus.prototype.sendToServer = function (messageName, messageData, instance) {
-		console.log('sentToServer', messageName, messageData);
 		this.socket.emit('multi', {
 			name: messageName,
 			data: messageData,
@@ -47,16 +48,25 @@ define(function(require, exports, module) {
 		});
 	};
 
-	exports.MessageBus.prototype.register = function (messageName, callback) {
-		this.emitter.on(messageName, callback);
+	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
+		var registerFunc = function (message) {
+			if (instance === message.from.instance && messageName === message.name) {
+				callback(message);
+			}
+		};
+		this.listeners.push(registerFunc);
+		return registerFunc;
 	};
 
-	exports.MessageBus.prototype.unregister = function (messageName, callback) {
-		this.emitter.removeListener(messageName, callback);
+	exports.MessageBus.prototype.unregister = function (register) {
+		var index = this.listeners.indexOf(register);
+		if (index !== -1) {
+			this.listeners.splice(index, 1);
+		}
 	};
 
-	exports.MessageBus.prototype.unregisterAll = function (messageName) {
-		this.emitter.removeAllListeners(messageName);
+	exports.MessageBus.prototype.unregisterAll = function () {
+		this.listeners = [];
 	};
 
 	exports.MessageBus.prototype.disconnect = function () {

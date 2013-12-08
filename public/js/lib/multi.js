@@ -714,7 +714,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	*
 	* @param messageBus ........
 	*/
-	var Player = function (messageBus) {
+	var Player = function (id, messageBus) {
 
 		EventEmitter.call(this);
 
@@ -731,7 +731,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		 * @type {string}
 		 * @readonly
 		 */
-		this.id = null;
+		this.id = id;
 		/**
 		 * Role that is fulfilled by this
 		 * player. Either 'presenter' or 'player'.
@@ -774,15 +774,13 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		this.height = null;
 
 		// listeners
-		this.onPlayerMessage = this.onPlayerMessage.bind(this);
-		this.onPlayerAttributesChanged = this.onPlayerAttributesChanged.bind(this);
-		this.onPlayerLeft = this.onPlayerLeft.bind(this);
-		this.onAttributesChanged = this.onAttributesChanged.bind(this);
-
-		this.bus.register('playerMessage', this.onPlayerMessage);
-		this.bus.register('playerAttributesChanged', this.onPlayerAttributesChanged);
-		this.bus.register('playerLeft', this.onPlayerLeft);
-		this.syncedAttributes.on('changed', this.onAttributesChanged);
+		this.messageRegister = this.bus.register('playerMessage',
+			this.id, this.onPlayerMessage.bind(this));
+		this.attributeRegister = this.bus.register('playerAttributesChanged',
+			this.id, this.onPlayerAttributesChanged.bind(this));
+		this.leftRegister = this.bus.register('disconnected',
+			this.id, this.onDisconnected.bind(this));
+		this.syncedAttributes.on('changed', this.onAttributesChanged.bind(this));
 		this.syncedAttributes.startWatching();
 	};
 
@@ -792,27 +790,24 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * Called when any player left its session.
 	 * @private
 	 */
-	Player.prototype.onPlayerLeft = function (data) {
-		if (data.playerId === this.id) {
-			// I do not longer exist - inform...
-			this.emit('disconnected');
-			// ... and remove listeners
-			this.removeAllListeners();
-			this.bus.unregister('playerMessage', this.onPlayerMessage);
-			this.bus.unregister('playerAttributesChanged', this.onPlayerAttributesChanged);
-			this.bus.unregister('playerLeft', this.onPlayerLeft);
-			this.syncedAttributes.stopWatching();
-		}
+	Player.prototype.onDisconnected = function (message) {
+		// I do not longer exist - inform...
+		this.emit('disconnected');
+		// ... and remove listeners
+		this.removeAllListeners();
+		this.bus.unregister(this.messageRegister);
+		this.bus.unregister(this.attributeRegister);
+		this.bus.unregister(this.leftRegister);
+		this.syncedAttributes.stopWatching();
 	};
 
 	/**
 	 * Called when this socket receives a message for any player.
 	 * @private
 	 */
-	Player.prototype.onPlayerMessage = function (data) {
-		if (data.id === this.id) {
-			this.emit(data.type, { type: data.type, data: data.data } );
-		}
+	Player.prototype.onPlayerMessage = function (message) {
+		var data = message.data;
+		this.emit(data.type, { type: data.type, data: data.data } );
 	};
 
 	/**
@@ -820,13 +815,12 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * on server side.
 	 * @private
 	 */
-	Player.prototype.onPlayerAttributesChanged = function (data) {
-		if (data.id === this.id) {
-			this.syncedAttributes.applyChangesetSilently(data.changeset);
-			if (data.changeset.hasOwnProperty('changed')) {
-				for (var i in data.changeset.changed) {
-					this.emit('attributesChanged', { key: i, value: this.attributes[i]});
-				}
+	Player.prototype.onPlayerAttributesChanged = function (message) {
+		var data = message.data;
+		this.syncedAttributes.applyChangesetSilently(data.changeset);
+		if (data.changeset.hasOwnProperty('changed')) {
+			for (var i in data.changeset.changed) {
+				this.emit('attributesChanged', { key: i, value: this.attributes[i]});
 			}
 		}
 	};
@@ -858,7 +852,8 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	*/
 	Player.prototype.message = function (type, data) {
 		this.bus.send('playerMessage',
-			{ id: this.id, type: type, data: data }
+			{ id: this.id, type: type, data: data },
+			this.id
 		);
 	};
 
@@ -894,7 +889,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	* @returns {module:client/player~Player}
 	*/
 	exports.fromPackedData = function (data, messageBus) {
-		var player = new Player(messageBus);
+		var player = new Player(data.id, messageBus);
 		for (var i in data) {
 			if (i === 'attributes') {
 				for (var j in data[i]) {
@@ -915,19 +910,18 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
  * @private
  */
  
-define('messages',['require','exports','module','events'],function(require, exports, module) {
-
-	var EventEmitter = require('events').EventEmitter;
+define('messages',['require','exports','module'],function(require, exports, module) {
 
 	exports.MessageBus = function (socket) {
 		var messageBus = this;
 
-		this.emitter = new EventEmitter();
 		this.socket = socket;
+		this.listeners = [];
 
 		socket.on('disconnect', function (data) {
 			messageBus.onSocketMessage({
 				name: 'disconnect',
+				from: { instance: 'session' },
 				data: data
 			});
 		});
@@ -937,12 +931,14 @@ define('messages',['require','exports','module','events'],function(require, expo
 	};
 
 	exports.MessageBus.prototype.onSocketMessage = function (message) {
-		console.log(JSON.stringify(message));
-		this.emitter.emit(message.name, message.data);
+		// console.log(JSON.stringify(message));
+		var listeners = this.listeners;
+		for (var i in listeners) {
+			listeners[i](message);
+		}
 	};
 
 	exports.MessageBus.prototype.sendToServer = function (messageName, messageData, instance) {
-		console.log('sentToServer', messageName, messageData);
 		this.socket.emit('multi', {
 			name: messageName,
 			data: messageData,
@@ -959,16 +955,25 @@ define('messages',['require','exports','module','events'],function(require, expo
 		});
 	};
 
-	exports.MessageBus.prototype.register = function (messageName, callback) {
-		this.emitter.on(messageName, callback);
+	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
+		var registerFunc = function (message) {
+			if (instance === message.from.instance && messageName === message.name) {
+				callback(message);
+			}
+		};
+		this.listeners.push(registerFunc);
+		return registerFunc;
 	};
 
-	exports.MessageBus.prototype.unregister = function (messageName, callback) {
-		this.emitter.removeListener(messageName, callback);
+	exports.MessageBus.prototype.unregister = function (register) {
+		var index = this.listeners.indexOf(register);
+		if (index !== -1) {
+			this.listeners.splice(index, 1);
+		}
 	};
 
-	exports.MessageBus.prototype.unregisterAll = function (messageName) {
-		this.emitter.removeAllListeners(messageName);
+	exports.MessageBus.prototype.unregisterAll = function () {
+		this.listeners = [];
 	};
 
 	exports.MessageBus.prototype.disconnect = function () {
@@ -1074,7 +1079,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 		}
 		// unpack players
 		for (i in packedPlayers) {
-			this.onPlayerConnected(packedPlayers[i]);
+			this.onPlayerConnected({ data: packedPlayers[i] });
 		}
 
 		// calculate attributes
@@ -1086,15 +1091,16 @@ define('session',['require','exports','module','events','util','./player','./mes
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
 		// add messages listeners
-		this.bus.register('disconnect', function (data) {
+		this.bus.register('disconnect', 'session', function (message) {
+			console.log('disconnected');
 			session.emit('destroyed');
 			session.bus.unregisterAll();
 			session.removeAllListeners();
 		});
-		this.bus.register('sessionMessage', function (data) {
-			session.emit(data.type, data);
+		this.bus.register('sessionMessage', 'session', function (message) {
+			session.emit(message.data.type, message.data);
 		});
-		this.bus.register('playerJoined', this.onPlayerConnected.bind(this));
+		this.bus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 
 	util.inherits(Session, EventEmitter);
@@ -1110,9 +1116,9 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * Creates a player from the given data and adds it to this session.
 	 * @private
 	 */
-	Session.prototype.onPlayerConnected = function (playerData) {
+	Session.prototype.onPlayerConnected = function (message) {
 		var session = this;
-		var player = playerModule.fromPackedData(playerData, this.bus);
+		var player = playerModule.fromPackedData(message.data, this.bus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {

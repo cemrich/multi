@@ -123,6 +123,7 @@ Player.prototype.onPlayerMessage = function (data) {
  * @private
  */
 Player.prototype.onDisconnect = function () {
+	this.messageBus.send('disconnected', { playerId: this.id }, this.id);
 	this.emit('disconnected');
 	// remove all listeners
 	this.socket.removeAllListeners();

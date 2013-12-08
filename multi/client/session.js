@@ -94,7 +94,7 @@ define(function(require, exports, module) {
 		}
 		// unpack players
 		for (i in packedPlayers) {
-			this.onPlayerConnected(packedPlayers[i]);
+			this.onPlayerConnected({ data: packedPlayers[i] });
 		}
 
 		// calculate attributes
@@ -106,15 +106,16 @@ define(function(require, exports, module) {
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
 		// add messages listeners
-		this.bus.register('disconnect', function (data) {
+		this.bus.register('disconnect', 'session', function (message) {
+			console.log('disconnected');
 			session.emit('destroyed');
 			session.bus.unregisterAll();
 			session.removeAllListeners();
 		});
-		this.bus.register('sessionMessage', function (data) {
-			session.emit(data.type, data);
+		this.bus.register('sessionMessage', 'session', function (message) {
+			session.emit(message.data.type, message.data);
 		});
-		this.bus.register('playerJoined', this.onPlayerConnected.bind(this));
+		this.bus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 
 	util.inherits(Session, EventEmitter);
@@ -130,9 +131,9 @@ define(function(require, exports, module) {
 	 * Creates a player from the given data and adds it to this session.
 	 * @private
 	 */
-	Session.prototype.onPlayerConnected = function (playerData) {
+	Session.prototype.onPlayerConnected = function (message) {
 		var session = this;
-		var player = playerModule.fromPackedData(playerData, this.bus);
+		var player = playerModule.fromPackedData(message.data, this.bus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
