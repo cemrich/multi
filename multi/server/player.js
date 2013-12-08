@@ -98,7 +98,8 @@ var Player = function (socket, messageBus, playerParams) {
 
 	// listeners
 	this.onAttributesChanged = this.onAttributesChanged.bind(this);
-	this.socket.on('disconnect', this.onDisconnect.bind(this));
+	this.disconnectToken = this.messageBus.register('disconnect',
+		this.id, this.onDisconnect.bind(this));
 	this.messageToken = this.messageBus.register('message',
 		this.id, this.onPlayerMessage.bind(this));
 	this.attributesChangedToken = this.messageBus.register('attributesChanged',
@@ -127,9 +128,9 @@ Player.prototype.onDisconnect = function () {
 	this.messageBus.send('disconnected', { playerId: this.id }, this.id);
 	this.messageBus.unregister(this.messageToken);
 	this.messageBus.unregister(this.attributesChangedToken);
+	this.messageBus.unregister(this.disconnectToken);
 	this.emit('disconnected');
 	// remove all listeners
-	this.socket.removeAllListeners();
 	this.removeAllListeners();
 	this.syncedAttributes.stopWatching();
 };

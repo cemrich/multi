@@ -16,6 +16,13 @@ exports.MessageBus = function (io, token) {
 exports.MessageBus.prototype.addSocket = function (socket) {
 	var messageBus = this;
 	socket.join(this.token);
+	socket.on('disconnect', function () {
+		messageBus.pubSub.publish({
+			name: 'disconnect',
+			from: { owner: 'server', instance: socket.id }
+		});
+		socket.removeAllListeners();
+	});
 	socket.on('multi', function (data) {
 		messageBus.onSocketMessage(data, socket);
 	});
