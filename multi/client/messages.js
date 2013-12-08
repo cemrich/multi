@@ -5,11 +5,13 @@
  
 define(function(require, exports, module) {
 
+	var PubSub = require('../shared/pubSub');
+
 	exports.MessageBus = function (socket) {
 		var messageBus = this;
 
 		this.socket = socket;
-		this.listeners = [];
+		this.pubSub = new PubSub();
 
 		socket.on('disconnect', function (data) {
 			messageBus.onSocketMessage({
@@ -25,10 +27,7 @@ define(function(require, exports, module) {
 
 	exports.MessageBus.prototype.onSocketMessage = function (message) {
 		// console.log(JSON.stringify(message));
-		var listeners = this.listeners;
-		for (var i in listeners) {
-			listeners[i](message);
-		}
+		this.pubSub.publish(message);
 	};
 
 	exports.MessageBus.prototype.sendToServer = function (messageName, messageData, instance) {
@@ -49,24 +48,17 @@ define(function(require, exports, module) {
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
-		var registerFunc = function (message) {
-			if (instance === message.from.instance && messageName === message.name) {
-				callback(message);
-			}
-		};
-		this.listeners.push(registerFunc);
-		return registerFunc;
+		return this.pubSub.subscribe(callback, function (message) {
+			return instance === message.from.instance && messageName === message.name;
+		});
 	};
 
-	exports.MessageBus.prototype.unregister = function (register) {
-		var index = this.listeners.indexOf(register);
-		if (index !== -1) {
-			this.listeners.splice(index, 1);
-		}
+	exports.MessageBus.prototype.unregister = function (token) {
+		this.pubSub.unsubscribe(token);
 	};
 
 	exports.MessageBus.prototype.unregisterAll = function () {
-		this.listeners = [];
+		this.pubSub.unsubscribeAll();
 	};
 
 	exports.MessageBus.prototype.disconnect = function () {

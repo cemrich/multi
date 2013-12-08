@@ -5,12 +5,12 @@
  * @private
  */
 
-var EventEmitter = require('events').EventEmitter;
+var PubSub = require('../shared/PubSub');
 
 exports.MessageBus = function (io, token) {
 	this.io = io;
 	this.token = token;
-	this.emitter = new EventEmitter();
+	this.pubSub = new PubSub();
 };
 
 exports.MessageBus.prototype.addSocket = function (socket) {
@@ -29,7 +29,7 @@ exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
 		// TODO: make it possible to exclude sender:
 		// socket.broadcast.to(this.token).emit(messageName, messageData);
 	}
-	this.emitter.emit(message.name, message.data);
+	this.pubSub.publish(message);
 };
 
 // sends to ALL sockets in this session
@@ -46,17 +46,16 @@ exports.MessageBus.prototype.send = function (messageName, messageData, instance
 	});
 };
 
-// receives events from ALL sockets in this session
-exports.MessageBus.prototype.register = function (messageName, callback) {
-	this.emitter.on(messageName, callback);
+exports.MessageBus.prototype.register = function (messageName, instance, callback) {
+	return this.pubSub.subscribe(callback, function (message) {
+		return instance === message.from.instance && messageName === message.name;
+	});
 };
 
-exports.MessageBus.prototype.unregister = function (messageName, callback) {
-	this.emitter.removeListener(messageName, callback);
+exports.MessageBus.prototype.unregister = function (token) {
+	this.pubSub.unsubscribe(token);
 };
 
-exports.MessageBus.prototype.unregisterAll = function (messageName) {
-	this.emitter.removeAllListeners(messageName);
+exports.MessageBus.prototype.unregisterAll = function () {
+	this.pubSub.unsubscribeAll();
 };
-
-return exports;

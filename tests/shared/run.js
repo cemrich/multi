@@ -36,6 +36,13 @@ testrunner.run({
 }, null);
 
 testrunner.run({
+	deps: {path: 'multi/shared/PubSub', namespace: 'PubSub'},
+	code: 'multi/shared/PubSub.js',
+	tests: 'tests/shared/PubSub.js',
+	log: log
+}, null);
+
+testrunner.run({
 	deps: [
 		{path: 'multi/server/session.js', namespace: 'sessionModule'},
 		{path: 'multi/shared/screen.js', namespace: 'screen'}

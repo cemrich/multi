@@ -107,7 +107,6 @@ define(function(require, exports, module) {
 
 		// add messages listeners
 		this.bus.register('disconnect', 'session', function (message) {
-			console.log('disconnected');
 			session.emit('destroyed');
 			session.bus.unregisterAll();
 			session.removeAllListeners();

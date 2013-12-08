@@ -86,8 +86,8 @@ var Session = function (io, options) {
 
 	EventEmitter.call(this);
 
-	this.messageBus.register('sessionMessage', this.onSessionMessage.bind(this));
-	this.messageBus.register('changePlayerJoining', this.onChangePlayerJoining.bind(this));
+	this.messageBus.register('sessionMessage', 'session', this.onSessionMessage.bind(this));
+	this.messageBus.register('changePlayerJoining', 'session', this.onChangePlayerJoining.bind(this));
 
 	if (options !== undefined && options.scriptName !== undefined) {
 		var gameModule = require('../../' + options.scriptName);
@@ -102,15 +102,16 @@ util.inherits(Session, EventEmitter);
  * for this session.
  * @private
  */
-Session.prototype.onChangePlayerJoining = function (data) {
-	this.enablePlayerJoining = data.enablePlayerJoining;
+Session.prototype.onChangePlayerJoining = function (message) {
+	this.enablePlayerJoining = message.data.enablePlayerJoining;
 };
 
 /**
  * Some session instance emitted a message. Distribute to _all_ clients. 
  * @private
  */
-Session.prototype.onSessionMessage = function (data) {
+Session.prototype.onSessionMessage = function (message) {
+	var data = message.data;
 	this.emit(data.type, { type: data.type, data: data.data });
 };
 
@@ -238,6 +239,7 @@ Session.prototype.removePlayer = function (player) {
 	}
 	if (this.getPlayerCount() === 0) {
 		this.emit('destroyed');
+		this.messageBus.unregisterAll();
 		this.removeAllListeners();
 	}
 };

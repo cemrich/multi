@@ -99,8 +99,10 @@ var Player = function (socket, messageBus, playerParams) {
 	// listeners
 	this.onAttributesChanged = this.onAttributesChanged.bind(this);
 	this.socket.on('disconnect', this.onDisconnect.bind(this));
-	this.messageBus.register('playerMessage', this.onPlayerMessage.bind(this));
-	this.messageBus.register('playerAttributesChanged', this.onAttributesChangedOnClient.bind(this));
+	this.messageToken = this.messageBus.register('playerMessage',
+		this.id, this.onPlayerMessage.bind(this));
+	this.attributesChangedToken = this.messageBus.register('playerAttributesChanged',
+		this.id, this.onAttributesChangedOnClient.bind(this));
 	this.syncedAttributes.on('changed', this.onAttributesChanged);
 	this.syncedAttributes.startWatching();
 };
@@ -112,10 +114,9 @@ util.inherits(Player, EventEmitter);
  * Any player send a player message. is it mine?
  * @private
  */
-Player.prototype.onPlayerMessage = function (data) {
-	if (data.id === this.id) {
-		this.emit(data.type, { type: data.type, data: data.data });
-	}
+Player.prototype.onPlayerMessage = function (message) {
+	var data = message.data;
+	this.emit(data.type, { type: data.type, data: data.data });
 };
 
 /**
@@ -124,6 +125,8 @@ Player.prototype.onPlayerMessage = function (data) {
  */
 Player.prototype.onDisconnect = function () {
 	this.messageBus.send('disconnected', { playerId: this.id }, this.id);
+	this.messageBus.unregister(this.messageToken);
+	this.messageBus.unregister(this.attributesChangedToken);
 	this.emit('disconnected');
 	// remove all listeners
 	this.socket.removeAllListeners();
@@ -136,10 +139,8 @@ Player.prototype.onDisconnect = function () {
  * Apply the changes.
  * @private
  */
-Player.prototype.onAttributesChangedOnClient = function (data) {
-	if (data.id === this.id) {
-		this.updateAttributes(data.changeset);
-	}
+Player.prototype.onAttributesChangedOnClient = function (message) {
+	this.updateAttributes(message.data.changeset);
 };
 
 /** 
