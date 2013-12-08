@@ -86,7 +86,7 @@ var Session = function (io, options) {
 
 	EventEmitter.call(this);
 
-	this.messageBus.register('sessionMessage', 'session', this.onSessionMessage.bind(this));
+	this.messageBus.register('message', 'session', this.onSessionMessage.bind(this));
 	this.messageBus.register('changePlayerJoining', 'session', this.onChangePlayerJoining.bind(this));
 
 	if (options !== undefined && options.scriptName !== undefined) {
@@ -129,7 +129,7 @@ Session.prototype.onSessionMessage = function (message) {
 * session.message('ping', { foo: 'bar' });
 */
 Session.prototype.message = function (type, data) {
-	this.messageBus.send('sessionMessage', { type: type, data: data }, 'session');
+	this.messageBus.send('message', { type: type, data: data }, 'session');
 };
 
 /**

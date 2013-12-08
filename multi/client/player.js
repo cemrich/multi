@@ -84,10 +84,10 @@ define(function(require, exports, module) {
 		this.height = null;
 
 		// listeners
-		this.messageRegister = this.bus.register('playerMessage',
+		this.messageRegister = this.bus.register('message',
 			this.id, this.onPlayerMessage.bind(this));
-		this.attributeRegister = this.bus.register('playerAttributesChanged',
-			this.id, this.onPlayerAttributesChanged.bind(this));
+		this.attributeRegister = this.bus.register('attributesChanged',
+			this.id, this.onAttributesChangedOnServer.bind(this));
 		this.leftRegister = this.bus.register('disconnected',
 			this.id, this.onDisconnected.bind(this));
 		this.syncedAttributes.on('changed', this.onAttributesChanged.bind(this));
@@ -125,7 +125,7 @@ define(function(require, exports, module) {
 	 * on server side.
 	 * @private
 	 */
-	Player.prototype.onPlayerAttributesChanged = function (message) {
+	Player.prototype.onAttributesChangedOnServer = function (message) {
 		var data = message.data;
 		this.syncedAttributes.applyChangesetSilently(data.changeset);
 		if (data.changeset.hasOwnProperty('changed')) {
@@ -141,7 +141,7 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.bus.sendToServer('playerAttributesChanged',
+		this.bus.sendToServer('attributesChanged',
 			{ id: this.id, changeset: changeset },
 			this.id
 		);
@@ -161,7 +161,7 @@ define(function(require, exports, module) {
 	* @param {object} [data]  message data that should be send
 	*/
 	Player.prototype.message = function (type, data) {
-		this.bus.send('playerMessage',
+		this.bus.send('message',
 			{ id: this.id, type: type, data: data },
 			this.id
 		);

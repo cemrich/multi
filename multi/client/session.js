@@ -111,7 +111,7 @@ define(function(require, exports, module) {
 			session.bus.unregisterAll();
 			session.removeAllListeners();
 		});
-		this.bus.register('sessionMessage', 'session', function (message) {
+		this.bus.register('message', 'session', function (message) {
 			session.emit(message.data.type, message.data);
 		});
 		this.bus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
@@ -240,7 +240,7 @@ define(function(require, exports, module) {
 	* session.message('ping', { foo: 'bar' });
 	*/
 	Session.prototype.message = function (type, data) {
-		this.bus.send('sessionMessage', { type: type, data: data }, 'session');
+		this.bus.send('message', { type: type, data: data }, 'session');
 	};
 
 	/**
