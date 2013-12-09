@@ -184,13 +184,21 @@ Player.prototype.updateAttributes = function (changeset) {
  * @param {string} type    type of message that should be send
  * @param {object} [data]  message data that should be send
  */
-Player.prototype.message = function (type, data) {
-	this.messageBus.send({
+Player.prototype.message = function (type, data, toClient) {
+	var message = {
 		name: 'message',
 		fromInstance: this.id,
 		type: type,
 		data: data
-	});
+	};
+	if (typeof toClient !== 'undefined') {
+		message.toClient = toClient;
+		if (typeof message.toClient === 'object' &&
+			message.toClient instanceof Player) {
+			message.toClient = [ message.toClient.id ];
+		}
+	}
+	this.messageBus.send(message);
 };
 
 /**

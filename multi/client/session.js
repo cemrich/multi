@@ -247,14 +247,19 @@ define(function(require, exports, module) {
 	* // on client no 2, instance of same session
 	* session.message('ping', { foo: 'bar' });
 	*/
-	Session.prototype.message = function (type, data) {
-		this.bus.send({
+	Session.prototype.message = function (type, data, toClient) {
+		var message = {
 			name: 'message',
 			fromInstance: 'session',
-			redistribute: true,
 			type: type,
 			data: data
-		});
+		};
+		message.toClient = toClient || 'all';
+		if (typeof message.toClient === 'object' &&
+			message.toClient instanceof playerModule.Player) {
+			message.toClient = [ message.toClient.id ];
+		}
+		this.bus.send(message);
 	};
 
 	/**

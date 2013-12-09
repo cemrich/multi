@@ -159,14 +159,19 @@ define(function(require, exports, module) {
 	* @param {string} type    type of message that should be send
 	* @param {object} [data]  message data that should be send
 	*/
-	Player.prototype.message = function (type, data) {
-		this.bus.send({
+	Player.prototype.message = function (type, data, toClient) {
+		var message = {
 			name: 'message',
-			redistribute: true,
 			fromInstance: this.id,
 			type: type,
 			data: data
-		});
+		};
+		message.toClient = toClient || 'all';
+		if (typeof message.toClient === 'object' &&
+			message.toClient instanceof Player) {
+			message.toClient = [ message.toClient.id ];
+		}
+		this.bus.send(message);
 	};
 
 

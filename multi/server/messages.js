@@ -5,6 +5,7 @@
  * @private
  */
 
+var util = require('util');
 var PubSub = require('../shared/PubSub');
 
 exports.MessageBus = function (io, token) {
@@ -28,18 +29,34 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 	});
 };
 
-exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
-	if (message.redistribute === true) {
-		this.send(message);
-		// TODO: make it possible to exclude sender:
-		// socket.broadcast.to(this.token).emit(messageName, messageData);
+exports.MessageBus.prototype.distribute = function (message, socket) {
+	var toClient = message.toClient;
+	if (toClient === 'all-but-myself' && socket) {
+		// send to all but sender
+		socket.broadcast.to(this.token).emit('multi', message);
+	} else if (util.isArray(toClient)) {
+		// send to all ids in array
+		var sockets = this.io.sockets.in(this.token).sockets;
+		for (var i in toClient) {
+			var id = toClient[i];
+			if (sockets.hasOwnProperty(id)) {
+				sockets[id].emit('multi', message);
+			}
+		}
+	} else if (toClient === 'all' || socket === null) {
+		// send to all - default on server
+		this.io.sockets.in(this.token).emit('multi', message);
 	}
+};
+
+exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
+	this.distribute(message, socket);
 	this.pubSub.publish(message);
 };
 
 // sends to ALL sockets in this session
 exports.MessageBus.prototype.send = function (message) {
-	this.io.sockets.in(this.token).emit('multi', message);
+	this.distribute(message, null);
 };
 
 exports.MessageBus.prototype.register = function (messageName, instance, callback) {

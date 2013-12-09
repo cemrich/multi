@@ -127,13 +127,22 @@ Session.prototype.onSessionMessage = function (message) {
 * // on server, instance of same session
 * session.message('ping', { foo: 'bar' });
 */
-Session.prototype.message = function (type, data) {
-	this.messageBus.send({
+Session.prototype.message = function (type, data, toClient) {
+	var message = {
 		name: 'message',
 		fromInstance: 'session',
 		type: type,
 		data: data
-	});
+	};
+	if (typeof toClient !== 'undefined') {
+		message.toClient = toClient;
+		if (typeof message.toClient === 'object' &&
+			message.toClient instanceof playerModule.Player) {
+			message.toClient = [ message.toClient.id ];
+		}
+	}
+
+	this.messageBus.send(message);
 };
 
 /**
