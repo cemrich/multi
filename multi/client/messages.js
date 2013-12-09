@@ -13,11 +13,10 @@ define(function(require, exports, module) {
 		this.socket = socket;
 		this.pubSub = new PubSub();
 
-		socket.on('disconnect', function (data) {
+		socket.on('disconnect', function () {
 			messageBus.onSocketMessage({
 				name: 'disconnect',
-				fromInstance: 'session',
-				data: data
+				fromInstance: 'session'
 			});
 		});
 		socket.on('multi', function (data) {
@@ -30,21 +29,8 @@ define(function(require, exports, module) {
 		this.pubSub.publish(message);
 	};
 
-	exports.MessageBus.prototype.sendToServer = function (messageName, messageData, instance) {
-		this.socket.emit('multi', {
-			name: messageName,
-			data: messageData,
-			fromInstance: instance
-		});
-	};
-
-	exports.MessageBus.prototype.send = function (messageName, messageData, instance) {
-		this.socket.emit('multi', {
-			name: messageName,
-			data: messageData,
-			fromInstance: instance,
-			redistribute: true
-		});
+	exports.MessageBus.prototype.send = function (message) {
+		this.socket.emit('multi', message);
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, instance, callback) {

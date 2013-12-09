@@ -94,7 +94,7 @@ define(function(require, exports, module) {
 		}
 		// unpack players
 		for (i in packedPlayers) {
-			this.onPlayerConnected({ data: packedPlayers[i] });
+			this.onPlayerConnected({ playerData: packedPlayers[i] });
 		}
 
 		// calculate attributes
@@ -112,7 +112,7 @@ define(function(require, exports, module) {
 			session.removeAllListeners();
 		});
 		this.bus.register('message', 'session', function (message) {
-			session.emit(message.data.type, message.data);
+			session.emit(message.type,  { type: message.type, data: message.data });
 		});
 		this.bus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
@@ -132,7 +132,7 @@ define(function(require, exports, module) {
 	 */
 	Session.prototype.onPlayerConnected = function (message) {
 		var session = this;
-		var player = playerModule.fromPackedData(message.data, this.bus);
+		var player = playerModule.fromPackedData(message.playerData, this.bus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
@@ -215,7 +215,11 @@ define(function(require, exports, module) {
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: false }, 'session');
+		this.bus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			enablePlayerJoining: false
+		});
 	};
 
 	/**
@@ -223,7 +227,11 @@ define(function(require, exports, module) {
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: true }, 'session');
+		this.bus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			enablePlayerJoining: true
+		});
 	};
 
 	/**
@@ -240,7 +248,13 @@ define(function(require, exports, module) {
 	* session.message('ping', { foo: 'bar' });
 	*/
 	Session.prototype.message = function (type, data) {
-		this.bus.send('message', { type: type, data: data }, 'session');
+		this.bus.send({
+			name: 'message',
+			fromInstance: 'session',
+			redistribute: true,
+			type: type,
+			data: data
+		});
 	};
 
 	/**

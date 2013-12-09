@@ -171,7 +171,7 @@ requirejs(['multi'], function (multiModule) {
 	});
 
 	asyncTest('test disconnectMyself', function () {
-		expect(1);
+		expect(3);
 		multi.createSession().then(function (session) {
 			var createdSession = session;
 
@@ -179,7 +179,12 @@ requirejs(['multi'], function (multiModule) {
 				var player = session.players[createdSession.myself.id];
 				player.on('disconnected', function () {
 					ok(true, 'disconnected event is fired on disconnected player');
+					equal(session.getPlayerCount(), 1, 'player count is one after disconnect');
 					start();
+				});
+
+				createdSession.on('destroyed', function () {
+					ok(true, 'destroyed event is fired on session on own client');
 				});
 
 				function disconnect() {

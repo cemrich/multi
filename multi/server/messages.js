@@ -30,7 +30,7 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 
 exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
 	if (message.redistribute === true) {
-		this._send(message);
+		this.send(message);
 		// TODO: make it possible to exclude sender:
 		// socket.broadcast.to(this.token).emit(messageName, messageData);
 	}
@@ -38,17 +38,8 @@ exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
 };
 
 // sends to ALL sockets in this session
-exports.MessageBus.prototype._send = function (message) {
+exports.MessageBus.prototype.send = function (message) {
 	this.io.sockets.in(this.token).emit('multi', message);
-};
-
-// sends to ALL sockets in this session
-exports.MessageBus.prototype.send = function (messageName, messageData, instance) {
-	this._send({
-		name: messageName,
-		fromInstance: instance,
-		data: messageData
-	});
 };
 
 exports.MessageBus.prototype.register = function (messageName, instance, callback) {

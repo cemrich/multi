@@ -116,8 +116,7 @@ util.inherits(Player, EventEmitter);
  * @private
  */
 Player.prototype.onPlayerMessage = function (message) {
-	var data = message.data;
-	this.emit(data.type, { type: data.type, data: data.data });
+	this.emit(message.type, { type: message.type, data: message.data });
 };
 
 /**
@@ -125,7 +124,10 @@ Player.prototype.onPlayerMessage = function (message) {
  * @private
  */
 Player.prototype.onDisconnect = function () {
-	this.messageBus.send('disconnected', { playerId: this.id }, this.id);
+	this.messageBus.send({
+		name: 'disconnected',
+		fromInstance: this.id
+	});
 	this.messageBus.unregister(this.messageToken);
 	this.messageBus.unregister(this.attributesChangedToken);
 	this.messageBus.unregister(this.disconnectToken);
@@ -141,7 +143,7 @@ Player.prototype.onDisconnect = function () {
  * @private
  */
 Player.prototype.onAttributesChangedOnClient = function (message) {
-	this.updateAttributes(message.data.changeset);
+	this.updateAttributes(message.changeset);
 };
 
 /** 
@@ -150,10 +152,11 @@ Player.prototype.onAttributesChangedOnClient = function (message) {
  * @private
  */
 Player.prototype.onAttributesChanged = function (changeset) {
-	this.messageBus.send('attributesChanged',
-		{ id: this.id, changeset: changeset },
-		this.id
-	);
+	this.messageBus.send({
+		name: 'attributesChanged',
+		fromInstance: this.id,
+		changeset: changeset
+	});
 	this.emit('attributesChanged', changeset);
 };
 
@@ -182,10 +185,12 @@ Player.prototype.updateAttributes = function (changeset) {
  * @param {object} [data]  message data that should be send
  */
 Player.prototype.message = function (type, data) {
-	this.messageBus.send('message',
-		{ id: this.id, type: type, data: data },
-		this.id
-	);
+	this.messageBus.send({
+		name: 'message',
+		fromInstance: this.id,
+		type: type,
+		data: data
+	});
 };
 
 /**

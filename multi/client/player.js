@@ -116,8 +116,7 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	Player.prototype.onPlayerMessage = function (message) {
-		var data = message.data;
-		this.emit(data.type, { type: data.type, data: data.data } );
+		this.emit(message.type, { type: message.type, data: message.data } );
 	};
 
 	/**
@@ -126,10 +125,9 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	Player.prototype.onAttributesChangedOnServer = function (message) {
-		var data = message.data;
-		this.syncedAttributes.applyChangesetSilently(data.changeset);
-		if (data.changeset.hasOwnProperty('changed')) {
-			for (var i in data.changeset.changed) {
+		this.syncedAttributes.applyChangesetSilently(message.changeset);
+		if (message.changeset.hasOwnProperty('changed')) {
+			for (var i in message.changeset.changed) {
 				this.emit('attributesChanged', { key: i, value: this.attributes[i]});
 			}
 		}
@@ -141,10 +139,11 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.bus.sendToServer('attributesChanged',
-			{ id: this.id, changeset: changeset },
-			this.id
-		);
+		this.bus.send({
+			name: 'attributesChanged',
+			fromInstance: this.id,
+			changeset: changeset
+		});
 	};
 
 	/**
@@ -161,10 +160,13 @@ define(function(require, exports, module) {
 	* @param {object} [data]  message data that should be send
 	*/
 	Player.prototype.message = function (type, data) {
-		this.bus.send('message',
-			{ id: this.id, type: type, data: data },
-			this.id
-		);
+		this.bus.send({
+			name: 'message',
+			redistribute: true,
+			fromInstance: this.id,
+			type: type,
+			data: data
+		});
 	};
 
 

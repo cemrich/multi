@@ -103,7 +103,7 @@ util.inherits(Session, EventEmitter);
  * @private
  */
 Session.prototype.onChangePlayerJoining = function (message) {
-	this.enablePlayerJoining = message.data.enablePlayerJoining;
+	this.enablePlayerJoining = message.enablePlayerJoining;
 };
 
 /**
@@ -111,8 +111,7 @@ Session.prototype.onChangePlayerJoining = function (message) {
  * @private
  */
 Session.prototype.onSessionMessage = function (message) {
-	var data = message.data;
-	this.emit(data.type, { type: data.type, data: data.data });
+	this.emit(message.type, { type: message.type, data: message.data });
 };
 
 /**
@@ -129,7 +128,12 @@ Session.prototype.onSessionMessage = function (message) {
 * session.message('ping', { foo: 'bar' });
 */
 Session.prototype.message = function (type, data) {
-	this.messageBus.send('message', { type: type, data: data }, 'session');
+	this.messageBus.send({
+		name: 'message',
+		fromInstance: 'session',
+		type: type,
+		data: data
+	});
 };
 
 /**
@@ -205,7 +209,11 @@ Session.prototype.addPlayer = function (player) {
 	var session = this;
 
 	// inform clients expect added player about this player
-	this.messageBus.send('playerJoined', player.pack(), 'session');
+	this.messageBus.send({
+		name: 'playerJoined',
+		fromInstance: 'session',
+		playerData: player.pack()
+	});
 
 	// add to collections
 	this.messageBus.addSocket(player.socket);
@@ -233,7 +241,11 @@ Session.prototype.removePlayer = function (player) {
 	this.freeNumbers.push(player.number);
 	delete this.players[player.id];
 	this.emit('playerLeft', { player: player });
-	this.messageBus.send('playerLeft', { playerId: player.id }, 'session');
+	this.messageBus.send({
+		name: 'playerLeft',
+		fromInstance: 'session',
+		playerId: player.id
+	});
 	if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
 		this.emit('belowMinPlayerNeeded');
 	}

@@ -806,8 +806,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * @private
 	 */
 	Player.prototype.onPlayerMessage = function (message) {
-		var data = message.data;
-		this.emit(data.type, { type: data.type, data: data.data } );
+		this.emit(message.type, { type: message.type, data: message.data } );
 	};
 
 	/**
@@ -816,10 +815,9 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * @private
 	 */
 	Player.prototype.onAttributesChangedOnServer = function (message) {
-		var data = message.data;
-		this.syncedAttributes.applyChangesetSilently(data.changeset);
-		if (data.changeset.hasOwnProperty('changed')) {
-			for (var i in data.changeset.changed) {
+		this.syncedAttributes.applyChangesetSilently(message.changeset);
+		if (message.changeset.hasOwnProperty('changed')) {
+			for (var i in message.changeset.changed) {
 				this.emit('attributesChanged', { key: i, value: this.attributes[i]});
 			}
 		}
@@ -831,10 +829,11 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.bus.sendToServer('attributesChanged',
-			{ id: this.id, changeset: changeset },
-			this.id
-		);
+		this.bus.send({
+			name: 'attributesChanged',
+			fromInstance: this.id,
+			changeset: changeset
+		});
 	};
 
 	/**
@@ -851,10 +850,13 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	* @param {object} [data]  message data that should be send
 	*/
 	Player.prototype.message = function (type, data) {
-		this.bus.send('message',
-			{ id: this.id, type: type, data: data },
-			this.id
-		);
+		this.bus.send({
+			name: 'message',
+			redistribute: true,
+			fromInstance: this.id,
+			type: type,
+			data: data
+		});
 	};
 
 
@@ -1028,11 +1030,10 @@ define('messages',['require','exports','module','../shared/pubSub'],function(req
 		this.socket = socket;
 		this.pubSub = new PubSub();
 
-		socket.on('disconnect', function (data) {
+		socket.on('disconnect', function () {
 			messageBus.onSocketMessage({
 				name: 'disconnect',
-				fromInstance: 'session',
-				data: data
+				fromInstance: 'session'
 			});
 		});
 		socket.on('multi', function (data) {
@@ -1045,21 +1046,8 @@ define('messages',['require','exports','module','../shared/pubSub'],function(req
 		this.pubSub.publish(message);
 	};
 
-	exports.MessageBus.prototype.sendToServer = function (messageName, messageData, instance) {
-		this.socket.emit('multi', {
-			name: messageName,
-			data: messageData,
-			fromInstance: instance
-		});
-	};
-
-	exports.MessageBus.prototype.send = function (messageName, messageData, instance) {
-		this.socket.emit('multi', {
-			name: messageName,
-			data: messageData,
-			fromInstance: instance,
-			redistribute: true
-		});
+	exports.MessageBus.prototype.send = function (message) {
+		this.socket.emit('multi', message);
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
@@ -1179,7 +1167,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 		}
 		// unpack players
 		for (i in packedPlayers) {
-			this.onPlayerConnected({ data: packedPlayers[i] });
+			this.onPlayerConnected({ playerData: packedPlayers[i] });
 		}
 
 		// calculate attributes
@@ -1197,7 +1185,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 			session.removeAllListeners();
 		});
 		this.bus.register('message', 'session', function (message) {
-			session.emit(message.data.type, message.data);
+			session.emit(message.type,  { type: message.type, data: message.data });
 		});
 		this.bus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
@@ -1217,7 +1205,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 */
 	Session.prototype.onPlayerConnected = function (message) {
 		var session = this;
-		var player = playerModule.fromPackedData(message.data, this.bus);
+		var player = playerModule.fromPackedData(message.playerData, this.bus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
@@ -1300,7 +1288,11 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: false }, 'session');
+		this.bus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			enablePlayerJoining: false
+		});
 	};
 
 	/**
@@ -1308,7 +1300,11 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.bus.sendToServer('changePlayerJoining', { enablePlayerJoining: true }, 'session');
+		this.bus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			enablePlayerJoining: true
+		});
 	};
 
 	/**
@@ -1325,7 +1321,13 @@ define('session',['require','exports','module','events','util','./player','./mes
 	* session.message('ping', { foo: 'bar' });
 	*/
 	Session.prototype.message = function (type, data) {
-		this.bus.send('message', { type: type, data: data }, 'session');
+		this.bus.send({
+			name: 'message',
+			fromInstance: 'session',
+			redistribute: true,
+			type: type,
+			data: data
+		});
 	};
 
 	/**
