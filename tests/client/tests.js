@@ -200,7 +200,7 @@ requirejs(['multi'], function (multiModule) {
 		});
 	});
 
-	asyncTest('test disable and enable olayer joining', function () {
+	asyncTest('test disable and enable player joining', function () {
 		expect(2);
 		multi.createSession().then(function (session) {
 

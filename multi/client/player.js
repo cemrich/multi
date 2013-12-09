@@ -157,7 +157,9 @@ define(function(require, exports, module) {
 	* // on client no 2, instance of same player
 	* player.message('ping', { foo: 'bar' });
 	* @param {string} type    type of message that should be send
-	* @param {object} [data]  message data that should be send
+	* @param {object} [data]  message data that should be send	
+	* @param {module:client/multi~toClient} [toClient='all']   which client
+	*  should receive this message
 	*/
 	Player.prototype.message = function (type, data, toClient) {
 		var message = {

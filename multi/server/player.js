@@ -183,6 +183,8 @@ Player.prototype.updateAttributes = function (changeset) {
  * player.message('ping', { foo: 'bar' });
  * @param {string} type    type of message that should be send
  * @param {object} [data]  message data that should be send
+ * @param {module:server/multi~toClient} [toClient='all']  which client
+ *  should receive this message
  */
 Player.prototype.message = function (type, data, toClient) {
 	var message = {

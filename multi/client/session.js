@@ -45,7 +45,7 @@ define(function(require, exports, module) {
 	*
 	* @param {module:client/player~Player} myself  the player instance that 
 	* represents my own client.
-	* @param {} messageBus ........
+	* @param {} messageBus
 	* @param {object} sessionData  data object from the server that
 	* describes this session
 	*/
@@ -238,6 +238,8 @@ define(function(require, exports, module) {
 	* Sends the given message to all other instances of this session.
 	* @param {string} type    type of message that should be send
 	* @param {object} [data]  message data that should be send
+	* @param {module:client/multi~toClient} [toClient='all']  which client
+	*  should receive this message
 	* @example
 	* // on client no 1
 	* session.on('ping', function (event) {

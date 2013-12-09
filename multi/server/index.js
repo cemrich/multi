@@ -23,6 +23,21 @@ var color = require('../shared/color');
 var instance = null;
 
 /**
+ * @typedef {(string|Array.<string>|module:server/player~Player)} module:server/multi~toClient
+ * @description  Option to determine to which client a message should be send
+ * (not to which _instance_ on this client).<br>
+ * You can set it to:
+ * <ul>
+ * <li>'all' - the message will be send to all clients currently connected to
+ * this session</li>
+ * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
+ * inside the array</li>
+ * <li>myPlayer - the message will be send to the client that is represented
+ * by myPlayer</li>
+ * </ul>
+ */
+
+/**
 * @inner
 * @class
 * @protected

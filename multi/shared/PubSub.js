@@ -12,6 +12,7 @@ define(function(require, exports, module) {
 	 * Publish/Suscribe-Pattern as described at
 	 * {@link http://msdn.microsoft.com/en-us/library/ff649664.aspx}.
 	 * @class PubSub
+	 * @private
 	 * @example
 	 * var pubSub = new PubSub();
 	 *

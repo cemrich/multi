@@ -43,6 +43,22 @@ define(function(require, exports, module) {
 	*/
 
 	/**
+	 * @typedef {(string|Array.<string>|module:client/player~Player)} module:client/multi~toClient
+	 * @description  Option to determine to which client a message should be send
+	 * (not to which _instance_ on this client).<br>
+	 * You can set it to:
+	 * <ul>
+	 * <li>'all' - the message will be send to all clients currently connected to
+	 * this session</li>
+	 * <li>'server' - the message will be send to the game server only</li>
+	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
+	 * inside the array</li>
+	 * <li>myPlayer - the message will be send to the client that is represented
+	 * by myPlayer</li>
+	 * </ul>
+	 */
+
+	/**
 	 * A promise object provided by the q promise library.
 	 * @external Promise
 	 * @see {@link https://github.com/kriskowal/q/wiki/API-Reference}
@@ -221,7 +237,6 @@ define(function(require, exports, module) {
 	 *
 	 * @example
 	 * var multiOptions = {
-	 *  io: socketio,
 	 *  server: 'http://mySocketioServer/',
 	 *  session: {
 	 *    minPlayerNeeded: 3,
