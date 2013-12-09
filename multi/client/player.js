@@ -35,7 +35,7 @@ define(function(require, exports, module) {
 		 */
 		this.syncedAttributes = new SyncedObject();
 
-		this.bus = messageBus;
+		this.messageBus = messageBus;
 		/** 
 		 * unique id for this player
 		 * @type {string}
@@ -84,11 +84,11 @@ define(function(require, exports, module) {
 		this.height = null;
 
 		// listeners
-		this.messageRegister = this.bus.register('message',
+		this.messageRegister = this.messageBus.register('message',
 			this.id, this.onPlayerMessage.bind(this));
-		this.attributeRegister = this.bus.register('attributesChanged',
+		this.attributeRegister = this.messageBus.register('attributesChanged',
 			this.id, this.onAttributesChangedOnServer.bind(this));
-		this.leftRegister = this.bus.register('disconnected',
+		this.leftRegister = this.messageBus.register('disconnected',
 			this.id, this.onDisconnected.bind(this));
 		this.syncedAttributes.on('changed', this.onAttributesChanged.bind(this));
 		this.syncedAttributes.startWatching();
@@ -105,9 +105,9 @@ define(function(require, exports, module) {
 		this.emit('disconnected');
 		// ... and remove listeners
 		this.removeAllListeners();
-		this.bus.unregister(this.messageRegister);
-		this.bus.unregister(this.attributeRegister);
-		this.bus.unregister(this.leftRegister);
+		this.messageBus.unregister(this.messageRegister);
+		this.messageBus.unregister(this.attributeRegister);
+		this.messageBus.unregister(this.leftRegister);
 		this.syncedAttributes.stopWatching();
 	};
 
@@ -139,7 +139,7 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	Player.prototype.onAttributesChanged = function (changeset) {
-		this.bus.send({
+		this.messageBus.send({
 			name: 'attributesChanged',
 			fromInstance: this.id,
 			changeset: changeset
@@ -171,7 +171,7 @@ define(function(require, exports, module) {
 			message.toClient instanceof Player) {
 			message.toClient = [ message.toClient.id ];
 		}
-		this.bus.send(message);
+		this.messageBus.send(message);
 	};
 
 

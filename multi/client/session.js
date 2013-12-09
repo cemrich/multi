@@ -60,7 +60,7 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.myself = myself;
-		this.bus = messageBus;
+		this.messageBus = messageBus;
 		/**
 		 * Dictionary of all players except myself currently 
 		 * connected to this session; mapped on their ids.
@@ -106,15 +106,15 @@ define(function(require, exports, module) {
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
 		// add messages listeners
-		this.bus.register('disconnect', 'session', function (message) {
+		this.messageBus.register('disconnect', 'session', function (message) {
 			session.emit('destroyed');
-			session.bus.unregisterAll();
+			session.messageBus.unregisterAll();
 			session.removeAllListeners();
 		});
-		this.bus.register('message', 'session', function (message) {
+		this.messageBus.register('message', 'session', function (message) {
 			session.emit(message.type,  { type: message.type, data: message.data });
 		});
-		this.bus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
+		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 
 	util.inherits(Session, EventEmitter);
@@ -132,7 +132,7 @@ define(function(require, exports, module) {
 	 */
 	Session.prototype.onPlayerConnected = function (message) {
 		var session = this;
-		var player = playerModule.fromPackedData(message.playerData, this.bus);
+		var player = playerModule.fromPackedData(message.playerData, this.messageBus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
@@ -215,7 +215,7 @@ define(function(require, exports, module) {
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
 	 */
 	Session.prototype.disablePlayerJoining = function () {
-		this.bus.send({
+		this.messageBus.send({
 			name: 'changePlayerJoining',
 			fromInstance: 'session',
 			enablePlayerJoining: false
@@ -227,7 +227,7 @@ define(function(require, exports, module) {
 	 * again.
 	 */
 	Session.prototype.enablePlayerJoining = function () {
-		this.bus.send({
+		this.messageBus.send({
 			name: 'changePlayerJoining',
 			fromInstance: 'session',
 			enablePlayerJoining: true
@@ -259,7 +259,7 @@ define(function(require, exports, module) {
 			message.toClient instanceof playerModule.Player) {
 			message.toClient = [ message.toClient.id ];
 		}
-		this.bus.send(message);
+		this.messageBus.send(message);
 	};
 
 	/**
@@ -269,7 +269,7 @@ define(function(require, exports, module) {
 	 * @fires module:client/session~Session#destroyed
 	 */
 	Session.prototype.disconnectMyself = function () {
-		this.bus.disconnect();
+		this.messageBus.disconnect();
 	};
 
 
