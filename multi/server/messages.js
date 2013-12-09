@@ -19,7 +19,7 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 	socket.on('disconnect', function () {
 		messageBus.pubSub.publish({
 			name: 'disconnect',
-			from: { owner: 'server', instance: socket.id }
+			fromInstance: socket.id
 		});
 		socket.removeAllListeners();
 	});
@@ -29,8 +29,6 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 };
 
 exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
-	console.log(message);
-	message.from.owner = socket.id;
 	if (message.redistribute === true) {
 		this._send(message);
 		// TODO: make it possible to exclude sender:
@@ -48,14 +46,14 @@ exports.MessageBus.prototype._send = function (message) {
 exports.MessageBus.prototype.send = function (messageName, messageData, instance) {
 	this._send({
 		name: messageName,
-		from: { owner: 'server', instance: instance },
+		fromInstance: instance,
 		data: messageData
 	});
 };
 
 exports.MessageBus.prototype.register = function (messageName, instance, callback) {
 	return this.pubSub.subscribe(callback, function (message) {
-		return instance === message.from.instance && messageName === message.name;
+		return instance === message.fromInstance && messageName === message.name;
 	});
 };
 

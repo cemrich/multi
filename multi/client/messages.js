@@ -16,7 +16,7 @@ define(function(require, exports, module) {
 		socket.on('disconnect', function (data) {
 			messageBus.onSocketMessage({
 				name: 'disconnect',
-				from: { instance: 'session' },
+				fromInstance: 'session',
 				data: data
 			});
 		});
@@ -34,7 +34,7 @@ define(function(require, exports, module) {
 		this.socket.emit('multi', {
 			name: messageName,
 			data: messageData,
-			from: { instance: instance }
+			fromInstance: instance
 		});
 	};
 
@@ -42,14 +42,14 @@ define(function(require, exports, module) {
 		this.socket.emit('multi', {
 			name: messageName,
 			data: messageData,
-			from: { instance: instance },
+			fromInstance: instance,
 			redistribute: true
 		});
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
 		return this.pubSub.subscribe(callback, function (message) {
-			return instance === message.from.instance && messageName === message.name;
+			return instance === message.fromInstance && messageName === message.name;
 		});
 	};
 

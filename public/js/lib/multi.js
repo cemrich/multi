@@ -1031,7 +1031,7 @@ define('messages',['require','exports','module','../shared/pubSub'],function(req
 		socket.on('disconnect', function (data) {
 			messageBus.onSocketMessage({
 				name: 'disconnect',
-				from: { instance: 'session' },
+				fromInstance: 'session',
 				data: data
 			});
 		});
@@ -1049,7 +1049,7 @@ define('messages',['require','exports','module','../shared/pubSub'],function(req
 		this.socket.emit('multi', {
 			name: messageName,
 			data: messageData,
-			from: { instance: instance }
+			fromInstance: instance
 		});
 	};
 
@@ -1057,14 +1057,14 @@ define('messages',['require','exports','module','../shared/pubSub'],function(req
 		this.socket.emit('multi', {
 			name: messageName,
 			data: messageData,
-			from: { instance: instance },
+			fromInstance: instance,
 			redistribute: true
 		});
 	};
 
 	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
 		return this.pubSub.subscribe(callback, function (message) {
-			return instance === message.from.instance && messageName === message.name;
+			return instance === message.fromInstance && messageName === message.name;
 		});
 	};
 
