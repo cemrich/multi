@@ -75,7 +75,7 @@ exports.Game = function (session) {
 					x: local.x,
 					y: local.y
 				};
-				local.player.message('draw', drawObj);
+				local.player.message('draw', drawObj, local.player);
 			}
 		};
 	}

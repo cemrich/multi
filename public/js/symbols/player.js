@@ -4,6 +4,7 @@ define(function(require, exports, module) {
 	var multi = null;
 	var sound = null;
 	var session = null;
+	var presenter = null;
 
 	function onIconClick(event) {
 		sound.onSymbol();
@@ -38,10 +39,10 @@ define(function(require, exports, module) {
 	}
 
 	function onUpClick() {
-		session.myself.message('move', { direction: 'up' });
+		session.myself.message('move', { direction: 'up' }, presenter);
 	}
 	function onDownClick() {
-		session.myself.message('move', { direction: 'down' });
+		session.myself.message('move', { direction: 'down' }, presenter);
 	}
 
 	function onStart() {
@@ -53,6 +54,7 @@ define(function(require, exports, module) {
 
 	function onSessionJoined(joinedSession) {
 		session = joinedSession;
+		presenter = session.getPlayerByNumber(0);
 		sound.onPlayerJoin();
 
 		$('#join').hide();

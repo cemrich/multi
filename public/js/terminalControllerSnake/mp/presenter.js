@@ -63,7 +63,7 @@ define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../
 			// assuming the game is finished here
 			// -> go back to waiting mode
 			sound.onGameOver();
-			session.message('finished');
+			session.message('finished', null, 'all-but-myself');
 			layout.showSection('#waiting');
 		}
 

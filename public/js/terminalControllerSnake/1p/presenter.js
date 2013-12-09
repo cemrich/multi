@@ -24,8 +24,6 @@ define(['./game', '../sound', '../layout'], function (Game, sound, layout) {
 			// assuming the game is finished here
 			sound.onGameOver();
 			layout.showSection('#finished');
-			// TODO: refactor session message to get leaner code
-			// and use broadcast OR emit
 			session.message('finished');
 			session.once('again', onAgain);
 		}
