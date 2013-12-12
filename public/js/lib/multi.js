@@ -818,7 +818,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		this.syncedAttributes.applyChangesetSilently(message.changeset);
 		if (message.changeset.hasOwnProperty('changed')) {
 			for (var i in message.changeset.changed) {
-				this.emit('attributesChanged', { key: i, value: this.attributes[i]});
+				this.emit('attributeChanged/' + i, this.attributes[i]);
 			}
 		}
 	};

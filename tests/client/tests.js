@@ -125,16 +125,15 @@ requirejs(['multi'], function (multiModule) {
 	});
 
 	asyncTest('test attribute synchronization', function () {
-		expect(3);
+		expect(2);
 
 		multi.createSession().then(function (session) {
 			var data = { test: 42, foo: 'bar' };
 			var createdSession = session;
 
 			multi.joinSession(createdSession.token).then(function (session) {
-				session.myself.on('attributesChanged', function (event) {
-					equal(event.key, 'data', 'event recognizes which attribute changed');
-					deepEqual(event.value, data, 'event recognizes to which value attribute changed');
+				session.myself.on('attributeChanged/data', function (value) {
+					deepEqual(value, data, 'event recognizes to which value attribute changed');
 					deepEqual(session.myself.attributes.data, data, 'attributes were really updated');
 					start();
 				});

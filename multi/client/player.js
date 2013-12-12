@@ -128,7 +128,7 @@ define(function(require, exports, module) {
 		this.syncedAttributes.applyChangesetSilently(message.changeset);
 		if (message.changeset.hasOwnProperty('changed')) {
 			for (var i in message.changeset.changed) {
-				this.emit('attributesChanged', { key: i, value: this.attributes[i]});
+				this.emit('attributeChanged/' + i, this.attributes[i]);
 			}
 		}
 	};

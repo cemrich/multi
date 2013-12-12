@@ -157,7 +157,11 @@ Player.prototype.onAttributesChanged = function (changeset) {
 		fromInstance: this.id,
 		changeset: changeset
 	});
-	this.emit('attributesChanged', changeset);
+	if (changeset.hasOwnProperty('changed')) {
+		for (var i in changeset.changed) {
+			this.emit('attributeChanged/' + i, this.attributes[i]);
+		}
+	}
 };
 
 /**
