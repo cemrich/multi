@@ -114,6 +114,24 @@ Session.prototype.onSessionMessage = function (message) {
 	this.emit(message.type, { type: message.type, data: message.data });
 };
 
+
+/**
+ * When you call this new players are not allowed to join this
+ * session any more. Instead their promise will be rejected with a 
+ * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
+ */
+Session.prototype.disablePlayerJoining = function () {
+	this.enablePlayerJoining = false;
+};
+
+/**
+ * A call to this method will allow new players to join this session
+ * again.
+ */
+Session.prototype.enablePlayerJoining = function () {
+	this.enablePlayerJoining = true;
+};
+
 /**
  * Sends the given message to all client instances of this session.
  * @param {string} type    type of message that should be send
