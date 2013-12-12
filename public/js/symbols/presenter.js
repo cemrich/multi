@@ -11,8 +11,7 @@ define(function(require, exports, module) {
 			sound.onPlayerDisconnect();
 			p.remove();
 		});
-		event.player.on('attributesChanged', function () {
-			var color = event.player.attributes.color;
+		event.player.on('attributeChanged/color', function (color) {
 			p.css('background-color', color);
 		});
 	}

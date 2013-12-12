@@ -36,7 +36,7 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		setColor();
 		$('.players').append(playerView);
 
-		player.on('attributesChanged', setColor);
+		player.on('attributeChanged/color', setColor);
 		player.on('disconnected', function () {
 			playerView.remove();
 		});

@@ -31,7 +31,8 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../../lib/joystick', '../
 		$('#waiting .start').click(onStartClick);
 		$('button.exit').click(onExitClick);
 
-		session.myself.on('attributesChanged', onAttributesChanged);
+		session.myself.on('attributeChanged/color', onColorChanged);
+		session.myself.on('attributeChanged/points', onPointsChanged);
 		session.on('aboveMinPlayerNeeded', onAboveMinPlayerNeeded);
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
 		session.on('playerLeft', onPlayerLeft);
@@ -99,17 +100,16 @@ define(['../../lib/multi', '/socket.io/socket.io.js', '../../lib/joystick', '../
 			$('#waiting .start').hide();
 		}
 
-		function onAttributesChanged(event) {
-			if (event.key === 'color') {
-				var color = event.value.hex;
-				$('#waiting h1').css('color', color);
-				$('#controller h1').css('color', color);
-				$('#finished h1').css('color', color);
-				$('#waiting button').css('background-color', color);
-			} else if (event.key === 'points') {
-				sound.onPoint();
-				$('#controller .points').text(event.value);
-			}
+		function onColorChanged(color) {
+			$('#waiting h1').css('color', color.hex);
+			$('#controller h1').css('color', color.hex);
+			$('#finished h1').css('color', color.hex);
+			$('#waiting button').css('background-color', color.hex);
+		}
+
+		function onPointsChanged(points) {
+			sound.onPoint();
+			$('#controller .points').text(points);
 		}
 
 		function onSessionDestroyed() {

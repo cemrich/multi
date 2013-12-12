@@ -30,22 +30,20 @@ define(['../../lib/jquery-2.0.0.min'], function () {
 			playerEle.css('background-color', player.attributes.color.hex);
 			board.append(playerEle);
 
-			var attributesChanged = function (event) {
-				if (event.key === 'points') {
-					playerEle.text(getText(player));
-					playerEle.attr('data-points', player.attributes.points);
-					sort();
-				}
+			var pointsChanged = function (points) {
+				playerEle.text(getText(player));
+				playerEle.attr('data-points', points);
+				sort();
 			};
 
 			var onDisconnected = function () {
 				playerEle.remove();
 			};
 
-			player.on('attributesChanged', attributesChanged);
+			player.on('attributeChanged/points', pointsChanged);
 			player.on('disconnected', onDisconnected);
 			playerEle.bind('stop', function() {
-				player.removeListener('attributesChanged', attributesChanged);
+				player.removeListener('attributeChanged/points', pointsChanged);
 				player.removeListener('disconnected', onDisconnected);
 			});
 		}
