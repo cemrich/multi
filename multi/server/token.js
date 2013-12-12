@@ -3,7 +3,33 @@
 /**
  * Collects some helper functions for generating
  * random tokens that can be used for identifying
- * things.
+ * sessions. You can configure the kind of token
+ * your session should use with the
+ * {@link SessionOptions}. <br><br>
+ * If you would like to use your own token function
+ * you can add it to this module before initializing
+ * the rest of the framework:
+ * @example
+ * // load module and add your function
+ * var tokenModule = require('./multi/server/token');
+ * tokenModule.myToken = function (prefix) {
+ *   return prefix + Math.floor(Math.random() * 100);
+ * };
+ * 
+ * // work with multi
+ * var multi = multiModule.init(server);
+ * multi.on('sessionCreated', onSessionCreated);
+ * 
+ * 
+ * // on client side do this:
+ * var sessionOptions = {
+ *   token: {
+ *     func: 'myToken',       // name of your function
+ *     args: [ 'mySession' ]  // arguments for your function
+ *   }
+ * };
+ * multi.createSession(sessionOptions);
+ * 
  * @module server/token
  */
 
