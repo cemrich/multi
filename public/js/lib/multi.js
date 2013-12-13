@@ -837,21 +837,24 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	};
 
 	/**
-	* Sends the given message to all other instances of this player.
-	* @example
-	* // on client no 1
-	* player.on('ping', function (event) {
-	*   // outputs 'bar'
-	*   console.log(event.data.foo);
-	* });
-	* // on client no 2, instance of same player
-	* player.message('ping', { foo: 'bar' });
-	* @param {string} type    type of message that should be send
-	* @param {object} [data]  message data that should be send	
-	* @param {module:client/multi~toClient} [toClient='all']   which client
-	*  should receive this message
-	*/
-	Player.prototype.message = function (type, data, toClient) {
+	 * Sends the given message to all other instances of this player.
+	 * @param {string} type    type of message that should be send
+	 * @param {object} [data]  message data that should be send	
+	 * @param {module:client/multi~toClient} [toClient='all']   which client
+	 *  should receive this message
+	 * @param {boolean} [volatile=false]  if true, the message may be dropped
+	 *  by the framework. Use this option for real time data where one dropped
+	 *  message does not interrupt your application.
+	 * @example
+	 * // on client no 1
+	 * player.on('ping', function (event) {
+	 *   // outputs 'bar'
+	 *   console.log(event.data.foo);
+	 * });
+	 * // on client no 2, instance of same player
+	 * player.message('ping', { foo: 'bar' });
+	 */
+	Player.prototype.message = function (type, data, toClient, volatile) {
 		var message = {
 			name: 'message',
 			fromInstance: this.id,
@@ -862,6 +865,9 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		if (typeof message.toClient === 'object' &&
 			message.toClient instanceof Player) {
 			message.toClient = [ message.toClient.id ];
+		}
+		if (volatile === true) {
+			message.volatile = true;
 		}
 		this.messageBus.send(message);
 	};
@@ -1078,7 +1084,8 @@ define('messages',['require','exports','module','../shared/pubSub'],function(req
 	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
 	 * inside the array </li>
 	 * </ul>
-	 * Use this option to save bandwidth.
+	 * Use this option to save bandwidth.<br><br>
+	 * Message that have set message.volatile=true may be dropped by the framework.
 	 * 
 	 * @param  {object} message
 	 * @example
@@ -1376,21 +1383,24 @@ define('session',['require','exports','module','events','util','./player','./mes
 	};
 
 	/**
-	* Sends the given message to all other instances of this session.
-	* @param {string} type    type of message that should be send
-	* @param {object} [data]  message data that should be send
-	* @param {module:client/multi~toClient} [toClient='all']  which client
-	*  should receive this message
-	* @example
-	* // on client no 1
-	* session.on('ping', function (event) {
-	*   // outputs 'bar'
-	*   console.log(event.data.foo);
-	* });
-	* // on client no 2, instance of same session
-	* session.message('ping', { foo: 'bar' });
-	*/
-	Session.prototype.message = function (type, data, toClient) {
+	 * Sends the given message to all other instances of this session.
+	 * @param {string} type    type of message that should be send
+	 * @param {object} [data]  message data that should be send
+	 * @param {module:client/multi~toClient} [toClient='all']  which client
+	 *  should receive this message
+	 * @param {boolean} [volatile=false]  if true, the message may be dropped
+	 *  by the framework. Use this option for real time data where one dropped
+	 *  message does not interrupt your application.
+	 * @example
+	 * // on client no 1
+	 * session.on('ping', function (event) {
+	 *   // outputs 'bar'
+	 *   console.log(event.data.foo);
+	 * });
+	 * // on client no 2, instance of same session
+	 * session.message('ping', { foo: 'bar' });
+	 */
+	Session.prototype.message = function (type, data, toClient, volatile) {
 		var message = {
 			name: 'message',
 			fromInstance: 'session',
@@ -1401,6 +1411,9 @@ define('session',['require','exports','module','events','util','./player','./mes
 		if (typeof message.toClient === 'object' &&
 			message.toClient instanceof playerModule.Player) {
 			message.toClient = [ message.toClient.id ];
+		}
+		if (volatile === true) {
+			message.volatile = true;
 		}
 		this.messageBus.send(message);
 	};

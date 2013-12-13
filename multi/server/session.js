@@ -138,6 +138,9 @@ Session.prototype.enablePlayerJoining = function () {
  * @param {object} [data]  message data that should be send
  * @param {module:server/multi~toClient} [toClient='all']  which client
  *  should receive this message
+ * @param {boolean} [volatile=false]  if true, the message may be dropped
+ *  by the framework. Use this option for real time data where one dropped
+ *  message does not interrupt your application.
  * @example
  * // on client no 1
  * session.on('ping', function (event) {
@@ -147,7 +150,7 @@ Session.prototype.enablePlayerJoining = function () {
  * // on server, instance of same session
  * session.message('ping', { foo: 'bar' });
  */
-Session.prototype.message = function (type, data, toClient) {
+Session.prototype.message = function (type, data, toClient, volatile) {
 	var message = {
 		name: 'message',
 		fromInstance: 'session',
@@ -160,6 +163,9 @@ Session.prototype.message = function (type, data, toClient) {
 			message.toClient instanceof playerModule.Player) {
 			message.toClient = [ message.toClient.id ];
 		}
+	}
+	if (volatile === true) {
+		message.volatile = true;
 	}
 
 	this.messageBus.send(message);

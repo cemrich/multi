@@ -53,7 +53,8 @@ define(function(require, exports, module) {
 	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
 	 * inside the array </li>
 	 * </ul>
-	 * Use this option to save bandwidth.
+	 * Use this option to save bandwidth.<br><br>
+	 * Message that have set message.volatile=true may be dropped by the framework.
 	 * 
 	 * @param  {object} message
 	 * @example

@@ -45,6 +45,14 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 	});
 };
 
+exports.MessageBus.prototype.sendToSockets = function (message, sockets) {
+	if (message.volatile) {
+		sockets.volatile.emit('multi', message);
+	} else {
+		sockets.emit('multi', message);
+	}
+};
+
 /**
  * Relayse the given message to all interested clients. This method is kind
  * of a filter to avoid unnecessary network traffic. To decide which client
@@ -58,19 +66,19 @@ exports.MessageBus.prototype.distribute = function (message, socket) {
 	var toClient = message.toClient;
 	if (toClient === 'all-but-myself' && socket) {
 		// send to all but sender
-		socket.broadcast.to(this.token).emit('multi', message);
+		this.sendToSockets(message, socket.broadcast.to(this.token));
 	} else if (util.isArray(toClient)) {
 		// send to all ids in array
 		var sockets = this.io.sockets.in(this.token).sockets;
 		for (var i in toClient) {
 			var id = toClient[i];
 			if (sockets.hasOwnProperty(id)) {
-				sockets[id].emit('multi', message);
+				this.sendToSockets(message, sockets[id]);
 			}
 		}
 	} else if (toClient === 'all' || socket === null) {
 		// send to all - default on server
-		this.io.sockets.in(this.token).emit('multi', message);
+		this.sendToSockets(message, this.io.sockets.in(this.token));
 	}
 };
 
@@ -93,7 +101,8 @@ exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
  * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
  * inside the array </li>
  * </ul>
- * Use this option to save bandwidth.
+ * Use this option to save bandwidth.<br><br>
+ * Message that have set message.volatile=true may be dropped by the framework.
  * 
  * @param  {object} message
  * @example
