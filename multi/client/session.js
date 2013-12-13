@@ -9,6 +9,7 @@ define(function(require, exports, module) {
 	var util = require('util');
 	var playerModule = require('./player');
 	var MessageBus = require('./messages').MessageBus;
+	var MessageSender = require('../shared/CustomMessageSender');
 
 
 	/* 
@@ -60,7 +61,10 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.myself = myself;
+
 		this.messageBus = messageBus;
+
+		this.messageSender = new MessageSender(messageBus, 'session');
 		/**
 		 * Dictionary of all players except myself currently 
 		 * connected to this session; mapped on their ids.
@@ -117,6 +121,7 @@ define(function(require, exports, module) {
 		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 
+	util.inherits(Session, EventEmitter);
 	util.inherits(Session, EventEmitter);
 
 	/**
@@ -253,21 +258,7 @@ define(function(require, exports, module) {
 	 * session.message('ping', { foo: 'bar' });
 	 */
 	Session.prototype.message = function (type, data, toClient, volatile) {
-		var message = {
-			name: 'message',
-			fromInstance: 'session',
-			type: type,
-			data: data
-		};
-		message.toClient = toClient || 'all';
-		if (typeof message.toClient === 'object' &&
-			message.toClient instanceof playerModule.Player) {
-			message.toClient = [ message.toClient.id ];
-		}
-		if (volatile === true) {
-			message.volatile = true;
-		}
-		this.messageBus.send(message);
+		this.messageSender.message(type, data, toClient, volatile);
 	};
 
 	/**

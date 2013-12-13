@@ -8,6 +8,7 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var SyncedObject = require('../shared/SyncedObject');
+var MessageSender = require('../shared/CustomMessageSender');
 
 
 /**
@@ -45,13 +46,14 @@ var Player = function (socket, messageBus, playerParams) {
 	 * @private
 	 */
 	this.socket = socket;
-	this.messageBus = messageBus;
 	/** 
 	 * unique id for this player
 	 * @type {string}
 	 * @readonly
 	 */
 	this.id = socket.id;
+	this.messageBus = messageBus;
+	this.messageSender = new MessageSender(messageBus, this.id);
 	/**
 	 * Role that is fulfilled by this
 	 * player. Either 'presenter' or 'player'.
@@ -194,23 +196,7 @@ Player.prototype.updateAttributes = function (changeset) {
  *  message does not interrupt your application.
  */
 Player.prototype.message = function (type, data, toClient, volatile) {
-	var message = {
-		name: 'message',
-		fromInstance: this.id,
-		type: type,
-		data: data
-	};
-	if (typeof toClient !== 'undefined') {
-		message.toClient = toClient;
-		if (typeof message.toClient === 'object' &&
-			message.toClient instanceof Player) {
-			message.toClient = [ message.toClient.id ];
-		}
-	}
-	if (volatile === true) {
-		message.volatile = true;
-	}
-	this.messageBus.send(message);
+	this.messageSender.message(type, data, toClient, volatile);
 };
 
 /**

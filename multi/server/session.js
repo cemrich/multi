@@ -7,6 +7,7 @@
 
 var EventEmitter = require('events').EventEmitter;
 var MessageBus = require('./messages').MessageBus;
+var MessageSender = require('../shared/CustomMessageSender');
 var util = require('util');
 var playerModule = require('./player');
 var token = require('./token');
@@ -68,6 +69,7 @@ var Session = function (io, options) {
 	this.token = tokenFunction.apply(this, tokenFunctionArgs);
 
 	this.messageBus = new MessageBus(io, this.token);
+	this.messageSender = new MessageSender(this.messageBus, 'session');
 
 	/**
 	 * Dictionary of all players currently connected
@@ -151,24 +153,7 @@ Session.prototype.enablePlayerJoining = function () {
  * session.message('ping', { foo: 'bar' });
  */
 Session.prototype.message = function (type, data, toClient, volatile) {
-	var message = {
-		name: 'message',
-		fromInstance: 'session',
-		type: type,
-		data: data
-	};
-	if (typeof toClient !== 'undefined') {
-		message.toClient = toClient;
-		if (typeof message.toClient === 'object' &&
-			message.toClient instanceof playerModule.Player) {
-			message.toClient = [ message.toClient.id ];
-		}
-	}
-	if (volatile === true) {
-		message.volatile = true;
-	}
-
-	this.messageBus.send(message);
+	this.messageSender.message(type, data, toClient, volatile);
 };
 
 /**

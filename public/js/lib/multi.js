@@ -688,16 +688,77 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 	return exports;
 
 });
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+define('../shared/CustomMessageSender',['require','exports','module'],function(require, exports, module) {
+
+	/**
+	 * @classdesc Util class for all objects that allow to send custom messages
+	 *  (e.g. player.message('foo', {data: 'bar'})).
+	 * @param {module:server/messages~MessageBus|module:client/messages~MessageBus} 
+	 *  messageBus message bus instance used for sending the messages
+	 * @param {string} instance   instance identifier that should be used for
+	 *  the 'fromInstance' attribute of outgoing messages
+	 * @private
+	 */
+	var CustomMessageSender = function (messageBus, instance) {
+		this.messageBus = messageBus;
+		this.instance = instance;
+	};
+
+	/**
+	 * Sends a custom message over the message bus.
+	 * @param  {string} type     name of the custom message
+	 * @param  {*}      [data]   any data to transport
+	 * @param  {module:client/multi~toClient|module:server/multi~toClient} 
+	 *  [toClient='all'] which client should receive the message
+	 * @param  {boolean} [volatile=false] if true, the message may be dropped
+	 *  by the framework
+	 */
+	CustomMessageSender.prototype.message = function (type, data, toClient, volatile) {
+		var message = {
+			name: 'message',
+			fromInstance: this.instance,
+			type: type,
+			data: data
+		};
+
+		message.toClient = toClient || 'all';
+		if (typeof message.toClient === 'object') {
+			if (message.toClient instanceof Array) {
+				console.log('array');
+			} else {
+				message.toClient = [ message.toClient.id ];
+			}
+		}
+
+		if (volatile === true) {
+			message.volatile = true;
+		}
+
+		this.messageBus.send(message);
+	};
+
+	
+	exports = CustomMessageSender;
+	return exports;
+
+});
 /**
  * @module client/player
  * @private
  */
  
-define('player',['require','exports','module','events','util','../shared/SyncedObject'],function(require, exports, module) {
+define('player',['require','exports','module','events','util','../shared/SyncedObject','../shared/CustomMessageSender'],function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var SyncedObject = require('../shared/SyncedObject');
+	var MessageSender = require('../shared/CustomMessageSender');
 
 	/**
 	* @classdesc This player class represents a device connected
@@ -726,6 +787,8 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		this.syncedAttributes = new SyncedObject();
 
 		this.messageBus = messageBus;
+
+		this.messageSender = new MessageSender(messageBus, id);
 		/** 
 		 * unique id for this player
 		 * @type {string}
@@ -855,21 +918,7 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	 * player.message('ping', { foo: 'bar' });
 	 */
 	Player.prototype.message = function (type, data, toClient, volatile) {
-		var message = {
-			name: 'message',
-			fromInstance: this.id,
-			type: type,
-			data: data
-		};
-		message.toClient = toClient || 'all';
-		if (typeof message.toClient === 'object' &&
-			message.toClient instanceof Player) {
-			message.toClient = [ message.toClient.id ];
-		}
-		if (volatile === true) {
-			message.volatile = true;
-		}
-		this.messageBus.send(message);
+		this.messageSender.message(type, data, toClient, volatile);
 	};
 
 
@@ -1151,12 +1200,13 @@ define('messages',['require','exports','module','../shared/pubSub'],function(req
  * @private
  */
 
-define('session',['require','exports','module','events','util','./player','./messages'],function(require, exports, module) {
+define('session',['require','exports','module','events','util','./player','./messages','../shared/CustomMessageSender'],function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var playerModule = require('./player');
 	var MessageBus = require('./messages').MessageBus;
+	var MessageSender = require('../shared/CustomMessageSender');
 
 
 	/* 
@@ -1208,7 +1258,10 @@ define('session',['require','exports','module','events','util','./player','./mes
 		 * @readonly
 		 */
 		this.myself = myself;
+
 		this.messageBus = messageBus;
+
+		this.messageSender = new MessageSender(messageBus, 'session');
 		/**
 		 * Dictionary of all players except myself currently 
 		 * connected to this session; mapped on their ids.
@@ -1265,6 +1318,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 
+	util.inherits(Session, EventEmitter);
 	util.inherits(Session, EventEmitter);
 
 	/**
@@ -1401,21 +1455,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 * session.message('ping', { foo: 'bar' });
 	 */
 	Session.prototype.message = function (type, data, toClient, volatile) {
-		var message = {
-			name: 'message',
-			fromInstance: 'session',
-			type: type,
-			data: data
-		};
-		message.toClient = toClient || 'all';
-		if (typeof message.toClient === 'object' &&
-			message.toClient instanceof playerModule.Player) {
-			message.toClient = [ message.toClient.id ];
-		}
-		if (volatile === true) {
-			message.volatile = true;
-		}
-		this.messageBus.send(message);
+		this.messageSender.message(type, data, toClient, volatile);
 	};
 
 	/**
@@ -3625,6 +3665,8 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * <ul>
 	 * <li>'all' - the message will be send to all clients currently connected to
 	 * this session</li>
+	 * <li>'all-but-myself' - the message will be send to all clients currently 
+	 * connected to this session except the sending client </li>
 	 * <li>'server' - the message will be send to the game server only</li>
 	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
 	 * inside the array</li>

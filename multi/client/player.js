@@ -8,6 +8,7 @@ define(function(require, exports, module) {
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var SyncedObject = require('../shared/SyncedObject');
+	var MessageSender = require('../shared/CustomMessageSender');
 
 	/**
 	* @classdesc This player class represents a device connected
@@ -36,6 +37,8 @@ define(function(require, exports, module) {
 		this.syncedAttributes = new SyncedObject();
 
 		this.messageBus = messageBus;
+
+		this.messageSender = new MessageSender(messageBus, id);
 		/** 
 		 * unique id for this player
 		 * @type {string}
@@ -165,21 +168,7 @@ define(function(require, exports, module) {
 	 * player.message('ping', { foo: 'bar' });
 	 */
 	Player.prototype.message = function (type, data, toClient, volatile) {
-		var message = {
-			name: 'message',
-			fromInstance: this.id,
-			type: type,
-			data: data
-		};
-		message.toClient = toClient || 'all';
-		if (typeof message.toClient === 'object' &&
-			message.toClient instanceof Player) {
-			message.toClient = [ message.toClient.id ];
-		}
-		if (volatile === true) {
-			message.volatile = true;
-		}
-		this.messageBus.send(message);
+		this.messageSender.message(type, data, toClient, volatile);
 	};
 
 
