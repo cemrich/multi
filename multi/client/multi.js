@@ -50,6 +50,8 @@ define(function(require, exports, module) {
 	 * <ul>
 	 * <li>'all' - the message will be send to all clients currently connected to
 	 * this session</li>
+	 * <li>'all-but-myself' - the message will be send to all clients currently 
+	 * connected to this session except the sending client </li>
 	 * <li>'server' - the message will be send to the game server only</li>
 	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
 	 * inside the array</li>
