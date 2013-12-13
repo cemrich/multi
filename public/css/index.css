@@ -28,5 +28,6 @@ body {
 }
 .gamelist li img {
   width: 170px;
+  max-height: 140px;
   float: left;
 }

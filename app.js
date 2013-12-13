@@ -42,6 +42,7 @@ app.get('/snake1p', routes.terminalControllerSnake1pPlayer);
 app.get('/snakemp/presenter', routes.terminalControllerSnakeMpPresenter);
 app.get('/snakemp', routes.terminalControllerSnakeMpPlayer);
 app.get('/snake1s', routes.serverOnescreenSnake);
+app.get('/image', routes.image);
 
 server.listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));

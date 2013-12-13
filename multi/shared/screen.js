@@ -137,6 +137,28 @@ define(function(require, exports, module) {
 		return {x: globalX, y: globalY };
 	};
 
+	exports.ScreenArranger.prototype.globalToLocals = function (x, y, witdh, height) {
+		var players = [];
+		players.push(this.getPlayerAtCoords(x, y));
+		players.push(this.getPlayerAtCoords(x, y+height));
+		players.push(this.getPlayerAtCoords(x+witdh, y));
+		players.push(this.getPlayerAtCoords(x+witdh, y+height));
+
+		var locals = {};
+		var local, player;
+		for (var i in players) {
+			player = players[i];
+			if (player !== null && !locals.hasOwnProperty(player.id)) {
+				local = this.globalToLocal(x, y, player);
+				if (local !== null) {
+					locals[player.id] = { player: player, x: local.x, y: local.y };
+				}
+			}
+		}
+
+		return locals;
+	};
+
 	/**
 	 * Converts global pixel coordinates into their corresponding
 	 * local ones.
@@ -145,15 +167,21 @@ define(function(require, exports, module) {
 	 * @return {object}  { player: localPlayer, x: localX, y: localY }
 	 *  or null if there is no player hitting the given coordinates
 	 */
-	exports.ScreenArranger.prototype.globalToLocal = function (x, y) {
-		var player = this.getPlayerAtCoords(x, y);
-		if (player === null) {
-			return null;
+	exports.ScreenArranger.prototype.globalToLocal = function (x, y, player) {
+		if (typeof player === 'undefined') {
+			player = this.getPlayerAtCoords(x, y);
+			if (player === null) {
+				return null;
+			}
 		}
 		var screen = this.screens[player.id];
-		var localX = x - screen.left;
-		var localY = y - screen.top;
-		return {player: player, x: localX, y: localY };
+		if (typeof screen !== 'undefined') {
+			var localX = x - screen.left;
+			var localY = y - screen.top;
+			return {player: player, x: localX, y: localY };
+		} else {
+			return null;
+		}
 	};
 
 	/**

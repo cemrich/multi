@@ -4,19 +4,17 @@ requirejs.config({
 	}
 });
 
-requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
-	function (multiModule, Joystick) {
-
-	var canvas = document.getElementById('canvas');
-	var context = canvas.getContext('2d');
-	var joystick = null;
+requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
+	function (multiModule) {
 
 	var multiOptions = {
 		server: '192.168.0.100',
 		session: {
-			scriptName: 'games/serverOnescreenSnake.js'
+			scriptName: 'games/image.js'
 		}
 	};
+
+	var session;
 
 	function showSection(section) {
 		$('.section').hide();
@@ -37,13 +35,6 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		$('.players').append(playerView);
 
 		player.on('attributeChanged/color', setColor);
-		player.on('draw', function (event) {
-			//console.log(event.data);
-			context.strokeStyle = player.attributes.color;
-			context.moveTo(event.data.x, event.data.y);
-			context.lineTo(event.data.x+event.data.width, event.data.y+event.data.height);
-			context.stroke();
-		});
 		player.on('disconnected', function () {
 			playerView.remove();
 		});
@@ -55,23 +46,34 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		$('#error').text(message);
 	}
 
-	function onStartGame() {
+	function onStartGame(session) {
 		showSection('game');
-		joystick.start();
-	}
 
-	function onGameFinished() {
-		showSection('joined');
-		joystick.stop();
+		var image = $('#image');
+
+		session.on('pos', function (event) {
+			image.css('top', event.data.y);
+			image.css('left', event.data.x);
+		});
+
+		function move(event) {
+			session.myself.message('pos', {
+					x: event.clientX-142,
+					y: event.clientY-142
+				}, 'server');
+			event.preventDefault();
+		}
+
+		image.on('mousedown', function (event) {
+			image.on('mousemove', move);
+		});
+
+		$(document.body).on('mouseup', function () {
+			image.off('mousemove', move);
+		});
 	}
 
 	function onSession(session) {
-
-		function onDirectionChange(direction) {
-			session.myself.attributes.direction = direction;
-		}
-	
-		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));
 		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);
@@ -84,15 +86,13 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		$('button.start').click(function () {
 			session.message('startGame');
 		});
-		session.on('startGame', onStartGame);
-		session.on('finished', onGameFinished);
+		session.on('startGame', function () {
+			onStartGame(session);
+		});
 	}
 
 	function onSessionDestroyed() {
 		onError('session has been destroyed');
-		if (joystick !== null) {
-			joystick.stop();
-		}
 	}
 
 	function onSessionFailed(error) {
@@ -102,7 +102,5 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 
 	var multi = multiModule.init(multiOptions);
 	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
 
 });

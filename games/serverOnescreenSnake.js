@@ -13,6 +13,12 @@ exports.Game = function (session) {
 		this.startY = startY;
 		this.x = startX;
 		this.y = startY;
+		this.getWidth = function () {
+			return this.x - this.startX;
+		};
+		this.getHeight = function () {
+			return this.y - this.startY;
+		};
 	}
 
 	function Snake (owner) {
@@ -68,14 +74,21 @@ exports.Game = function (session) {
 		};
 
 		this.updateDisplay = function () {
-			var local = arranger.globalToLocal(this.pos.x, this.pos.y);
-			if (local !== null) {
-				var drawObj = {
-					playerId: this.owner.id,
-					x: local.x,
-					y: local.y
-				};
-				local.player.message('draw', drawObj, local.player);
+			var width = this.curSegment.getWidth();
+			var height = this.curSegment.getHeight();
+			var locals = arranger.globalToLocals(this.curSegment.startX,
+				this.curSegment.startY, width, height);
+			var local;
+			for (var i in locals) {
+				local = locals[i];
+				this.owner.message('draw',
+					{
+						x: local.x,
+						y: local.y,
+						width: width,
+						height: height
+					},
+					local.player);
 			}
 		};
 	}
