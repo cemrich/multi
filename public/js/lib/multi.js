@@ -694,6 +694,7 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','ev
 */
 
 
+
 define('../shared/CustomMessageSender',['require','exports','module'],function(require, exports, module) {
 
 	/**
@@ -730,7 +731,9 @@ define('../shared/CustomMessageSender',['require','exports','module'],function(r
 		message.toClient = toClient || 'all';
 		if (typeof message.toClient === 'object') {
 			if (message.toClient instanceof Array) {
-				console.log('array');
+				for (var i in message.toClient) {
+					message.toClient[i] = message.toClient[i].id;
+				}
 			} else {
 				message.toClient = [ message.toClient.id ];
 			}
@@ -3668,8 +3671,8 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * <li>'all-but-myself' - the message will be send to all clients currently 
 	 * connected to this session except the sending client </li>
 	 * <li>'server' - the message will be send to the game server only</li>
-	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
-	 * inside the array</li>
+	 * <li>[player1, player2] - message will be send to all clients that are
+	 * represented by players inside this array</li>
 	 * <li>myPlayer - the message will be send to the client that is represented
 	 * by myPlayer</li>
 	 * </ul>

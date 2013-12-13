@@ -110,9 +110,10 @@ requirejs(['multi'], function (multiModule) {
 				function startPing() {
 					createdSession.players[session.myself.id].on('ping', function (event) {
 						ok(true, 'ping message received');
-						createdSession.players[session.myself.id].message('pong', data);
+						var toPlayer = createdSession.players[session.myself.id];
+						toPlayer.message('pong', data, toPlayer);
 					});
-					session.myself.message('ping');
+					session.myself.message('ping', null, session.getPlayerArray());
 				}
 
 				if (Object.keys(createdSession.players).length === 1) {

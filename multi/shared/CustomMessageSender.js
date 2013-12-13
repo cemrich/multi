@@ -41,7 +41,9 @@ define(function(require, exports, module) {
 		message.toClient = toClient || 'all';
 		if (typeof message.toClient === 'object') {
 			if (message.toClient instanceof Array) {
-				console.log('array');
+				for (var i in message.toClient) {
+					message.toClient[i] = message.toClient[i].id;
+				}
 			} else {
 				message.toClient = [ message.toClient.id ];
 			}
