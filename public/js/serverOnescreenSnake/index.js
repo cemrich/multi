@@ -74,6 +74,8 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		var dangerZone = document.getElementById('danger-zone');
 		var pattern = context.createPattern(dangerZone, 'repeat');
 		var width = 14;
+		var globalStartY, myStartY, myEndY;
+
 		context.lineWidth = width * 2;
 		context.strokeStyle = pattern;
 		context.strokeRect(0, 0, canvas.width, canvas.height);
@@ -82,17 +84,17 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		context.beginPath();
 		var myScreen = session.myself.screen;
 		if (myScreen.rightPlayers[0]) {
-			var globalStartY = myScreen.rightPlayers[0].screen.y;
-			var myStartY = myScreen.globalToLocal(0, globalStartY);
-			var myEndY = Math.min(myStartY.y + myScreen.rightPlayers[0].height, 
+			globalStartY = myScreen.rightPlayers[0].screen.y;
+			myStartY = myScreen.globalToLocal(0, globalStartY);
+			myEndY = Math.min(myStartY.y + myScreen.rightPlayers[0].height,
 				myScreen.height);
 			context.moveTo(canvas.width, myStartY.y + width);
 			context.lineTo(canvas.width, myEndY - width);
 		}
 		if (myScreen.leftPlayers[0]) {
-			var globalStartY = myScreen.leftPlayers[0].screen.y;
-			var myStartY = myScreen.globalToLocal(0, globalStartY);
-			var myEndY = Math.min(myStartY.y + myScreen.leftPlayers[0].height, 
+			globalStartY = myScreen.leftPlayers[0].screen.y;
+			myStartY = myScreen.globalToLocal(0, globalStartY);
+			myEndY = Math.min(myStartY.y + myScreen.leftPlayers[0].height,
 				myScreen.height);
 			context.moveTo(0, myStartY.y + width);
 			context.lineTo(0, myEndY - width);
@@ -110,7 +112,7 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 			session.myself.attributes.direction = direction;
 		}
 
-		arranger = new multiModule.ScreenArranger(session);	
+		arranger = new multiModule.ScreenArranger(session);
 		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));
 		showSection('joined');
 		$('#status').text('connected');

@@ -21,7 +21,7 @@ define(function(require, exports, module) {
 		this.y = y;
 		this.rightPlayers = [];
 		this.leftPlayers = [];
-	}
+	};
 
 	/**
 	 * @param  {integer}  x  global x position in pixel
@@ -41,7 +41,7 @@ define(function(require, exports, module) {
 		return x + width >= this.x &&
 			y + height >= this.y &&
 			x < this.x + this.width &&
-			y < this.y + this.height; 
+			y < this.y + this.height;
 	};
 
 	exports.Screen.prototype.localToGlobal = function (x, y) {
@@ -111,7 +111,7 @@ define(function(require, exports, module) {
 
 	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
 		var locals = {};
-		var local, screen;
+		var screen;
 		for (var i in this.session.players) {
 			screen = this.session.players[i].screen;
 			if (screen !== null && screen.isHitByRect(x, y, width, height)) {
@@ -163,7 +163,7 @@ define(function(require, exports, module) {
 		var lastPlayer = null;
 		this.session.getPlayerArray().forEach(function (player) {
 			player.screen = new exports.Screen(xPos, 0, player);
-			if (lastPlayer != null) {
+			if (lastPlayer !== null) {
 				player.screen.leftPlayers = [ lastPlayer ];
 				lastPlayer.screen.rightPlayers = [ player ];
 			}

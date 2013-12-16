@@ -1,4 +1,4 @@
-/* global exports */
+/* global module */
 
 
 function Segment(startX, startY) {
@@ -71,8 +71,7 @@ Snake.prototype.move = function () {
 };
 
 Snake.prototype.isAlive = function () {
-	return this.arranger.getPlayerAtCoords(this.curSegment.x, this.curSegment.y)
-		!== null;
+	return this.arranger.getPlayerAtCoords(this.curSegment.x, this.curSegment.y) !== null;
 };
 
 Snake.prototype.updateDisplay = function () {
@@ -82,7 +81,7 @@ Snake.prototype.updateDisplay = function () {
 	var top = this.curSegment.getTop();
 	var locals = this.arranger.globalRectToLocals(left, top, width, height);
 	for (var i in locals) {
-		local = locals[i];
+		var local = locals[i];
 		this.owner.message('draw',
 			{
 				x: local.x,

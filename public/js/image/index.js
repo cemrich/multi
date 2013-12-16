@@ -23,8 +23,6 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	}
 
 	function addPlayer(player) {
-		var nextScreen = session.myself.screen.nextScreen;
-
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
 		playerView.css('height', player.height/10);
