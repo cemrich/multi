@@ -46,7 +46,9 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 };
 
 exports.MessageBus.prototype.sendToSockets = function (message, sockets) {
-	if (message.volatile) {
+	var volatile = message.volatile;
+	delete message.volatile;
+	if (volatile) {
 		sockets.volatile.emit('multi', message);
 	} else {
 		sockets.emit('multi', message);
@@ -64,6 +66,7 @@ exports.MessageBus.prototype.sendToSockets = function (message, sockets) {
  */
 exports.MessageBus.prototype.distribute = function (message, socket) {
 	var toClient = message.toClient;
+	delete message.toClient;
 	if (toClient === 'all-but-myself' && socket) {
 		// send to all but sender
 		this.sendToSockets(message, socket.broadcast.to(this.token));
