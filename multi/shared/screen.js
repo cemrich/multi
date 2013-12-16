@@ -35,6 +35,13 @@ define(function(require, exports, module) {
 			y < this.y + this.height;
 	};
 
+	exports.Screen.prototype.isHitByRect = function (x, y, width, height) {
+		return x + width > this.x &&
+			y + height > this.y &&
+			x < this.x + this.width &&
+			y < this.y + this.height; 
+	};
+
 	exports.Screen.prototype.localToGlobal = function (x, y) {
 		return { x: this.x + x, y: this.y + y };
 	};
@@ -166,47 +173,18 @@ define(function(require, exports, module) {
 		return screen.localToGlobal(x, y);
 	};
 
-	exports.ScreenArranger.prototype.globalToLocals = function (x, y, witdh, height) {
-		var screens = [];
-		screens.push(this.getScreenAtCoords(x, y));
-		screens.push(this.getScreenAtCoords(x, y+height));
-		screens.push(this.getScreenAtCoords(x+witdh, y));
-		screens.push(this.getScreenAtCoords(x+witdh, y+height));
-
+	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
 		var locals = {};
 		var local, screen;
-		for (var i in screens) {
-			screen = screens[i];
-			if (screen !== null) {
+		for (var i in this.screens) {
+			screen = this.screens[i];
+			if (screen !== null && screen.isHitByRect(x, y, width, height)) {
 				locals[screen.player.id] = screen.globalToLocal(x, y);
 			}
 		}
 
 		return locals;
 	};
-
-	/**
-	 * Converts global pixel coordinates into their corresponding
-	 * local ones.
-	 * @param  {integer} x  global x position in pixel
-	 * @param  {integer} y  global y position in pixel
-	 * @return {object}  { player: localPlayer, x: localX, y: localY }
-	 *  or null if there is no player hitting the given coordinates
-	 */
-	/*exports.ScreenArranger.prototype.globalToLocal = function (x, y, player) {
-		if (typeof player === 'undefined') {
-			player = this.getPlayerAtCoords(x, y);
-			if (player === null) {
-				return null;
-			}
-		}
-		var screen = this.screens[player.id];
-		if (typeof screen !== 'undefined') {
-			return screen.globalToLocal(x, y);
-		} else {
-			return null;
-		}
-	};*/
 
 	/**
 	 * @param  {module:server/player~Player|module:client/player~Player} player 
