@@ -19,6 +19,8 @@ define(function(require, exports, module) {
 		this.player = player;
 		this.x = this.left = left;
 		this.y = this.top = top;
+		this.prevScreen = null;
+		this.nextScreen = null;
 	}
 
 	/**
@@ -234,10 +236,16 @@ define(function(require, exports, module) {
 		var screens = {};
 		var height = 0;
 		var xPos = 0;
+		var lastId = null;
 		this.session.getPlayerArray().forEach(function (player) {
 			screens[player.id] = new exports.Screen(0, xPos, player);
+			if (lastId != null) {
+				screens[player.id].lastScreen = screens[lastId];
+				screens[lastId].nextScreen = screens[player.id];
+			}
 			height = Math.max(height, player.height);
 			xPos += player.width;
+			lastId = player.id;
 		});
 
 		this.screens = screens;

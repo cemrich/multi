@@ -15,6 +15,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	};
 
 	var session;
+	var arranger;
 
 	function showSection(section) {
 		$('.section').hide();
@@ -22,6 +23,8 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	}
 
 	function addPlayer(player) {
+		var nextScreen = arranger.screens[session.myself.id].nextScreen;
+
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
 		playerView.css('height', player.height/10);
@@ -29,6 +32,9 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 
 		var setColor = function () {
 			playerView.css('background-color', player.attributes.color);
+			if (player === session.myself) {
+				$('#game').css('background-color', player.attributes.color);
+			}
 		};
 
 		setColor();
@@ -77,7 +83,9 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		});
 	}
 
-	function onSession(session) {
+	function onSession(s) {
+		session = s;
+		arranger = new multiModule.ScreenArranger(session);
 		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);
