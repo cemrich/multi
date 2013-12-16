@@ -21,9 +21,20 @@ define(function(require, exports, module) {
 		this.y = this.top = top;
 	}
 
+	/**
+	 * @param  {integer}  x  global x position in pixel
+	 * @param  {integer}  y  global y position in pixel
+	 * @return {boolean}  true if the given global coordinates lie inside 
+	 * the this screen object, else false
+	 * @private
+	 */
 	exports.Screen.prototype.isHit = function (x, y) {
-
+		return x >= this.x &&
+			x < this.x + this.width &&
+			y >= this.y &&
+			y < this.y + this.height;
 	};
+
 
 	/**
 	 * @classdesc This class can be used to arrange multiple clients
@@ -197,21 +208,6 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @param  {object}  screen  any screen object that should be tested
-	 * @param  {integer}  x  global x position in pixel
-	 * @param  {integer}  y  global y position in pixel
-	 * @return {boolean}  true if the given global coordinates lie inside 
-	 * the given screen object, else false
-	 * @private
-	 */
-	exports.ScreenArranger.prototype.isScreenHit = function (screen, x, y) {
-		return x >= screen.left &&
-			x < screen.left + screen.player.width &&
-			y >= screen.top &&
-			y < screen.top + screen.player.height;
-	};
-
-	/**
 	 * @param  {module:server/player~Player|module:client/player~Player} player 
 	 * any player object connected to the arranged session
 	 * @param  {integer}  x  global x position in pixel
@@ -220,7 +216,7 @@ define(function(require, exports, module) {
 	 * the screen of the given player
 	 */
 	exports.ScreenArranger.prototype.isPlayerHit = function (player, x, y) {
-		return this.isScreenHit(this.screens[player.id], x, y);
+		return this.screens[player.id].isHit(x, y);
 	};
 
 	/**
@@ -233,7 +229,7 @@ define(function(require, exports, module) {
 	exports.ScreenArranger.prototype.getPlayerAtCoords = function (x, y) {
 		for (var i in this.screens) {
 			var screen = this.screens[i];
-			if (this.isScreenHit(screen, x, y)) {
+			if (screen.isHit(x, y)) {
 				return screen.player;
 			}
 		}
