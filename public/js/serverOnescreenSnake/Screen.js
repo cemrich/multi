@@ -38,18 +38,18 @@ define(function () {
 		var myScreen = this.session.myself.screen;
 		if (myScreen.rightPlayers[0]) {
 			globalStartY = myScreen.rightPlayers[0].screen.y;
-			myStartY = myScreen.globalToLocal(0, globalStartY);
-			myEndY = Math.min(myStartY.y + myScreen.rightPlayers[0].height,
+			myStartY = Math.max(myScreen.globalToLocal(0, globalStartY).y, 0);
+			myEndY = Math.min(myStartY + myScreen.rightPlayers[0].height,
 				myScreen.height);
-			context.moveTo(canvas.width, myStartY.y + BORDER_WIDTH);
+			context.moveTo(canvas.width, myStartY + BORDER_WIDTH);
 			context.lineTo(canvas.width, myEndY - BORDER_WIDTH);
 		}
 		if (myScreen.leftPlayers[0]) {
 			globalStartY = myScreen.leftPlayers[0].screen.y;
-			myStartY = myScreen.globalToLocal(0, globalStartY);
-			myEndY = Math.min(myStartY.y + myScreen.leftPlayers[0].height,
+			myStartY = Math.max(myScreen.globalToLocal(0, globalStartY).y, 0);
+			myEndY = Math.min(myStartY + myScreen.leftPlayers[0].height,
 				myScreen.height);
-			context.moveTo(0, myStartY.y + BORDER_WIDTH);
+			context.moveTo(0, myStartY + BORDER_WIDTH);
 			context.lineTo(0, myEndY - BORDER_WIDTH);
 		}
 		context.stroke();

@@ -1842,14 +1842,19 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 	exports.ScreenArranger.prototype.arrange = function () {
 		var height = 0;
 		var xPos = 0;
+		var yPos;
 		var lastPlayer = null;
-		this.session.getPlayerArray().forEach(function (player) {
-			player.screen = new exports.Screen(xPos, 0, player);
+		var players = this.session.getPlayerArray();
+		players.forEach(function (player) {
+			height = Math.max(height, player.height);
+		});
+		players.forEach(function (player) {
+			yPos = Math.round((height - player.height) / 2);
+			player.screen = new exports.Screen(xPos, yPos, player);
 			if (lastPlayer !== null) {
 				player.screen.leftPlayers = [ lastPlayer ];
 				lastPlayer.screen.rightPlayers = [ player ];
 			}
-			height = Math.max(height, player.height);
 			xPos += player.width;
 			lastPlayer = player;
 		});
