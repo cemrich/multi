@@ -89,7 +89,7 @@ Snake.prototype.updateDisplay = function () {
 				width: width,
 				height: height
 			},
-			local.player);
+			local.player, true);
 	}
 };
 
