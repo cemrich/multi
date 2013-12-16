@@ -35,6 +35,14 @@ define(function(require, exports, module) {
 			y < this.y + this.height;
 	};
 
+	exports.Screen.prototype.localToGlobal = function (x, y) {
+		return { x: this.x + x, y: this.y + y };
+	};
+
+	exports.Screen.prototype.globalToLocal = function (x, y) {
+		return { x: x - this.x, y: y - this.y, player: this.player };
+	};
+
 
 	/**
 	 * @classdesc This class can be used to arrange multiple clients
@@ -155,27 +163,22 @@ define(function(require, exports, module) {
 		if (screen === null) {
 			return null;
 		}
-		var globalX = screen.left + x;
-		var globalY = screen.top + y;
-		return {x: globalX, y: globalY };
+		return screen.localToGlobal(x, y);
 	};
 
 	exports.ScreenArranger.prototype.globalToLocals = function (x, y, witdh, height) {
-		var players = [];
-		players.push(this.getPlayerAtCoords(x, y));
-		players.push(this.getPlayerAtCoords(x, y+height));
-		players.push(this.getPlayerAtCoords(x+witdh, y));
-		players.push(this.getPlayerAtCoords(x+witdh, y+height));
+		var screens = [];
+		screens.push(this.getScreenAtCoords(x, y));
+		screens.push(this.getScreenAtCoords(x, y+height));
+		screens.push(this.getScreenAtCoords(x+witdh, y));
+		screens.push(this.getScreenAtCoords(x+witdh, y+height));
 
 		var locals = {};
-		var local, player;
-		for (var i in players) {
-			player = players[i];
-			if (player !== null && !locals.hasOwnProperty(player.id)) {
-				local = this.globalToLocal(x, y, player);
-				if (local !== null) {
-					locals[player.id] = { player: player, x: local.x, y: local.y };
-				}
+		var local, screen;
+		for (var i in screens) {
+			screen = screens[i];
+			if (screen !== null) {
+				locals[screen.player.id] = screen.globalToLocal(x, y);
 			}
 		}
 
@@ -190,7 +193,7 @@ define(function(require, exports, module) {
 	 * @return {object}  { player: localPlayer, x: localX, y: localY }
 	 *  or null if there is no player hitting the given coordinates
 	 */
-	exports.ScreenArranger.prototype.globalToLocal = function (x, y, player) {
+	/*exports.ScreenArranger.prototype.globalToLocal = function (x, y, player) {
 		if (typeof player === 'undefined') {
 			player = this.getPlayerAtCoords(x, y);
 			if (player === null) {
@@ -199,13 +202,11 @@ define(function(require, exports, module) {
 		}
 		var screen = this.screens[player.id];
 		if (typeof screen !== 'undefined') {
-			var localX = x - screen.left;
-			var localY = y - screen.top;
-			return {player: player, x: localX, y: localY };
+			return screen.globalToLocal(x, y);
 		} else {
 			return null;
 		}
-	};
+	};*/
 
 	/**
 	 * @param  {module:server/player~Player|module:client/player~Player} player 
@@ -219,6 +220,16 @@ define(function(require, exports, module) {
 		return this.screens[player.id].isHit(x, y);
 	};
 
+	exports.ScreenArranger.prototype.getScreenAtCoords = function (x, y) {
+		for (var i in this.screens) {
+			var screen = this.screens[i];
+			if (screen.isHit(x, y)) {
+				return screen;
+			}
+		}
+		return null;
+	};
+
 	/**
 	 * @param  {integer}  x  global x position in pixel
 	 * @param  {integer}  y  global y position in pixel
@@ -227,13 +238,12 @@ define(function(require, exports, module) {
 	 * or null when no player can be found at this position
 	 */
 	exports.ScreenArranger.prototype.getPlayerAtCoords = function (x, y) {
-		for (var i in this.screens) {
-			var screen = this.screens[i];
-			if (screen.isHit(x, y)) {
-				return screen.player;
-			}
+		var screen = this.getScreenAtCoords(x, y);
+		if (screen === null) {
+			return null;
+		} else {
+			return screen.player;
 		}
-		return null;
 	};
 
 	/**
