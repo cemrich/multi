@@ -13,6 +13,18 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define(function(require, exports, module) {
 
+	exports.Screen = function (top, left, player) {
+		this.width = player.width;
+		this.height = player.height;
+		this.player = player;
+		this.x = this.left = left;
+		this.y = this.top = top;
+	}
+
+	exports.Screen.prototype.isHit = function (x, y) {
+
+	};
+
 	/**
 	 * @classdesc This class can be used to arrange multiple clients
 	 * into one big game screen. It does rearrange every time a player
@@ -239,11 +251,7 @@ define(function(require, exports, module) {
 		var height = 0;
 		var xPos = 0;
 		this.session.getPlayerArray().forEach(function (player) {
-			screens[player.id] = {
-				top: 0,
-				left: xPos,
-				player: player
-			};
+			screens[player.id] = new exports.Screen(0, xPos, player);
 			height = Math.max(height, player.height);
 			xPos += player.width;
 		});
