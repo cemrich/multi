@@ -47,12 +47,12 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	}
 
 	function onStartGame(session) {
+		var image = $('#image');
+
 		if (session.myself.number === 0) {
-			$('#image').css('left', 0);
+			image.css('left', 0);
 		}
 		showSection('game');
-
-		var image = $('#image');
 
 		session.on('pos', function (event) {
 			image.css('top', event.data.y);
@@ -68,11 +68,12 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		}
 
 		image.on('mousedown', function (event) {
-			image.on('mousemove', move);
+			event.preventDefault();
 		});
-
-		$(document.body).on('mouseup', function () {
-			image.off('mousemove', move);
+		$(window).on('mousemove', function (event) {
+			if (event.which === 1) {
+				move(event);
+			}
 		});
 	}
 
