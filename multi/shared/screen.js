@@ -134,16 +134,6 @@ define(function(require, exports, module) {
 		return player.screen.isHit(x, y);
 	};
 
-	exports.ScreenArranger.prototype.getScreenAtCoords = function (x, y) {
-		for (var i in this.session.players) {
-			var screen = this.session.players[i].screen;
-			if (screen.isHit(x, y)) {
-				return screen;
-			}
-		}
-		return null;
-	};
-
 	/**
 	 * @param  {integer}  x  global x position in pixel
 	 * @param  {integer}  y  global y position in pixel
@@ -152,12 +142,13 @@ define(function(require, exports, module) {
 	 * or null when no player can be found at this position
 	 */
 	exports.ScreenArranger.prototype.getPlayerAtCoords = function (x, y) {
-		var screen = this.getScreenAtCoords(x, y);
-		if (screen === null) {
-			return null;
-		} else {
-			return screen.player;
+		for (var i in this.session.players) {
+			var screen = this.session.players[i].screen;
+			if (screen.isHit(x, y)) {
+				return screen.player;
+			}
 		}
+		return null;
 	};
 
 	/**
