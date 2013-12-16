@@ -13,12 +13,12 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define(function(require, exports, module) {
 
-	exports.Screen = function (top, left, player) {
+	exports.Screen = function (x, y, player) {
 		this.width = player.width;
 		this.height = player.height;
 		this.player = player;
-		this.x = this.left = left;
-		this.y = this.top = top;
+		this.x = x;
+		this.y = y;
 		this.prevScreen = null;
 		this.nextScreen = null;
 	}
@@ -168,18 +168,14 @@ define(function(require, exports, module) {
 	 *  player is no part of this arranger
 	 */
 	exports.ScreenArranger.prototype.localToGlobal = function (player, x, y) {
-		var screen = this.screens[player.id];
-		if (screen === null) {
-			return null;
-		}
-		return screen.localToGlobal(x, y);
+		return player.screen.localToGlobal(x, y);
 	};
 
 	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
 		var locals = {};
 		var local, screen;
-		for (var i in this.screens) {
-			screen = this.screens[i];
+		for (var i in this.session.players) {
+			screen = this.session.players[i].screen;
 			if (screen !== null && screen.isHitByRect(x, y, width, height)) {
 				locals[screen.player.id] = screen.globalToLocal(x, y);
 			}
@@ -197,12 +193,12 @@ define(function(require, exports, module) {
 	 * the screen of the given player
 	 */
 	exports.ScreenArranger.prototype.isPlayerHit = function (player, x, y) {
-		return this.screens[player.id].isHit(x, y);
+		return player.screen.isHit(x, y);
 	};
 
 	exports.ScreenArranger.prototype.getScreenAtCoords = function (x, y) {
-		for (var i in this.screens) {
-			var screen = this.screens[i];
+		for (var i in this.session.players) {
+			var screen = this.session.players[i].screen;
 			if (screen.isHit(x, y)) {
 				return screen;
 			}
@@ -233,22 +229,20 @@ define(function(require, exports, module) {
 	 * @private
 	 */
 	exports.ScreenArranger.prototype.arrange = function () {
-		var screens = {};
 		var height = 0;
 		var xPos = 0;
-		var lastId = null;
+		var lastPlayer = null;
 		this.session.getPlayerArray().forEach(function (player) {
-			screens[player.id] = new exports.Screen(0, xPos, player);
-			if (lastId != null) {
-				screens[player.id].lastScreen = screens[lastId];
-				screens[lastId].nextScreen = screens[player.id];
+			player.screen = new exports.Screen(xPos, 0, player);
+			if (lastPlayer != null) {
+				player.screen.lastScreen = lastPlayer.screen;
+				lastPlayer.screen.nextScreen = player.screen;
 			}
 			height = Math.max(height, player.height);
 			xPos += player.width;
-			lastId = player.id;
+			lastPlayer = player;
 		});
 
-		this.screens = screens;
 		this.width = xPos;
 		this.height = height;
 	};
