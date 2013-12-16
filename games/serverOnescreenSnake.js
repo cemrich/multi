@@ -104,12 +104,11 @@ exports.Game = function (session) {
 		snakes.forEach(function (snake) {
 			snake.update();
 			if (!snake.isAlive()) {
-				console.log('dead:', snake);
 				dead.push(snake);
 			}
 		});
 		dead.forEach(function (snake) {
-			snakes.splice(snakes.indexOf(snake));
+			snakes.splice(snakes.indexOf(snake), 1);
 		});
 	}
 
