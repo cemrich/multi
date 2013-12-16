@@ -39,10 +39,12 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		player.on('attributeChanged/color', setColor);
 		player.on('draw', function (event) {
 			//console.log(event.data);
+			context.beginPath();
 			context.strokeStyle = player.attributes.color;
 			context.moveTo(event.data.x, event.data.y);
 			context.lineTo(event.data.x+event.data.width, event.data.y+event.data.height);
 			context.stroke();
+			context.closePath();
 		});
 		player.on('disconnected', function () {
 			playerView.remove();

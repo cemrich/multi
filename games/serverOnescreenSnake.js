@@ -14,10 +14,16 @@ exports.Game = function (session) {
 		this.x = startX;
 		this.y = startY;
 		this.getWidth = function () {
-			return this.x - this.startX;
+			return Math.abs(this.x - this.startX);
 		};
 		this.getHeight = function () {
-			return this.y - this.startY;
+			return Math.abs(this.y - this.startY);
+		};
+		this.getTop = function () {
+			return this.y - this.startY < 0 ? this.y : this.startY;
+		};
+		this.getLeft = function () {
+			return this.x - this.startX < 0 ? this.x : this.startX;
 		};
 	}
 
@@ -76,8 +82,9 @@ exports.Game = function (session) {
 		this.updateDisplay = function () {
 			var width = this.curSegment.getWidth();
 			var height = this.curSegment.getHeight();
-			var locals = arranger.globalRectToLocals(this.curSegment.startX,
-				this.curSegment.startY, width, height);
+			var left = this.curSegment.getLeft();
+			var top = this.curSegment.getTop();
+			var locals = arranger.globalRectToLocals(left, top, width, height);
 			for (var i in locals) {
 				local = locals[i];
 				this.owner.message('draw',
