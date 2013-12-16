@@ -1,7 +1,16 @@
+html {
+  background-color: #160F0F;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+}
 canvas {
   position: absolute;
   top: 0;
   left: 0;
+}
+#danger-zone {
+  display: none;
 }
 .section {
   display: none;
@@ -28,11 +37,11 @@ canvas {
   width: 20px;
   height: 20px;
   margin: -10px 0 0 -10px;
-  background-color: black;
+  background-color: rgba(255, 255, 255, 0.5);
 }
 .joystick .move {
   width: 10px;
   height: 10px;
   margin: -5px 0 0 -5px;
-  background-color: black;
+  background-color: rgba(255, 255, 255, 0.3);
 }

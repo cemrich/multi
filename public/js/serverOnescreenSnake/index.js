@@ -9,6 +9,8 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 
 	var canvas = document.getElementById('canvas');
 	var context = canvas.getContext('2d');
+	var session = null;
+	var arranger = null;
 	var joystick = null;
 
 	var multiOptions = {
@@ -58,6 +60,7 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 	}
 
 	function onStartGame() {
+		updateCanvasBorders();
 		showSection('game');
 		joystick.start();
 	}
@@ -67,12 +70,47 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 		joystick.stop();
 	}
 
-	function onSession(session) {
+	function updateCanvasBorders() {
+		var dangerZone = document.getElementById('danger-zone');
+		var pattern = context.createPattern(dangerZone, 'repeat');
+		var width = 14;
+		context.lineWidth = width * 2;
+		context.strokeStyle = pattern;
+		context.strokeRect(0, 0, canvas.width, canvas.height);
+
+		context.globalCompositeOperation = 'destination-out';
+		context.beginPath();
+		var myScreen = session.myself.screen;
+		if (myScreen.rightPlayers[0]) {
+			var globalStartY = myScreen.rightPlayers[0].screen.y;
+			var myStartY = myScreen.globalToLocal(0, globalStartY);
+			var myEndY = Math.min(myStartY.y + myScreen.rightPlayers[0].height, 
+				myScreen.height);
+			context.moveTo(canvas.width, myStartY.y + width);
+			context.lineTo(canvas.width, myEndY - width);
+		}
+		if (myScreen.leftPlayers[0]) {
+			var globalStartY = myScreen.leftPlayers[0].screen.y;
+			var myStartY = myScreen.globalToLocal(0, globalStartY);
+			var myEndY = Math.min(myStartY.y + myScreen.leftPlayers[0].height, 
+				myScreen.height);
+			context.moveTo(0, myStartY.y + width);
+			context.lineTo(0, myEndY - width);
+		}
+		context.stroke();
+		context.closePath();
+		context.globalCompositeOperation = 'source-over';
+		context.lineWidth = 1;
+	}
+
+	function onSession(s) {
+		session = s;
 
 		function onDirectionChange(direction) {
 			session.myself.attributes.direction = direction;
 		}
-	
+
+		arranger = new multiModule.ScreenArranger(session);	
 		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));
 		showSection('joined');
 		$('#status').text('connected');

@@ -1701,8 +1701,8 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 		this.player = player;
 		this.x = x;
 		this.y = y;
-		this.prevScreen = null;
-		this.nextScreen = null;
+		this.rightPlayers = [];
+		this.leftPlayers = [];
 	}
 
 	/**
@@ -1846,8 +1846,8 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 		this.session.getPlayerArray().forEach(function (player) {
 			player.screen = new exports.Screen(xPos, 0, player);
 			if (lastPlayer != null) {
-				player.screen.lastScreen = lastPlayer.screen;
-				lastPlayer.screen.nextScreen = player.screen;
+				player.screen.leftPlayers = [ lastPlayer ];
+				lastPlayer.screen.rightPlayers = [ player ];
 			}
 			height = Math.max(height, player.height);
 			xPos += player.width;
