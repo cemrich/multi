@@ -73,6 +73,7 @@ button:hover {
   -webkit-box-pack: center;
   -webkit-box-align: center;
   margin: 15px 0;
+  counter-reset: playerNr;
 }
 #joined .players .player {
   align-self: auto;
@@ -81,6 +82,11 @@ button:hover {
   -webkit-box-flex: 1;
   -moz-box-flex: 1;
   box-flex: 1;
+}
+#joined .players .player::before {
+  text-shadow: 1px 2px 1px #000000;
+  counter-increment: playerNr;
+  content: counter(playerNr);
 }
 .joystick > div {
   position: absolute;
