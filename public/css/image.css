@@ -18,8 +18,8 @@ html {
 }
 #image {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 0px;
+  left: -500px;
 }
 #image * {
   pointer-events: none;

@@ -47,6 +47,9 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	}
 
 	function onStartGame(session) {
+		if (session.myself.number === 0) {
+			$('#image').css('left', 0);
+		}
 		showSection('game');
 
 		var image = $('#image');
