@@ -97,68 +97,6 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @param  {integer} x  current global x position in pixel
-	 * @param  {integer} y  current global y position in pixel
-	 * @param  {integer} step  number of pixels you want to move
-	 * @return {object}  the new global position after moving step pixels
-	 *  to the top. Values lower than zero will continue on the bottom.
-	 */
-	exports.ScreenArranger.prototype.getUp = function (x, y, step) {
-		var newY = y - step;
-		if (newY < 0) {
-			newY = this.height + newY;
-		}
-		return { x: x, y: newY };
-	};
-
-	/**
-	 * @param  {integer} x  current global x position in pixel
-	 * @param  {integer} y  current global y position in pixel
-	 * @param  {integer} step  number of pixels you want to move
-	 * @return {object}  the new global position after moving step pixels
-	 *  to the right. Values greater than the total width will continue
-	 *  on the left side.
-	 */
-	exports.ScreenArranger.prototype.getRight = function (x, y, step) {
-		var newX = x + step;
-		if (newX >= this.width) {
-			newX = this.width - newX;
-		}
-		return { x: newX, y: y };
-	};
-
-	/**
-	 * @param  {integer} x  current global x position in pixel
-	 * @param  {integer} y  current global y position in pixel
-	 * @param  {integer} step  number of pixels you want to move
-	 * @return {object}  the new global position after moving step pixels
-	 *  to the bottom. Values lower than the total height will continue
-	 *  on the top.
-	 */
-	exports.ScreenArranger.prototype.getDown = function (x, y, step) {
-		var newY = y + step;
-		if (newY >= this.height) {
-			newY = newY - this.height;
-		}
-		return { x: x, y: newY };
-	};
-
-	/**
-	 * @param  {integer} x  current global x position in pixel
-	 * @param  {integer} y  current global y position in pixel
-	 * @param  {integer} step  number of pixels you want to move
-	 * @return {object}  the new global position after moving step pixels
-	 *  to the left. Values lower than zero will continue on the right side.
-	 */
-	exports.ScreenArranger.prototype.getLeft = function (x, y, step) {
-		var newX = x - step;
-		if (newX < 0) {
-			newX = this.width + newX;
-		}
-		return { x: newX, y: y };
-	};
-
-	/**
 	 * Converts local pixel coordinates to global ones.
 	 * @param  {module:server/player~Player|module:client/player~Player} player 
 	 * player instance the local coordinates refer to
