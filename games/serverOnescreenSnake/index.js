@@ -1,7 +1,7 @@
 /* global exports */
 
-var multiModule = require('../multi/server');
-var ScreenArranger = require('../multi/shared/screen').ScreenArranger;
+var multiModule = require('../../multi/server');
+var ScreenArranger = require('../../multi/shared/screen').ScreenArranger;
 
 
 exports.Game = function (session) {

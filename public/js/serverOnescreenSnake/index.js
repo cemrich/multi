@@ -14,7 +14,7 @@ requirejs(['../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 	var multiOptions = {
 		server: '192.168.0.100',
 		session: {
-			scriptName: 'games/serverOnescreenSnake.js'
+			scriptName: 'games/serverOnescreenSnake/index.js'
 		}
 	};
 
