@@ -38,8 +38,8 @@ define(function(require, exports, module) {
 	};
 
 	exports.Screen.prototype.isHitByRect = function (x, y, width, height) {
-		return x + width > this.x &&
-			y + height > this.y &&
+		return x + width >= this.x &&
+			y + height >= this.y &&
 			x < this.x + this.width &&
 			y < this.y + this.height; 
 	};
