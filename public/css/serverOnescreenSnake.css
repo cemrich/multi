@@ -3,25 +3,80 @@ html {
   background-image: linear-gradient(rgba(255, 255, 255, 0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
   background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+  font-family: monospace;
+  color: white;
 }
-canvas {
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+a {
+  color: white;
+}
+a:hover {
+  color: grey;
+}
+button {
+  border: 2px solid #FFF;
+  background-color: #000;
+  color: #FFF;
+  padding: 0.5em 2em;
+}
+button:hover {
+  border-color: grey;
+  color: grey;
+}
+#status {
   position: absolute;
-  top: 0;
-  left: 0;
+  bottom: 20px;
+  left: 0px;
+  width: 100%;
+  text-align: center;
 }
 #danger-zone {
   display: none;
 }
+#error {
+  padding: 20px;
+  text-align: center;
+  color: red;
+  font-size: 1.7em;
+}
+#game {
+  height: 100%;
+}
+#game canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 .section {
   display: none;
 }
-.players {
+#joined {
+  text-align: center;
+  padding: 20px;
+}
+#joined .join-url {
+  font-size: 1.7em;
+}
+#joined .players {
   width: 100%;
   display: -webkit-box;
   display: -moz-box;
   display: box;
+  -webkit-justify-content: center;
+  -webkit-align-items: center;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+  margin: 15px 0;
 }
-.players .player {
+#joined .players .player {
+  align-self: auto;
+  margin: 4px;
   height: 50px;
   -webkit-box-flex: 1;
   -moz-box-flex: 1;
