@@ -196,6 +196,7 @@ define(function(require, exports, module) {
 		var multi = this;
 		var deferred = Q.defer();
 		var socket = io.connect(this.server, {
+				reconnect: false,
 				'force new connection': true
 			});
 		socket.on('connect', function () {
@@ -264,6 +265,7 @@ define(function(require, exports, module) {
 		var multi = this;
 		var deferred = Q.defer();
 		var socket = io.connect(this.server, {
+				reconnect: false,
 				'force new connection': true
 			});
 		socket.on('connect', function () {
