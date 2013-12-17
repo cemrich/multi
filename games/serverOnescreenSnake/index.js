@@ -7,7 +7,14 @@ var Snake = require('./snake');
 
 exports.Game = function (session) {
 
-	var snakes = [];
+	var snakes = null;
+	var interval = null;
+	var arranger = new ScreenArranger(session);
+
+	session.on('playerJoined', onPlayerJoined);
+	session.on('startGame', onStartGame);
+	session.on('destroyed', onSessionDestroyed);
+
 
 	function move() {
 		var dead = [];
@@ -26,19 +33,34 @@ exports.Game = function (session) {
 		event.player.attributes.color = multiModule.color.random();
 	}
 
+	function onSessionDestroyed() {
+		onEndGame();
+	}
+
+	function onPlayerLeft() {
+		onEndGame();
+	}
+
+	function onEndGame() {
+		clearInterval(interval);
+		session.removeListener('playerLeft', onPlayerLeft);
+	}
+
 	function onStartGame() {
+		snakes = [];
+
 		for (var i in session.players) {
 			snakes.push(new Snake(session.players[i], arranger));
 		}
+
+		session.on('playerLeft', onPlayerLeft);
+
 		// very, very simple gameloop for the start
-		setInterval(function () {
+		interval = setInterval(function () {
 			move();
+			console.log('tick');
 		}, 100);
 		// session.message('finished');
 	}
-
-	var arranger = new ScreenArranger(session);
-	session.on('playerJoined', onPlayerJoined);
-	session.on('startGame', onStartGame);
 
 };
