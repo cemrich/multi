@@ -6,7 +6,7 @@ requirejs.config({
 
 requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
 	function (Screen, multiModule, Joystick) {
-	console.log(Screen);
+
 	var screen = null;
 	var session = null;
 	var arranger = null;
@@ -54,7 +54,6 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 	}
 
 	function onStartGame() {
-		screen.updateBorders();
 		showSection('game');
 		joystick.start();
 	}
@@ -74,14 +73,19 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 		arranger = new multiModule.ScreenArranger(session);
 		screen = new Screen(session, arranger);
 		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));
+		screen.updateBorders();
 		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);
 		$('.join-url').attr('href', 'http://' + session.joinSessionUrl);
 		session.getPlayerArray().forEach(addPlayer);
 		session.on('destroyed', onSessionDestroyed);
+		session.on('playerLeft', function () {
+			screen.updateBorders();
+		});
 		session.on('playerJoined', function (event) {
 			addPlayer(event.player);
+			screen.updateBorders();
 		});
 		$('button.start').click(function () {
 			session.message('startGame');

@@ -29,6 +29,12 @@ button:hover {
   border-color: grey;
   color: grey;
 }
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
 #status {
   position: absolute;
   bottom: 20px;
@@ -47,11 +53,6 @@ button:hover {
 }
 #game {
   height: 100%;
-}
-#game canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
 }
 .section {
   display: none;
