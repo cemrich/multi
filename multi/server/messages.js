@@ -7,6 +7,7 @@
 
 var util = require('util');
 var PubSub = require('../shared/PubSub');
+var filterModule = require('./filter');
 
 /**
  * @classdesc Centralized communication infrastructure for one session.
@@ -17,10 +18,36 @@ var PubSub = require('../shared/PubSub');
  * @param io ready to use socket.io instance
  * @param {string} token  session token of the using session
  */
-exports.MessageBus = function (io, token) {
+exports.MessageBus = function (io, token, filters) {
 	this.io = io;
 	this.token = token;
 	this.pubSub = new PubSub();
+
+	// setup filter chain
+	filters = filters || [];
+	this.filterMethods = [];
+	for (var name in filters) {
+		var method = filterModule[filters[name]];
+		this.filterMethods.push(method);
+	}
+};
+
+/**
+ * Steps through every filter and decides if the given message should
+ * be send. 
+ * @param  {object} message    message object
+ * @param  {}                  fromSocket the socket that received this message 
+ *  originally or null if it's a server message
+ * @return {boolean}           true if this message is considered as invalid and
+ *  should _not_ be distributed, false if it's not filtered
+ */
+exports.MessageBus.prototype.filter = function (message, fromSocket) {
+	this.filterMethods.forEach(function (method) {
+		if (method(message, fromSocket) === true) {
+			return true;
+		}
+	});
+	return false;
 };
 
 /**
@@ -48,6 +75,7 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 exports.MessageBus.prototype.sendToSockets = function (message, sockets) {
 	var volatile = message.volatile;
 	delete message.volatile;
+	delete message.toClient;
 	if (volatile) {
 		sockets.volatile.emit('multi', message);
 	} else {
@@ -65,8 +93,11 @@ exports.MessageBus.prototype.sendToSockets = function (message, sockets) {
  * @param  socket  socket that received this message originally or null
  */
 exports.MessageBus.prototype.distribute = function (message, socket) {
+	if (this.filter(message, socket)) {
+		return;
+	}
+
 	var toClient = message.toClient;
-	delete message.toClient;
 	if (toClient === 'all-but-myself' && socket) {
 		// send to all but sender
 		this.sendToSockets(message, socket.broadcast.to(this.token));

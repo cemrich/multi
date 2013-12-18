@@ -17,10 +17,17 @@ var token = require('./token');
  * @property {string} [scriptName] name of server side script file that should
  *  be executed when a new session is created. This module must provide a Game
  *  constructor that takes a session as only argument.
- * @property {string} [token.func='numeric']  name of a function inside the {@link module:server/token} module that should generate the session token
- * @property {Array}  [token.args=[]]   argument array for the token generation function
- * @property {integer}[minPlayerNeeded=1] minimum number of players needed for this session
- * @property {integer}[maxPlayerAllowed=10] maximum number of players allowed for this session. Every addition player won't be allowed to join the session.
+ * @property {string} [token.func='numeric']  name of a function inside the 
+ *  {@link module:server/token} module that should generate the session token
+ * @property {Array}  [token.args=[]]   argument array for the token 
+ *  generationfunction
+ * @property {integer}[minPlayerNeeded=1] minimum number of players needed 
+ *  for this session
+ * @property {integer}[maxPlayerAllowed=10] maximum number of players allowed 
+ *  for this session. Every addition player won't be allowed to join the session.
+ * @property {Array.<string>}[filter] list of names of filter functions. 
+ *  The functions have to be defined in {@link module:server/filter} and will 
+ *  then be used to filter outgoing server-messages.
  */
 
 /**
@@ -68,7 +75,7 @@ var Session = function (io, options) {
 	 */
 	this.token = tokenFunction.apply(this, tokenFunctionArgs);
 
-	this.messageBus = new MessageBus(io, this.token);
+	this.messageBus = new MessageBus(io, this.token, options.filter);
 	this.messageSender = new MessageSender(this.messageBus, 'session');
 
 	/**
