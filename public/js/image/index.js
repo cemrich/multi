@@ -83,7 +83,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 
 	function onSession(s) {
 		session = s;
-		arranger = new multiModule.ScreenArranger(session);
+		arranger = new multiModule.screens.HorizontalArranger(session);
 		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);

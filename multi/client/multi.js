@@ -28,7 +28,7 @@ define(function(require, exports, module) {
 	var sessionModule = require('./session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
-	var ScreenArranger = require('../shared/screen').ScreenArranger;
+	var HorizontalArranger = require('../shared/screens/HorizontalArranger');
 	var Q = require('../lib/q');
 	var io = require('socket.io');
 
@@ -367,6 +367,7 @@ define(function(require, exports, module) {
 	 */
 	exports.color = color;
 
-	exports.ScreenArranger = ScreenArranger;
+	exports.screens = {};
+	exports.screens.HorizontalArranger = HorizontalArranger;
 
 });

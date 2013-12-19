@@ -1691,18 +1691,21 @@ define('../shared/errors',['require','exports','module','util'],function(require
  * This module contains all classes and utils that are useful
  * for working with multiple screens. Currently that's only the 
  * {@link module:shared/screen.ScreenArranger ScreenArranger}.
- * @module shared/screen
+ * @module shared/screens
  */
-define('../shared/screen',['require','exports','module'],function(require, exports, module) {
+define('../shared/screens/index',['require','exports','module'],function(require, exports, module) {
 
-	exports.Screen = function (x, y, player) {
+
+	exports.Screen = function (player) {
 		this.width = player.width;
 		this.height = player.height;
 		this.player = player;
-		this.x = x;
-		this.y = y;
+		this.x = null;
+		this.y = null;
 		this.rightPlayers = [];
 		this.leftPlayers = [];
+		this.topPlayers = [];
+		this.bottomPlayers = [];
 	};
 
 	/**
@@ -1773,7 +1776,13 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 		 */
 		this.height = 0;
 
-		this.arrange();
+		session.myself.screen = new exports.Screen(session.myself);
+		for (var id in session.players) {
+			var player = session.players[id];
+			player.screen = new exports.Screen(player);
+		}
+		this.refresh();
+
 		session.on('playerJoined', this.onPlayerJoined.bind(this));
 		session.on('playerLeft', this.onPlayerLeft.bind(this));
 	};
@@ -1833,6 +1842,22 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 		return null;
 	};
 
+	exports.ScreenArranger.prototype.refresh = function () {
+		this.arrange();
+		this.recaculateDimentions();
+	};
+
+	exports.ScreenArranger.prototype.recaculateDimentions = function () {
+		var maxX = 0;
+		var maxY = 0;
+		this.session.getPlayerArray().forEach(function (player) {
+			maxX = Math.max(maxX, player.screen.x + player.screen.width);
+			maxY = Math.max(maxY, player.screen.y + player.screen.height);
+		});
+		this.width = maxX;
+		this.height = maxY;
+	};
+
 	/**
 	 * Rearranges the screens of all players currently connected to
 	 * the arranged session. Width, height and other attributes
@@ -1840,6 +1865,41 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 	 * @private
 	 */
 	exports.ScreenArranger.prototype.arrange = function () {
+		// this does nothing!
+	};
+
+	exports.ScreenArranger.prototype.onPlayerJoined = function (event) {
+		console.log(event.player);
+		event.player.screen = new exports.Screen(event.player);
+		this.refresh();
+	};
+
+	exports.ScreenArranger.prototype.onPlayerLeft = function (event) {
+		this.refresh();
+	};
+
+	return exports;
+
+});
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+define('../shared/screens/HorizontalArranger',['require','exports','module','util','./index'],function(require, exports, module) {
+
+	var util = require('util');
+	var ScreenArranger = require('./index').ScreenArranger;
+
+
+	var HorizontalArranger = function (session) {
+		ScreenArranger.call(this, session);
+	};
+	util.inherits(HorizontalArranger, ScreenArranger);
+
+	HorizontalArranger.prototype.refresh = function () {
 		var height = 0;
 		var xPos = 0;
 		var yPos;
@@ -1850,7 +1910,8 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 		});
 		players.forEach(function (player) {
 			yPos = Math.round((height - player.height) / 2);
-			player.screen = new exports.Screen(xPos, yPos, player);
+			player.screen.x = xPos;
+			player.screen.y = yPos;
 			if (lastPlayer !== null) {
 				player.screen.leftPlayers = [ lastPlayer ];
 				lastPlayer.screen.rightPlayers = [ player ];
@@ -1863,14 +1924,7 @@ define('../shared/screen',['require','exports','module'],function(require, expor
 		this.height = height;
 	};
 
-	exports.ScreenArranger.prototype.onPlayerJoined = function (event) {
-		this.arrange();
-	};
-
-	exports.ScreenArranger.prototype.onPlayerLeft = function (event) {
-		this.arrange();
-	};
-
+	exports = HorizontalArranger;
 	return exports;
 
 });
@@ -3833,14 +3887,14 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 
 
-define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','../shared/screen','../lib/q','socket.io'],function(require, exports, module) {
+define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','../shared/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var sessionModule = require('./session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
-	var ScreenArranger = require('../shared/screen').ScreenArranger;
+	var HorizontalArranger = require('../shared/screens/HorizontalArranger');
 	var Q = require('../lib/q');
 	var io = require('socket.io');
 
@@ -4179,7 +4233,8 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 */
 	exports.color = color;
 
-	exports.ScreenArranger = ScreenArranger;
+	exports.screens = {};
+	exports.screens.HorizontalArranger = HorizontalArranger;
 
 });
 define(["multi"], function(index) { return index; });
