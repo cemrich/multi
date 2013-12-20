@@ -1,7 +1,6 @@
 /* global exports */
 
 var multiModule = require('../multi/server');
-var ScreenArranger = require('../multi/shared/screens/HorizontalArranger');
 
 
 exports.Game = function (session) {
@@ -25,7 +24,7 @@ exports.Game = function (session) {
 		
 	}
 
-	var arranger = new ScreenArranger(session);
+	var arranger = new multiModule.screens.HorizontalArranger(session);
 	session.on('playerJoined', onPlayerJoined);
 	session.on('startGame', onStartGame);
 

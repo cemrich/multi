@@ -1688,23 +1688,73 @@ define('../shared/errors',['require','exports','module','util'],function(require
 
 
 /**
- * This module contains all classes and utils that are useful
- * for working with multiple screens. Currently that's only the 
- * {@link module:shared/screen.ScreenArranger ScreenArranger}.
+ * This module contains classes and utils that are useful
+ * for working with multiple screens. To use a ScreenArranger inside your
+ * game look up the 
+ * {@link module:shared/screens.HorizontalArranger|HorizontalArranger}
+ * documentation.
  * @module shared/screens
  */
 define('../shared/screens/index',['require','exports','module'],function(require, exports, module) {
 
-
+	/**
+	 * @classdesc When any ScreenArranger is used, an instance of this 
+	 * class will be added to every player. Here you can find all
+	 * information and helper methods relevant for positioning one 
+	 * screen on a bigger playing field.
+	 * @class
+	 * @param {module:client/player~Player|module:server/player~Player} 
+	 *  player player instance this screen is added to
+	 */
 	exports.Screen = function (player) {
+		/**
+		 * width of the screen in pixel
+		 * @type {integer}
+		 */
 		this.width = player.width;
+		/**
+		 * height of the screen in pixel
+		 * @type {integer}
+		 */
 		this.height = player.height;
+		/**
+		 * player instance this screen is added to
+		 * @type {module:client/player~Player|module:server/player~Player}
+		 */
 		this.player = player;
+		/**
+		 * global x-position (from left) of this screen in pixel
+		 * @type {integer}
+		 */
 		this.x = null;
+		/**
+		 * global x-position (from top) of this screen in pixel
+		 * @type {integer}
+		 */
 		this.y = null;
+		/**
+		 * list of all player instances that border on the right
+		 * side of this screen
+		 * @type {Array}
+		 */
 		this.rightPlayers = [];
+		/**
+		 * list of all player instances that border on the left
+		 * side of this screen
+		 * @type {Array}
+		 */
 		this.leftPlayers = [];
+		/**
+		 * list of all player instances that border on the top
+		 * of this screen
+		 * @type {Array}
+		 */
 		this.topPlayers = [];
+		/**
+		 * list of all player instances that border on the bottom
+		 * of this screen
+		 * @type {Array}
+		 */
 		this.bottomPlayers = [];
 	};
 
@@ -1722,6 +1772,16 @@ define('../shared/screens/index',['require','exports','module'],function(require
 			y < this.y + this.height;
 	};
 
+	/**
+	 * @param  {integer}  x      global x-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  y      global y-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  width  width of the rectangle in pixel
+	 * @param  {integer}  height height of the rectangle in pixel
+	 * @return {boolean}         true if the given rectangle or parts of it 
+	 *  overlap with this screen
+	 */
 	exports.Screen.prototype.isHitByRect = function (x, y, width, height) {
 		return x + width >= this.x &&
 			y + height >= this.y &&
@@ -1729,21 +1789,37 @@ define('../shared/screens/index',['require','exports','module'],function(require
 			y < this.y + this.height;
 	};
 
+	/**
+	 * Converts local pixel coordinates to global ones, using this screen
+	 * as local coordinate system.
+	 * @param  {integer} x  local x position in pixel
+	 * @param  {integer} y  local y position in pixel
+	 * @return {object}  { x: globalX, y: globalY }
+	 */
 	exports.Screen.prototype.localToGlobal = function (x, y) {
 		return { x: this.x + x, y: this.y + y };
 	};
 
+	/**
+	 * Converts global pixel coordinates to local ones, using this screen
+	 * as local coordinate system.
+	 * @param  {integer} x  global x position in pixel
+	 * @param  {integer} y  global y position in pixel
+	 * @return {object}  { x: localX, y: localY, player: this.player }
+	 */
 	exports.Screen.prototype.globalToLocal = function (x, y) {
 		return { x: x - this.x, y: y - this.y, player: this.player };
 	};
 
 
 	/**
-	 * @classdesc This class can be used to arrange multiple clients
-	 * into one big game screen. It does rearrange every time a player
-	 * joins or leaves the given session.<br>
-	 * You can influence the behaviour by using this class as the base
-	 * of your own Arranger class.
+	 * @classdesc This is the base class for arranging players of the given
+	 * session to one big playing field. It will add a 
+	 * {@link module:shared/screens.Screen|screen} attribute to every joined 
+	 * player.<br><br>
+	 * Feel free to extend this class to create your own ScreenArranger. You
+	 * can use {@link module:shared/screens.HorizontalArranger} 
+	 * as example implementation.
 	 * @class
 	 * @param {module:client/session~Session|module:server/session~Session}
 	 *  Session that contains the players that should be arranged into
@@ -1757,13 +1833,6 @@ define('../shared/screens/index',['require','exports','module'],function(require
 		 */
 		this.session = session;
 		/**
-		 * Contains one screen object for every player id
-		 * A screen object consists of player, x and y attributes.
-		 * @type {Object.<string, object>}
-		 * @private
-		 */
-		this.screens = {};
-		/**
 		 * total width of the big screen in pixel
 		 * @type {integer}
 		 * @readonly
@@ -1776,13 +1845,13 @@ define('../shared/screens/index',['require','exports','module'],function(require
 		 */
 		this.height = 0;
 
-		session.myself.screen = new exports.Screen(session.myself);
-		for (var id in session.players) {
-			var player = session.players[id];
+		// add a screen to every player...
+		session.getPlayerArray().forEach(function (player) {
 			player.screen = new exports.Screen(player);
-		}
+		});
 		this.refresh();
 
+		// ...and every player that will come
 		session.on('playerJoined', this.onPlayerJoined.bind(this));
 		session.on('playerLeft', this.onPlayerLeft.bind(this));
 	};
@@ -1800,12 +1869,26 @@ define('../shared/screens/index',['require','exports','module'],function(require
 		return player.screen.localToGlobal(x, y);
 	};
 
+	/**
+	 * Determines which Player overlaps with the given rectangle.
+	 * @param  {integer}  x      global x-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  y      global y-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  width  width of the rectangle in pixel
+	 * @param  {integer}  height height of the rectangle in pixel
+	 * @return {Array}    list of local objects of the form 
+	 *  { x: localX, y: localY, player: hitPlayer }. X and y are the upper-left
+	 *  corner of the given rectangle in the players local coordinate system.
+	 * @see module:shared/screens.Screen#globalToLocal
+	 * @see module:shared/screens.Screen#isHitByRect
+	 */
 	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
 		var locals = {};
 		var screen;
 		for (var i in this.session.players) {
 			screen = this.session.players[i].screen;
-			if (screen !== null && screen.isHitByRect(x, y, width, height)) {
+			if (screen.isHitByRect(x, y, width, height)) {
 				locals[screen.player.id] = screen.globalToLocal(x, y);
 			}
 		}
@@ -1842,11 +1925,28 @@ define('../shared/screens/index',['require','exports','module'],function(require
 		return null;
 	};
 
+	/**
+	 * This method by default gets called whenever a new player joins
+	 * the underlying session. It calls
+	 * {@link module:shared/screens.ScreenArranger#arrange|arrange} and 
+	 * {@link module:shared/screens.ScreenArranger#recaculateDimentions|recaculateDimentions}. <br>
+	 * You can override this method to write your own screen arranger.
+	 * In this case please make sure to arrange every player and 
+	 * update the dimentions of the whole playing field accordingly.
+	 */
 	exports.ScreenArranger.prototype.refresh = function () {
 		this.arrange();
 		this.recaculateDimentions();
 	};
 
+	/**
+	 * This method is called by the 
+	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} 
+	 * method by default. It takes the global position and dimentions of every 
+	 * player into account to update the global playing field width and height 
+	 * accordingly.<br>
+	 * You may override this method or call it from any overridden method.
+	 */
 	exports.ScreenArranger.prototype.recaculateDimentions = function () {
 		var maxX = 0;
 		var maxY = 0;
@@ -1859,21 +1959,34 @@ define('../shared/screens/index',['require','exports','module'],function(require
 	};
 
 	/**
-	 * Rearranges the screens of all players currently connected to
-	 * the arranged session. Width, height and other attributes
-	 * will be recalculated and may change.
-	 * @private
+	 * This method is called by the 
+	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} method by default. 
+	 * It does  nothing for this base class and should be overridden by every 
+	 * child class.<br><br>
+	 * Please make sure to update the positions of every players screen here.
+	 * @abstract
 	 */
 	exports.ScreenArranger.prototype.arrange = function () {
 		// this does nothing!
 	};
 
+	/**
+	 * This method is callen whenever a new player joins the session.
+	 * Feel free to override. In this case you may want to create a new
+	 * screen for the player and call your refresh method.
+	 * @param event
+	 */
 	exports.ScreenArranger.prototype.onPlayerJoined = function (event) {
-		console.log(event.player);
 		event.player.screen = new exports.Screen(event.player);
 		this.refresh();
 	};
 
+	/**
+	 * This method is callen whenever a new player leaves the session.
+	 * Feel free to override. In this case you may want to call your 
+	 * refresh method.
+	 * @param event
+	 */
 	exports.ScreenArranger.prototype.onPlayerLeft = function (event) {
 		this.refresh();
 	};
@@ -1891,9 +2004,31 @@ define('../shared/screens/index',['require','exports','module'],function(require
 define('../shared/screens/HorizontalArranger',['require','exports','module','util','./index'],function(require, exports, module) {
 
 	var util = require('util');
-	var ScreenArranger = require('./index').ScreenArranger;
+	var screensModule = require('./index');
+	var ScreenArranger = screensModule.ScreenArranger;
 
-
+	/**
+	 * @classdesc This class arranges the screens of the every player 
+	 * horizontally. Player with lower playerNumbers will be farer left.
+	 * @example
+	 * --------    ------------
+	 * |      |----|          |
+	 * |  p1  | p2 |    p3    |
+	 * |      |----|          |
+	 * --------    ------------
+	 * @example
+	 * var arranger = new multiModule.screens.HorizontalArranger(session);
+	 * var firstPlayer = session.getPlayerByNumber(0);
+	 * console.log(firstPlayer.screen.x);
+	 * console.log(firstPlayer.screen.y);
+	 * console.log(firstPlayer.screen.width);
+	 * console.log(firstPlayer.screen.height);
+	 * @class
+	 * @mixes module:shared/screens.ScreenArranger
+	 * @memberOf module:shared/screens
+	 * @param {module:client/session~Session|module:server/session~Session} 
+	 *  session session instance whose player you want to be arranged.
+	 */
 	var HorizontalArranger = function (session) {
 		ScreenArranger.call(this, session);
 	};
@@ -1924,6 +2059,7 @@ define('../shared/screens/HorizontalArranger',['require','exports','module','uti
 		this.height = height;
 	};
 
+	screensModule.HorizontalArranger = HorizontalArranger;
 	exports = HorizontalArranger;
 	return exports;
 
@@ -3887,13 +4023,14 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 
 
-define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','../shared/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
+define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','../shared/screens/index','../shared/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var sessionModule = require('./session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
+	var screensModule = require('../shared/screens/index');
 	var HorizontalArranger = require('../shared/screens/HorizontalArranger');
 	var Q = require('../lib/q');
 	var io = require('socket.io');
@@ -4233,7 +4370,10 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 */
 	exports.color = color;
 
-	exports.screens = {};
+	/**
+	 * @type module:shared/screens
+	 */
+	exports.screens = screensModule;
 	exports.screens.HorizontalArranger = HorizontalArranger;
 
 });

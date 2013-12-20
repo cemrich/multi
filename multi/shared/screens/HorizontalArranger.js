@@ -8,9 +8,31 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 define(function(require, exports, module) {
 
 	var util = require('util');
-	var ScreenArranger = require('./index').ScreenArranger;
+	var screensModule = require('./index');
+	var ScreenArranger = screensModule.ScreenArranger;
 
-
+	/**
+	 * @classdesc This class arranges the screens of the every player 
+	 * horizontally. Player with lower playerNumbers will be farer left.
+	 * @example
+	 * --------    ------------
+	 * |      |----|          |
+	 * |  p1  | p2 |    p3    |
+	 * |      |----|          |
+	 * --------    ------------
+	 * @example
+	 * var arranger = new multiModule.screens.HorizontalArranger(session);
+	 * var firstPlayer = session.getPlayerByNumber(0);
+	 * console.log(firstPlayer.screen.x);
+	 * console.log(firstPlayer.screen.y);
+	 * console.log(firstPlayer.screen.width);
+	 * console.log(firstPlayer.screen.height);
+	 * @class
+	 * @mixes module:shared/screens.ScreenArranger
+	 * @memberOf module:shared/screens
+	 * @param {module:client/session~Session|module:server/session~Session} 
+	 *  session session instance whose player you want to be arranged.
+	 */
 	var HorizontalArranger = function (session) {
 		ScreenArranger.call(this, session);
 	};
@@ -41,6 +63,7 @@ define(function(require, exports, module) {
 		this.height = height;
 	};
 
+	screensModule.HorizontalArranger = HorizontalArranger;
 	exports = HorizontalArranger;
 	return exports;
 

@@ -19,6 +19,8 @@ var util = require('util');
 var sessionModule = require('./session');
 var playerModule = require('./player');
 var color = require('../shared/color');
+var screensModule = require('../shared/screens');
+var HorizontalArranger = require('../shared/screens/HorizontalArranger');
 
 var instance = null;
 
@@ -137,3 +139,9 @@ exports.init = function (server) {
  * @type module:shared/color
  */
 exports.color = color;
+
+/**
+ * @type module:shared/screens
+ */
+exports.screens = screensModule;
+exports.screens.HorizontalArranger = HorizontalArranger;
