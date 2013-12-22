@@ -25,6 +25,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function addPlayer(player) {
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
+		playerView[0].style.order = player.number;
 
 		var setColor = function () {
 			playerView.css('background-color', player.attributes.color);
