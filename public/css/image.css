@@ -5,6 +5,9 @@ html {
   background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4) 35px, rgba(255, 255, 255, 0.5) 35px, rgba(255, 255, 255, 0.5) 70px);
   min-height: 100%;
 }
+a {
+  color: #333;
+}
 #status {
   width: 100%;
   text-align: center;
@@ -51,8 +54,10 @@ html {
 }
 #image {
   position: absolute;
-  top: 10%;
-  left: -500px;
+  top: 0;
+  left: 0;
+  -webkit-transform: translate3d(-500px, 50px, 0);
+  -webkit-backface-visibility: hidden;
   -webkit-filter: grayscale(1) brightness(10);
 }
 #image * {

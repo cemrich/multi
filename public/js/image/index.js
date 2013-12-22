@@ -49,13 +49,12 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		var screen = session.myself.screen;
 
 		if (session.myself.number === 0) {
-			image.css('left', 0);
+			imageStyle.webkitTransform = 'translate3d(50px,50px,0)';
 		}
 		showSection('game');
 
 		function moveStar(x, y) {
-			imageStyle.top = y+'px';
-			imageStyle.left = x+'px';
+			imageStyle.webkitTransform = 'translate3d(' + x + 'px,' + y + 'px,0)';
 		}
 
 		session.on('pos', function (event) {
