@@ -4263,7 +4263,7 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * multi.createSession().then(onSession, onSessionFailed).done();
 	 */
 	Multi.prototype.createSession = function (options) {
-		options = options || this.sessionOptions;
+		options = options || this.sessionOptions || {};
 
 		var multi = this;
 		var deferred = Q.defer();

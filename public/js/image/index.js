@@ -8,10 +8,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function (multiModule) {
 
 	var multiOptions = {
-		server: 'localhost',
-		session: {
-			scriptName: 'games/image.js'
-		}
+		server: 'localhost'
 	};
 
 	var session;
@@ -29,9 +26,6 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 
 		var setColor = function () {
 			playerView.css('background-color', player.attributes.color);
-			if (player === session.myself) {
-				$('html').css('background-color', player.attributes.color);
-			}
 		};
 
 		setColor();
@@ -91,7 +85,11 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function onSession(s) {
 		session = s;
 		arranger = new multiModule.screens.HorizontalArranger(session);
+
 		$('#status').text('connected');
+		session.myself.attributes.color = multiModule.color.random();
+		$('html').css('background-color', session.myself.attributes.color);
+
 		$('.join-url').text(session.joinSessionUrl);
 		$('.join-url').attr('href', 'http://' + session.joinSessionUrl);
 		session.getPlayerArray().forEach(addPlayer);
