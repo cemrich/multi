@@ -8,7 +8,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function (multiModule) {
 
 	var multiOptions = {
-		server: '192.168.0.100',
+		server: 'localhost',
 		session: {
 			scriptName: 'games/image.js'
 		}
@@ -25,13 +25,11 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function addPlayer(player) {
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
-		playerView.css('height', player.height/10);
-		playerView.css('max-width', player.width/10);
 
 		var setColor = function () {
 			playerView.css('background-color', player.attributes.color);
 			if (player === session.myself) {
-				$('#game').css('background-color', player.attributes.color);
+				$('html').css('background-color', player.attributes.color);
 			}
 		};
 
@@ -52,22 +50,30 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 
 	function onStartGame(session) {
 		var image = $('#image');
+		var imageStyle = image[0].style;
+		var screen = session.myself.screen;
 
 		if (session.myself.number === 0) {
 			image.css('left', 0);
 		}
 		showSection('game');
 
+		function moveStar(x, y) {
+			imageStyle.top = y+'px';
+			imageStyle.left = x+'px';
+		}
+
 		session.on('pos', function (event) {
-			image.css('top', event.data.y);
-			image.css('left', event.data.x);
+			var local = screen.globalToLocal(event.data.x, event.data.y);
+			moveStar(local.x, local.y);
 		});
 
-		function move(event) {
-			session.myself.message('pos', {
-					x: event.clientX-142,
-					y: event.clientY-142
-				}, 'server');
+		function onMouseMove(event) {
+			var x = event.clientX-142;
+			var y = event.clientY-142;
+			var global = screen.localToGlobal(x, y);
+			session.message('pos', global, 'all-but-myself', true);
+			moveStar(x, y);
 			event.preventDefault();
 		}
 
@@ -76,7 +82,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		});
 		$(window).on('mousemove', function (event) {
 			if (event.which === 1) {
-				move(event);
+				onMouseMove(event);
 			}
 		});
 	}
@@ -84,7 +90,6 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function onSession(s) {
 		session = s;
 		arranger = new multiModule.screens.HorizontalArranger(session);
-		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);
 		$('.join-url').attr('href', 'http://' + session.joinSessionUrl);
@@ -93,12 +98,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		session.on('playerJoined', function (event) {
 			addPlayer(event.player);
 		});
-		$('button.start').click(function () {
-			session.message('startGame');
-		});
-		session.on('startGame', function () {
-			onStartGame(session);
-		});
+		onStartGame(session);
 	}
 
 	function onSessionDestroyed() {

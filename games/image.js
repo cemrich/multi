@@ -11,12 +11,7 @@ exports.Game = function (session) {
 
 		event.player.on('pos', function (event) {
 			var global = player.screen.localToGlobal(event.data.x, event.data.y);
-			var locals = arranger.globalRectToLocals(global.x, global.y, 283, 283);
-
-			for (var i in locals) {
-				var local = locals[i];
-				session.message('pos', {x: local.x, y: local.y}, local.player, true);
-			}
+			session.message('pos', global, 'all', true);
 		});
 	}
 
