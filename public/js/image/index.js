@@ -44,17 +44,20 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	}
 
 	function onStartGame(session) {
+		var isMouseDown = false;
 		var image = $('#image');
 		var imageStyle = image[0].style;
 		var screen = session.myself.screen;
 
 		if (session.myself.number === 0) {
-			imageStyle.webkitTransform = 'translate3d(50px,50px,0)';
+			imageStyle.transform = imageStyle.webkitTransform =
+				'translate3d(50px,50px,0)';
 		}
 		showSection('game');
 
 		function moveStar(x, y) {
-			imageStyle.webkitTransform = 'translate3d(' + x + 'px,' + y + 'px,0)';
+			imageStyle.transform = imageStyle.webkitTransform =
+				'translate3d(' + x + 'px,' + y + 'px,0)';
 		}
 
 		session.on('pos', function (event) {
@@ -62,22 +65,33 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 			moveStar(local.x, local.y);
 		});
 
-		function onMouseMove(event) {
-			var x = event.clientX-142;
-			var y = event.clientY-142;
-			var global = screen.localToGlobal(x, y);
+		function onMovedLocally(x, y) {
+			var global = screen.localToGlobal(x-142, y-142);
 			session.message('pos', global, 'all-but-myself', true);
-			moveStar(x, y);
-			event.preventDefault();
+			moveStar(x-142, y-142);
 		}
-
 		image.on('mousedown', function (event) {
 			event.preventDefault();
 		});
 		$(window).on('mousemove', function (event) {
-			if (event.which === 1) {
-				onMouseMove(event);
+			if (isMouseDown) {
+				var x = event.clientX;
+				var y = event.clientY;
+				onMovedLocally(x, y);
+				event.preventDefault();
 			}
+		});
+		$(window).on('touchmove', function (event) {
+			var x = event.originalEvent.touches[0].clientX;
+			var y = event.originalEvent.touches[0].clientY;
+			onMovedLocally(x, y);
+			event.preventDefault();
+		});
+		$(window).on('mouseup', function() {
+			isMouseDown = false;
+		});
+		$(window).on('mousedown', function() {
+			isMouseDown = true;
 		});
 	}
 

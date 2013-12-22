@@ -23,7 +23,7 @@ a {
   bottom: 40px;
   width: 100%;
   text-align: center;
-  font-size: 200%;
+  font-size: 150%;
 }
 #game .line {
   width: 100%;
@@ -57,8 +57,13 @@ a {
   top: 0;
   left: 0;
   -webkit-transform: translate3d(-500px, 50px, 0);
+  transform: translate3d(-500px, 50px, 0);
   -webkit-backface-visibility: hidden;
-  -webkit-filter: grayscale(1) brightness(10);
+  backface-visibility: hidden;
+  filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 1 0\'/></filter></svg>#grayscale");
+  /* Firefox 10+, Firefox on Android */
+
+  -webkit-filter: grayscale(1);
 }
 #image * {
   pointer-events: none;
