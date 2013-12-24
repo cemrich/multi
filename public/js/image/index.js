@@ -8,7 +8,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function (multiModule) {
 
 	var multiOptions = {
-		server: 'localhost'
+		server: '192.168.1.109'
 	};
 
 	var session;
@@ -48,14 +48,19 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		var image = $('#image');
 		var imageStyle = image[0].style;
 		var screen = session.myself.screen;
+		var currX = 0;
+		var currY = 0;
+		var offsetX = 0;
+		var offsetY = 0;
 
 		if (session.myself.number === 0) {
-			imageStyle.transform = imageStyle.webkitTransform =
-				'translate3d(50px,50px,0)';
+			moveStar(50, 50);
 		}
 		showSection('game');
 
 		function moveStar(x, y) {
+			currX = x;
+			currY = y;
 			imageStyle.transform = imageStyle.webkitTransform =
 				'translate3d(' + x + 'px,' + y + 'px,0)';
 		}
@@ -66,11 +71,23 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		});
 
 		function onMovedLocally(x, y) {
-			var global = screen.localToGlobal(x-142, y-142);
+			x -= offsetX;
+			y -= offsetY;
+			var global = screen.localToGlobal(x, y);
 			session.message('pos', global, 'all-but-myself', true);
-			moveStar(x-142, y-142);
+			moveStar(x, y);
 		}
 		image.on('mousedown', function (event) {
+			offsetX = event.clientX - currX;
+			offsetY = event.clientY - currY;
+			isMouseDown = true;
+			event.stopPropagation();
+			event.preventDefault();
+		});
+		image.on('touchstart', function (event) {
+			offsetX = event.originalEvent.touches[0].clientX - currX;
+			offsetY = event.originalEvent.touches[0].clientY- currY;
+			event.stopPropagation();
 			event.preventDefault();
 		});
 		$(window).on('mousemove', function (event) {
@@ -90,7 +107,9 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		$(window).on('mouseup', function() {
 			isMouseDown = false;
 		});
-		$(window).on('mousedown', function() {
+		$(window).on('mousedown touchstart', function(event) {
+			offsetX = 142;
+			offsetY = 142;
 			isMouseDown = true;
 		});
 	}
