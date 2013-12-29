@@ -1,7 +1,7 @@
 /* global exports */
 
 var multiModule = require('../../multi/server');
-var ScreenArranger = require('../../multi/shared/screen').ScreenArranger;
+var ScreenArranger = multiModule.screens.HorizontalArranger;
 var Snake = require('./snake');
 
 
@@ -20,7 +20,7 @@ exports.Game = function (session) {
 		var dead = [];
 		snakes.forEach(function (snake) {
 			snake.update();
-			if (!snake.isAlive()) {
+			if (!snake.isAlive() || snake.hits(snakes)) {
 				dead.push(snake);
 			}
 		});

@@ -8,7 +8,7 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 	function (multiModule) {
 
 	var multiOptions = {
-		server: '192.168.1.109'
+		server: 'tinelaptopsony'
 	};
 
 	var session;

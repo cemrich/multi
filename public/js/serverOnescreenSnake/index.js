@@ -13,7 +13,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 	var joystick = null;
 
 	var multiOptions = {
-		server: '192.168.0.100',
+		server: 'tinelaptopsony',
 		session: {
 			scriptName: 'games/serverOnescreenSnake/index.js'
 		}
@@ -70,7 +70,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 			session.myself.attributes.direction = direction;
 		}
 
-		arranger = new multiModule.ScreenArranger(session);
+		arranger = new multiModule.screens.HorizontalArranger(session);
 		screen = new Screen(session, arranger);
 		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));
 		screen.updateBorders();
