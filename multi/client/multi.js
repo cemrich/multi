@@ -213,6 +213,9 @@ define(function(require, exports, module) {
 		socket.on('connect_failed', function () {
 			deferred.reject(new errors.NoConnectionError());
 		});
+		socket.on('error', function (reason) {
+			deferred.reject(new errors.NoConnectionError());
+		});
 		socket.on('joinSessionFailed', function (data) {
 			var error;
 			if (data.reason === 'sessionNotFound') {
@@ -285,6 +288,9 @@ define(function(require, exports, module) {
 			}
 		});
 		socket.on('connect_failed', function () {
+			deferred.reject(new errors.NoConnectionError());
+		});
+		socket.on('error', function (reason) {
 			deferred.reject(new errors.NoConnectionError());
 		});
 		return deferred.promise;

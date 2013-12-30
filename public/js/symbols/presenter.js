@@ -47,6 +47,10 @@ define(function(require, exports, module) {
 		$('#new .symbols').css('pointer-events', 'none');
 	}
 
+	function onSessionFailed(error) {
+		alert('Opps - you have no connection. Try a reload when your connection returns.');
+	}
+
 	function go(multi, soundModule) {
 		sound = soundModule;
 		$('#new .ready').click(onReadyClick);
@@ -54,7 +58,7 @@ define(function(require, exports, module) {
 		$('#loading').show();
 		window.scrollTo(0, 1);
 
-		multi.createSession().then(onSessionCreated).done();
+		multi.createSession().then(onSessionCreated, onSessionFailed).done();
 	}
 
 	exports.go = go;
