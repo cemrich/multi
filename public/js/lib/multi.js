@@ -1908,6 +1908,16 @@ define('../shared/screens/index',['require','exports','module'],function(require
 		return player.screen.isHit(x, y);
 	};
 
+	/*
+	 * @param  {integer}  x  global x position in pixel
+	 * @param  {integer}  y  global y position in pixel
+	 * @return {boolean}  true if the given coordinates lie within
+	 * the screen of any player, false otherwise
+	 */
+	exports.ScreenArranger.prototype.isAnyPlayerHit = function (x, y) {
+		return this.getPlayerAtCoords(x, y) !== null;
+	};
+
 	/**
 	 * @param  {integer}  x  global x position in pixel
 	 * @param  {integer}  y  global y position in pixel

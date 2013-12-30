@@ -19,11 +19,17 @@ Segment.prototype.getTop = function () {
 Segment.prototype.getLeft = function () {
 	return this.x - this.startX < 0 ? this.x : this.startX;
 };
+Segment.prototype.getBottom = function () {
+	return this.y - this.startY < 0 ? this.startY : this.y;
+};
+Segment.prototype.getRight = function () {
+	return this.x - this.startX < 0 ? this.startX : this.x;
+};
 Segment.prototype.intersects = function (segment) {
-	var x1 = this.x - this.startX < 0 ? this.x : this.startX;
-	var x2 = this.x - this.startX < 0 ? this.startX : this.x;
-	var y1 = this.y - this.startY < 0 ? this.y : this.startY;
-	var y2 = this.y - this.startY < 0 ? this.startY : this.y;
+	var x1 = this.getLeft();
+	var x2 = this.getRight();
+	var y1 = this.getTop();
+	var y2 = this.getBottom();
 	return !((segment.startX >= x2 && segment.x >= x2) ||
 		(segment.startX <= x1 && segment.x <= x2) ||
 		(segment.startY <= y1 && segment.y <= y1) ||
@@ -80,31 +86,24 @@ Snake.prototype.move = function () {
 	}
 };
 
-Snake.prototype.isAlive = function () {
-	return this.arranger.getPlayerAtCoords(this.curSegment.x, this.curSegment.y) !== null;
+Snake.prototype.isDead = function (snakes) {
+	return !this.isInsidePlayingField() || this.hits(snakes);
 };
+
+Snake.prototype.isInsidePlayingField = function () {
+	return this.arranger.isAnyPlayerHit(this.curSegment.x, this.curSegment.y);
+};
+
 Snake.prototype.hits = function (snakes) {
-	// TODO: use array.some()
-	for (var i in snakes) {
-		if (snakes[i].isHitBy(this)) {
-			return true;
-		}
-	}
-	return false;
+	return snakes.some(function (snake) {
+		return snake.isHitBy(this);
+	}, this);
 };
+
 Snake.prototype.isHitBy = function (snake) {
-	// TODO: cleanup, use array.some()
-	//console.log('segments:', this.segments);
-	//console.log('-- test intersection of', snake.curSegment);
-	for (var i in this.segments) {
-		//console.log('\tagainst', this.segments[i]);
-		if (this.segments[i] !== snake.curSegment &&
-			this.segments[i].intersects(snake.curSegment)) {
-			//console.log('>>>> is hit', this.segments[i], snake.curSegment);
-			return true;
-		}
-	}
-	return false;
+	return this.segments.some(function (segment) {
+		return segment !== snake.curSegment && segment.intersects(snake.curSegment);
+	});
 };
 
 Snake.prototype.updateDisplay = function () {

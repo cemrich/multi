@@ -20,7 +20,7 @@ exports.Game = function (session) {
 		var dead = [];
 		snakes.forEach(function (snake) {
 			snake.update();
-			if (!snake.isAlive() || snake.hits(snakes)) {
+			if (snake.isDead(snakes)) {
 				dead.push(snake);
 				snake.owner.message('died');
 			}
