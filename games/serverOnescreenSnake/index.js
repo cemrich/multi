@@ -28,6 +28,9 @@ exports.Game = function (session) {
 		dead.forEach(function (snake) {
 			snakes.splice(snakes.indexOf(snake), 1);
 		});
+		if (snakes.length === 0) {
+			onEndGame();
+		}
 	}
 
 	function onPlayerJoined(event) {
@@ -44,6 +47,7 @@ exports.Game = function (session) {
 
 	function onEndGame() {
 		clearInterval(interval);
+		session.message('finished');
 		session.removeListener('playerLeft', onPlayerLeft);
 	}
 

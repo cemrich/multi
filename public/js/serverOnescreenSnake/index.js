@@ -60,6 +60,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 
 	function onGameFinished() {
 		showSection('joined');
+		screen.clearPlayers();
 		joystick.stop();
 	}
 

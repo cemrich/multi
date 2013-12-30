@@ -17,6 +17,11 @@ define(function () {
 		this.arranger = arranger;
 	};
 
+	Screen.prototype.clearPlayers = function () {
+		context.clearRect(0, 0, canvas.width, canvas.height);
+		this.updateBorders();
+	};
+
 	Screen.prototype.drawPlayer = function (player, x, y, width, height) {
 		context.beginPath();
 		context.strokeStyle = player.attributes.color;
