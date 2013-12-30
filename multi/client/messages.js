@@ -5,7 +5,7 @@
  
 define(function(require, exports, module) {
 
-	var PubSub = require('../shared/pubSub');
+	var PubSub = require('../shared/PubSub');
 
 	/**
 	 * @classdesc Centralized communication infrastructure for one session.
