@@ -63,6 +63,10 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 		joystick.stop();
 	}
 
+	function onDied() {
+		console.log('I am dead!');
+	}
+
 	function onSession(s) {
 		session = s;
 
@@ -90,6 +94,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 		$('button.start').click(function () {
 			session.message('startGame');
 		});
+		session.myself.on('died', onDied);
 		session.on('startGame', onStartGame);
 		session.on('finished', onGameFinished);
 	}

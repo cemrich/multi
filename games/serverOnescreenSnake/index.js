@@ -22,6 +22,7 @@ exports.Game = function (session) {
 			snake.update();
 			if (!snake.isAlive() || snake.hits(snakes)) {
 				dead.push(snake);
+				snake.owner.message('died');
 			}
 		});
 		dead.forEach(function (snake) {
