@@ -29,6 +29,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 		playerView.addClass('player');
 		playerView.css('height', player.height/10);
 		playerView.css('max-width', player.width/10);
+		playerView[0].style.order = player.number;
 
 		var setColor = function () {
 			playerView.css('background-color', player.attributes.color);
