@@ -510,1570 +510,6 @@ define('util',['require','exports','module','socket.io'],function(require, expor
 
 }));
 
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-
-define('../shared/SyncedObject',['require','exports','module','../lib/watch','events','util'],function(require, exports, module) {
-
-	var WatchJS = require('../lib/watch');
-	var EventEmitter = require('events').EventEmitter;
-	var util = require('util');
-
-	/**
-	 * @typedef Changeset
-	 * This object describes changes made to the attributes inside the wrapped
-	 * object.
-	 * @memberOf SyncedObject
-	 * @property {Object.<string, *>} changed  any changed top level attributes:
-	 * their new value mapped to their name
-	 * @property {Array.<string>} removed  names of all top level
-	 * attributes that have been deleted
-	 */
-
-	/**
-	 * @classdesc This class wraps an object and detects when it is changed from
-	 * the outside world.
-	 * @example
-	 * var synced = new SyncedObject();
-	 * synced.on('changed', function (changeset) {
-	 *   console.log(changeset.changed); // { 'foo': 'bar' }
-	 * });
-	 * synced.data.foo = 'bar';
-	 * @class SyncedObject
-	 * @mixes external:EventEmitter
-	 */
-	var SyncedObject = function () {
-
-		EventEmitter.call(this);
-		this._data = {};
-		this.onAttributesChange = this.onAttributesChange.bind(this);
-	};
-
-	util.inherits(SyncedObject, EventEmitter);
-
-	/**
-	 * The wrapped data object. Changes to it's top level attributes are
-	 * detected and a {@link SyncedObject#event:changed changed} event is
-	 * fired in this case.
-	 * @type {Object}
-	 * @name data
-	 * @instance
-	 * @memberOf SyncedObject
-	 */
-	Object.defineProperty(SyncedObject.prototype, 'data', {
-		get: function() {
-			return this._data;
-		},
-		set: function(val) {
-			if (typeof val === 'object') {
-				// remove
-				for (var j in this._data) {
-					if (!val.propertyIsEnumerable(j)) {
-						delete this._data[j];
-					}
-				}
-				// add
-				for (var i in val) {
-					this._data[i] = val[i];
-				}
-			}
-		}
-	});
-
-	/**
-	 * Starts detecting changes to the wrapped object.
-	 * @memberOf SyncedObject
-	 */
-	SyncedObject.prototype.startWatching = function () {
-		WatchJS.watch(this._data, this.onAttributesChange, 0, true);
-	};
-
-	/**
-	 * Stops detecting changes to the wrapped object. You can resume watching
-	 * @memberOf SyncedObject
-	 * again any time.
-	 */
-	SyncedObject.prototype.stopWatching = function () {
-		WatchJS.unwatch(this._data, this.onAttributesChange);
-	};
-
-	/**
-	 * Applies the given changeset to the wrapped object without fireing 
-	 * a {@link SyncedObject#event:changed changed} event.
-	 * @param  {SyncedObject.Changeset} changeset  changes that should be
-	 *  applied to the wrapped object
-	 * @memberOf SyncedObject
-	 */
-	SyncedObject.prototype.applyChangesetSilently = function (changeset) {
-		this.stopWatching();
-		this.applyChangeset(changeset);
-		this.startWatching();
-	};
-
-	/**
-	 * Applies the given changeset to the wrapped object. Note that this
-	 * method fires a {@link SyncedObject#event:changed changed} event if any 
-	 * attribute does change. If you don't want to receive this event, use 
-	 * {@link SyncedObject#applyChangesetSilently applyChangesetSilently} 
-	 * instead.
-	 * @fires  SyncedObject#changed
-	 * @param  {SyncedObject.Changeset} changeset  changes that should be
-	 *  applied to the wrapped object
-	 * @memberOf SyncedObject
-	 */
-	SyncedObject.prototype.applyChangeset = function (changeset) {
-		var propertyName;
-		if (changeset.hasOwnProperty('changed')) {
-			for (propertyName in changeset.changed) {
-				this._data[propertyName] = changeset.changed[propertyName];
-			}
-		}
-		if (changeset.hasOwnProperty('removed')) {
-			for (var i in changeset.removed) {
-				propertyName = changeset.removed[i];
-				delete this._data[propertyName];
-			}
-		}
-	};
-
-	/** 
-	 * @param {string} property  property that has been changed
-	 * @param {string} action    what has been done to the property
-	 * @param          newValue  new value of the changed property
-	 * @param          oldValue  old value of the changed property
-	 * @see                      https://github.com/melanke/Watch.JS
-	 * @private
-	 */
-	SyncedObject.prototype.onAttributesChange = function (property, action, newValue, oldValue) {
-		var changed = {};
-		var removed = [];
-
-		if (property === 'root' && action === 'differentattr') {
-			// some attributes have been added or deleted
-			for (var i in newValue.added) {
-				var propertyName = newValue.added[i];
-				changed[propertyName] = this._data[propertyName];
-			}
-			for (var j in newValue.removed) {
-				removed.push(newValue.removed[j]);
-			}
-		} else if (action === 'set' &&
-				JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
-			// one attribute has changed
-			changed[property] = newValue;
-		}
-
-		var changeset = {};
-		if (Object.keys(changed).length > 0) {
-			changeset.changed = changed;
-		}
-		if (Object.keys(removed).length > 0) {
-			changeset.removed = removed;
-		}
-
-		this.emit('changed', changeset);
-	};
-
-	/**
-	 * Fired when any top level attribute of the wrapped object has changed.
-	 * @event SyncedObject#changed
-	 * @property {SyncedObject.Changeset} changeset  what has changed exactly?
-	 */
-
-	exports = SyncedObject;
-	return exports;
-
-});
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-
-define('../shared/CustomMessageSender',['require','exports','module'],function(require, exports, module) {
-
-	/**
-	 * @classdesc Util class for all objects that allow to send custom messages
-	 *  (e.g. player.message('foo', {data: 'bar'})).
-	 * @param {module:server/messages~MessageBus|module:client/messages~MessageBus} 
-	 *  messageBus message bus instance used for sending the messages
-	 * @param {string} instance   instance identifier that should be used for
-	 *  the 'fromInstance' attribute of outgoing messages
-	 * @private
-	 */
-	var CustomMessageSender = function (messageBus, instance) {
-		this.messageBus = messageBus;
-		this.instance = instance;
-	};
-
-	/**
-	 * Sends a custom message over the message bus.
-	 * @param  {string} type     name of the custom message
-	 * @param  {*}      [data]   any data to transport
-	 * @param  {module:client/multi~toClient|module:server/multi~toClient} 
-	 *  [toClient='all'] which client should receive the message
-	 * @param  {boolean} [volatile=false] if true, the message may be dropped
-	 *  by the framework
-	 */
-	CustomMessageSender.prototype.message = function (type, data, toClient, volatile) {
-		var message = {
-			name: 'message',
-			fromInstance: this.instance,
-			type: type,
-			data: data
-		};
-
-		message.toClient = toClient || 'all';
-		if (typeof message.toClient === 'object') {
-			if (message.toClient instanceof Array) {
-				for (var i in message.toClient) {
-					message.toClient[i] = message.toClient[i].id;
-				}
-			} else {
-				message.toClient = [ message.toClient.id ];
-			}
-		}
-
-		if (volatile === true) {
-			message.volatile = true;
-		}
-
-		this.messageBus.send(message);
-	};
-
-	
-	exports = CustomMessageSender;
-	return exports;
-
-});
-/**
- * @module client/player
- * @private
- */
- 
-define('player',['require','exports','module','events','util','../shared/SyncedObject','../shared/CustomMessageSender'],function(require, exports, module) {
-
-	var EventEmitter = require('events').EventEmitter;
-	var util = require('util');
-	var SyncedObject = require('../shared/SyncedObject');
-	var MessageSender = require('../shared/CustomMessageSender');
-
-	/**
-	* @classdesc This player class represents a device connected
-	* to a session. Every player is mirrored from its original instance 
-	* on the server side.
-	* 
-	* @inner
-	* @class
-	* @protected
-	* @mixes module:client/events.EventEmitter
-	* @memberof module:client/player
-	* @fires module:client/player~Player#attributesChanged
-	* @fires module:client/player~Player#disconnected
-	*
-	* @param messageBus ........
-	*/
-	var Player = function (id, messageBus) {
-
-		EventEmitter.call(this);
-
-		/**
-		 * wrapper for this players attributes
-		 * @type {SyncedObject}
-		 * @private
-		 */
-		this.syncedAttributes = new SyncedObject();
-
-		this.messageBus = messageBus;
-
-		this.messageSender = new MessageSender(messageBus, id);
-		/** 
-		 * unique id for this player
-		 * @type {string}
-		 * @readonly
-		 */
-		this.id = id;
-		/**
-		 * Role that is fulfilled by this
-		 * player. Either 'presenter' or 'player'.
-		 * @type {string}
-		 * @readonly
-		 */
-		this.role = 'player';
-		/** 
-		 * Object with user attributes for this player.
-		 * All changes within this object will automatically
-		 * be synced to the server side and all other clients. 
-		 * Make sure not to override the hole object but only 
-		 * its attributes.
-		 * <br>
-		 * Listen for changes by subscribing to the
-		 * {@link module:client/player~Player#attributesChanged attributesChanged}
-		 * event.
-		 * @type {object}
-		 */
-		this.attributes = this.syncedAttributes.data;
-		/**
-		 * Unique player-number inside this session beginning with 0.
-		 * Free numbers from disconnected players will be reused to
-		 * avoid gaps.
-		 * @type {integer}
-		 * @readonly
-		 */
-		this.number = null;
-		/**
-		 * pixel width of this clients screen
-		 * @type {integer}
-		 * @readonly
-		 */
-		this.width = null;
-		/**
-		 * pixel height of this clients screen
-		 * @type {integer}
-		 * @readonly
-		 */
-		this.height = null;
-
-		// listeners
-		this.messageRegister = this.messageBus.register('message',
-			this.id, this.onPlayerMessage.bind(this));
-		this.attributeRegister = this.messageBus.register('attributesChanged',
-			this.id, this.onAttributesChangedOnServer.bind(this));
-		this.leftRegister = this.messageBus.register('disconnected',
-			this.id, this.onDisconnected.bind(this));
-		this.syncedAttributes.on('changed', this.onAttributesChanged.bind(this));
-		this.syncedAttributes.startWatching();
-	};
-
-	util.inherits(Player, EventEmitter);
-
-	/**
-	 * Called when any player left its session.
-	 * @private
-	 */
-	Player.prototype.onDisconnected = function (message) {
-		// I do not longer exist - inform...
-		this.emit('disconnected');
-		// ... and remove listeners
-		this.removeAllListeners();
-		this.messageBus.unregister(this.messageRegister);
-		this.messageBus.unregister(this.attributeRegister);
-		this.messageBus.unregister(this.leftRegister);
-		this.syncedAttributes.stopWatching();
-	};
-
-	/**
-	 * Called when this socket receives a message for any player.
-	 * @private
-	 */
-	Player.prototype.onPlayerMessage = function (message) {
-		this.emit(message.type, { type: message.type, data: message.data } );
-	};
-
-	/**
-	 * Called when attributes for any player have been changed
-	 * on server side.
-	 * @private
-	 */
-	Player.prototype.onAttributesChangedOnServer = function (message) {
-		this.syncedAttributes.applyChangesetSilently(message.changeset);
-		if (message.changeset.hasOwnProperty('changed')) {
-			for (var i in message.changeset.changed) {
-				this.emit('attributeChanged/' + i, this.attributes[i]);
-			}
-		}
-	};
-
-	/** 
-	 * Called when the user attributes have been changed.
-	 * @param {SyncedObject.Changeset} changeset
-	 * @private
-	 */
-	Player.prototype.onAttributesChanged = function (changeset) {
-		this.messageBus.send({
-			name: 'attributesChanged',
-			fromInstance: this.id,
-			changeset: changeset
-		});
-	};
-
-	/**
-	 * Sends the given message to all other instances of this player.
-	 * @param {string} type    type of message that should be send
-	 * @param {object} [data]  message data that should be send	
-	 * @param {module:client/multi~toClient} [toClient='all']   which client
-	 *  should receive this message
-	 * @param {boolean} [volatile=false]  if true, the message may be dropped
-	 *  by the framework. Use this option for real time data where one dropped
-	 *  message does not interrupt your application.
-	 * @example
-	 * // on client no 1
-	 * player.on('ping', function (event) {
-	 *   // outputs 'bar'
-	 *   console.log(event.data.foo);
-	 * });
-	 * // on client no 2, instance of same player
-	 * player.message('ping', { foo: 'bar' });
-	 */
-	Player.prototype.message = function (type, data, toClient, volatile) {
-		this.messageSender.message(type, data, toClient, volatile);
-	};
-
-
-	/**
-	 * Fired when the {@link module:client/player~Player#attributes attributes} of 
-	 * this player have been changed by this client, another client or 
-	 * the server.
-	 * @event module:client/player~Player#attributesChanged
-	 * @property {string} key    name of the changed attribute
-	 * @property {*}      value  new value of the changed attribute
-	 * @todo this is currently dispatched only when changed from outside
-	 */
-
-	/**
-	 * Fired when this player disconnects from the server. Don't use this
-	 * instance any longer after this event has been fired.
-	 * @event module:client/player~Player#disconnected
-	 */
-
-
-	/**
-	 * Compare function to sort an array of players by 
-	 * {@link module:client/player~Player#number player numbers}.
-	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
-	 */
-	exports.compare = function (p1, p2) {
-		return p1.number - p2.number;
-	};
-
-	/**
-	* Unpacks a player object send over a socket connection.
-	* @returns {module:client/player~Player}
-	*/
-	exports.fromPackedData = function (data, messageBus) {
-		var player = new Player(data.id, messageBus);
-		for (var i in data) {
-			if (i === 'attributes') {
-				for (var j in data[i]) {
-					player.attributes[j] = data[i][j];
-				}
-			} else {
-				player[i] = data[i];
-			}
-		}
-		return player;
-	};
-
-	return exports;
-
-});
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-
-define('../shared/pubSub',['require','exports','module'],function(require, exports, module) {
-
-	/**
-	 * @classdesc A simple implementation of the content based
-	 * Publish/Suscribe-Pattern as described at
-	 * {@link http://msdn.microsoft.com/en-us/library/ff649664.aspx}.
-	 * @class PubSub
-	 * @private
-	 * @example
-	 * var pubSub = new PubSub();
-	 *
-	 * var myCallback = function (message) {
-	 *   // this will be called, for any message that
-	 *   // is approved by our filter function
-	 *   console.log(message);
-	 * };
-	 * 
-	 * pubSub.subscribe(myCallback, function (message) {
-	 *   // filter function returning true or false
-	 *   return message.topic === 'test' && message.sender === 42;
-	 * });
-	 *
-	 * pubSub.publish({ topic: 'test', sender: 42 }); // myCallback is called
-	 * pubSub.publish({ topic: 'test', sender: 0 });  // myCallback is not called
-	 */
-	var PubSub = function () {
-		this.listeners = [];
-	};
-
-	/**
-	 * Adds a callback funtion that is called for any message published
-	 * to this pubSub-instance that is approved by the given filter function.
-	 * @param  {function} callback  this will be called for any published message
-	 *  that matches the filter function. The massage will be passed as argument.
-	 * @param  {function} filter    a filter function acception any message as
-	 *  argument and returning true, when the message should be accepted and
-	 *  false otherwise.
-	 * @return  a token that can be used to unsubscribe this callback-filter-combo
-	 * @memberOf PubSub
-	 */
-	PubSub.prototype.subscribe = function (callback, filter) {
-		if (typeof callback !== 'function' || typeof filter !== 'function') {
-			throw 'callback and filter have to be a function';
-		}
-		var token = function (message) {
-			if (filter(message)) {
-				callback(message);
-			}
-		};
-		this.listeners.push(token);
-		return token;
-	};
-
-	/**
-	 * Removes a callback-filter-combo so they don't receive published messages
-	 * any longer.
-	 * @param  token  the token to identify the subscription that should
-	 *  be removed - returned by the subscribe method	
-	 * @memberOf PubSub
-	 * @example
-	 * var pubSub = new PubSub();
-	 *
-	 * // subscribe
-	 * var token = pubSub.subscribe(myCallback, function (message) {
-	 *   return message.receiver === 'xyz';
-	 * });
-	 * 
-	 * // unsubscribe
-	 * pubSub.unsubscribe(token);
-	 */
-	PubSub.prototype.unsubscribe = function (token) {
-		var index = this.listeners.indexOf(token);
-		if (index !== -1) {
-			this.listeners.splice(index, 1);
-		}
-	};
-
-	/**
-	 * Publishes a message in any format to all interested
-	 * subscribers.
-	 * @param  {*} message
-	 * @memberOf PubSub
-	 */
-	PubSub.prototype.publish = function (message) {
-		var listeners = this.listeners;
-		for (var i in listeners) {
-			listeners[i](message);
-		}
-	};
-
-	/**
-	 * Removes all subscriptions on this instance.
-	 * @memberOf PubSub
-	 */
-	PubSub.prototype.unsubscribeAll = function () {
-		this.listeners = [];
-	};
-
-	exports = PubSub;
-	return exports;
-
-});
-/**
- * @module client/messages
- * @private
- */
- 
-define('messages',['require','exports','module','../shared/pubSub'],function(require, exports, module) {
-
-	var PubSub = require('../shared/pubSub');
-
-	/**
-	 * @classdesc Centralized communication infrastructure for one session.
-	 * Every session or player can send messages to the outside world
-	 * and subscribe to messages, using a custom filter.
-	 * @class
-	 * @param socket socket.io socket instance that connects the
-	 *  using session to the outside world
-	 * @private
-	 */
-	exports.MessageBus = function (socket) {
-		var messageBus = this;
-
-		this.socket = socket;
-		this.pubSub = new PubSub();
-
-		socket.on('disconnect', function () {
-			messageBus.onSocketMessage({
-				name: 'disconnect',
-				fromInstance: 'session'
-			});
-		});
-		socket.on('multi', function (data) {
-			messageBus.onSocketMessage(data);
-		});
-	};
-
-	/**
-	 * The socket send a message - publish it to all subscribers.
-	 * @private
-	 */
-	exports.MessageBus.prototype.onSocketMessage = function (message) {
-		// console.log(JSON.stringify(message));
-		this.pubSub.publish(message);
-	};
-
-	/**
-	 * Sends the given message to the server and the instances of the sender
-	 * (fromInstance) on all other clients (including the sending client) by 
-	 * default. <br><br>
-	 * You can set message.toClient to: <br>
-	 * <ul>
-	 * <li>'all' - default behaviour </li>
-	 * <li>'all-but-myself' - message does not return to sending client (broadcast) </li>
-	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
-	 * inside the array </li>
-	 * </ul>
-	 * Use this option to save bandwidth.<br><br>
-	 * Message that have set message.volatile=true may be dropped by the framework.
-	 * 
-	 * @param  {object} message
-	 * @example
-	 * messageBus.send({
-	 *   name: 'myEvent',
-	 *   fromInstance: 'playerXYZ',
-	 *   toClient: 'all-but-myself',
-	 *   data1: 'mydata',
-	 *   data2: 42
-	 * });
-	 */
-	exports.MessageBus.prototype.send = function (message) {
-		this.socket.emit('multi', message);
-	};
-
-	/**
-	 * Register a callback for messages from the outside world.
-	 * @param  {string}   messageName  on which message name you would like to register?
-	 * @param  {string}   instance     messages from which instance do interest you?
-	 * @param  {Function} callback     function to call when a corresponding message
-	 *  is received (message name _and_ instance correspond to arguments)
-	 * @return {}                      token to unregister this callback again
-	 */
-	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
-		return this.pubSub.subscribe(callback, function (message) {
-			return instance === message.fromInstance && messageName === message.name;
-		});
-	};
-
-	/**
-	 * Unrigister a callback you registered earlier.
-	 * @param  {} token  register token returned by 'register' method
-	 * @example
-	 * // register
-	 * token = messageBus.register('myEventName', myId, callback);
-	 * // ... do something ...
-	 * // unregister again
-	 * messageBus.unregister(token);
-	 */
-	exports.MessageBus.prototype.unregister = function (token) {
-		this.pubSub.unsubscribe(token);
-	};
-
-	/**
-	 * Unregister all callbacks from this MessageBus instance.
-	 */
-	exports.MessageBus.prototype.unregisterAll = function () {
-		this.pubSub.unsubscribeAll();
-	};
-
-	/**
-	 * Destroys the link to the outsie world.
-	 */
-	exports.MessageBus.prototype.disconnect = function () {
-		this.socket.disconnect();
-	};
-
-	return exports;
-
-});
-/**
- * @module client/session
- * @private
- */
-
-define('session',['require','exports','module','events','util','./player','./messages','../shared/CustomMessageSender'],function(require, exports, module) {
-
-	var EventEmitter = require('events').EventEmitter;
-	var util = require('util');
-	var playerModule = require('./player');
-	var MessageBus = require('./messages').MessageBus;
-	var MessageSender = require('../shared/CustomMessageSender');
-
-
-	/* 
-	* internal module functions
-	*/
-
-	function getJoinSesionUrl(token) {
-		var url = window.location.host;
-		if (window.location.port !== '' && window.location.port !== '80') {
-			url += ':' + window.location.port;
-		}
-		url += window.location.pathname + '#' + token;
-		return url;
-	}
-
-
-	/* 
-	* session class functions
-	*/
-
-	/**
-	* @classdesc A game session that connects and manages multiple players.
-	* @inner
-	* @class
-	* @protected
-	* @mixes module:client/events.EventEmitter
-	* @memberof module:client/session
-	*
-	* @fires module:client/session~Session#playerJoined
-	* @fires module:client/session~Session#playerLeft
-	* @fires module:client/session~Session#destroyed
-	* @fires module:client/session~Session#belowMinPlayerNeeded
-	* @fires module:client/session~Session#aboveMinPlayerNeeded
-	*
-	* @param {module:client/player~Player} myself  the player instance that 
-	* represents my own client.
-	* @param {} messageBus
-	* @param {object} sessionData  data object from the server that
-	* describes this session
-	*/
-	var Session = function (myself, messageBus, sessionData) {
-
-		EventEmitter.call(this);
-		var session = this;
-
-		/**
-		 * The player instance that represents my own client.
-		 * @type {module:client/player~Player}
-		 * @readonly
-		 */
-		this.myself = myself;
-
-		this.messageBus = messageBus;
-
-		this.messageSender = new MessageSender(messageBus, 'session');
-		/**
-		 * Dictionary of all players except myself currently 
-		 * connected to this session; mapped on their ids.
-		 * @type {Object.<string, module:client/player~Player>}
-		 * @readonly
-		 */
-		this.players = {};
-		/** 
-		 * unique token identifying this session
-		 * @type {string}
-		 * @readonly
-		 */
-		this.token = null;
-		/**
-		 * @see SessionOptions
-		 * @readonly
-		 */
-		this.minPlayerNeeded = null;
-		/**
-		 * @see SessionOptions
-		 * @readonly
-		 */
-		this.maxPlayerAllowed = null;
-
-		var packedPlayers = sessionData.players;
-		delete sessionData.players;
-
-		// unpack session attributes
-		for (var i in sessionData) {
-			this[i] = sessionData[i];
-		}
-		// unpack players
-		for (i in packedPlayers) {
-			this.onPlayerConnected({ playerData: packedPlayers[i] });
-		}
-
-		// calculate attributes
-		/**
-		 * URL you have to visit in order to connect to this session.
-		 * @type {string}
-		 * @readonly
-		 */
-		this.joinSessionUrl = getJoinSesionUrl(this.token);
-
-		// add messages listeners
-		this.messageBus.register('disconnect', 'session', function (message) {
-			session.emit('destroyed');
-			session.messageBus.unregisterAll();
-			session.removeAllListeners();
-		});
-		this.messageBus.register('message', 'session', function (message) {
-			session.emit(message.type,  { type: message.type, data: message.data });
-		});
-		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
-	};
-
-	util.inherits(Session, EventEmitter);
-	util.inherits(Session, EventEmitter);
-
-	/**
-	 * @return {integer} number of currently connected players including myself
-	 */
-	Session.prototype.getPlayerCount = function () {
-		return Object.keys(this.players).length + 1;
-	};
-
-	/**
-	 * Creates a player from the given data and adds it to this session.
-	 * @private
-	 */
-	Session.prototype.onPlayerConnected = function (message) {
-		var session = this;
-		var player = playerModule.fromPackedData(message.playerData, this.messageBus);
-		this.players[player.id] = player;
-
-		player.on('disconnected', function () {
-			session.onPlayerDisconnected(player);
-		});
-
-		session.emit('playerJoined', { player: player });
-		if (session.getPlayerCount() === session.minPlayerNeeded) {
-			session.emit('aboveMinPlayerNeeded');
-		}
-	};
-
-	/**
-	 * Removes the given player from this session.
-	 * @private
-	 */
-	Session.prototype.onPlayerDisconnected = function (player) {
-		delete this.players[player.id];
-		this.emit('playerLeft', { player: player });
-
-		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
-			this.emit('belowMinPlayerNeeded');
-		}
-	};
-
-	/**
-	 * @returns {Array.<module:client/player~Player>} an array of all 
-	 * players currently connected to this session including myself.
-	 * The array is sorted by 
-	 * {@link module:client/player~Player#number player numbers} 
-	 * from small to high.
-	 */
-	Session.prototype.getPlayerArray = function () {
-		var playerArray = [];
-		for(var i in this.players) {
-			playerArray.push(this.players[i]);
-		}
-		playerArray.push(this.myself);
-		return playerArray.sort(playerModule.compare);
-	};
-
-	/**
-	 * @returns {module:client/player~Player} the player with the
-	 * given {@link module:client/player~Player#number player numbers} 
-	 * (even if this is myself) or null if no player with this number 
-	 * exists
-	 */
-	Session.prototype.getPlayerByNumber = function (number) {
-		for (var i in this.players) {
-			var player = this.players[i];
-			if (player.number === number) {
-				return player;
-			}
-		}
-		if (this.myself.number === number) {
-			return this.myself;
-		}
-		return null;
-	};
-
-	/**
-	 * @returns {module:client/player~Player} the player with the
-	 * given {@link module:client/player~Player#id id} 
-	 * (even if this is myself) or null if no player with this id 
-	 * exists
-	 */
-	Session.prototype.getPlayerById = function (id) {
-		if (this.players.hasOwnProperty(id)) {
-			return this.players[id];
-		}
-		if (this.myself.id === id) {
-			return this.myself;
-		}
-		return null;
-	};
-
-	/**
-	 * When you call this new players are not allowed to join this
-	 * session any more. Instead their promise will be rejected with a 
-	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
-	 */
-	Session.prototype.disablePlayerJoining = function () {
-		this.messageBus.send({
-			name: 'changePlayerJoining',
-			fromInstance: 'session',
-			enablePlayerJoining: false
-		});
-	};
-
-	/**
-	 * A call to this method will allow new players to join this session
-	 * again.
-	 */
-	Session.prototype.enablePlayerJoining = function () {
-		this.messageBus.send({
-			name: 'changePlayerJoining',
-			fromInstance: 'session',
-			enablePlayerJoining: true
-		});
-	};
-
-	/**
-	 * Sends the given message to all other instances of this session.
-	 * @param {string} type    type of message that should be send
-	 * @param {object} [data]  message data that should be send
-	 * @param {module:client/multi~toClient} [toClient='all']  which client
-	 *  should receive this message
-	 * @param {boolean} [volatile=false]  if true, the message may be dropped
-	 *  by the framework. Use this option for real time data where one dropped
-	 *  message does not interrupt your application.
-	 * @example
-	 * // on client no 1
-	 * session.on('ping', function (event) {
-	 *   // outputs 'bar'
-	 *   console.log(event.data.foo);
-	 * });
-	 * // on client no 2, instance of same session
-	 * session.message('ping', { foo: 'bar' });
-	 */
-	Session.prototype.message = function (type, data, toClient, volatile) {
-		this.messageSender.message(type, data, toClient, volatile);
-	};
-
-	/**
-	 * Disconnects own player from this session.
-	 * This will remove this player from all existing
-	 * instances of this session.
-	 * @fires module:client/session~Session#destroyed
-	 */
-	Session.prototype.disconnectMyself = function () {
-		this.messageBus.disconnect();
-	};
-
-
-	/**
-	 * Fired when this session is no longer valid. <br>
-	 * The reason could be a broken connection or the
-	 * removal of your own player. <br><br>
-	 * Don't use this session any longer after the event 
-	 * has been fired.
-	 * @event module:client/session~Session#destroyed
-	 */
-
-	/**
-	 * Fired when a new player has been added to this session.
-	 * From now on you can safely communicate with this player.
-	 * @event module:client/session~Session#playerJoined
-	 * @property {module:client/player~Player} player  The newly added player.
-	 * @example <caption>Adding connected players to the DOM</caption>
-	 * session.on('playerJoined', function (event) {
-	 *   var playerDiv = $('#player').clone();
-	 *   $('#players').append(playerDiv);
-	 *   event.player.on('disconnected', function () {
-	 *     playerDiv.remove();
-	 *   });
-	 * }
-	 */
-
-	/**
-	 * Fired when a player has been removed from this session.
-	 * @event module:client/session~Session#playerLeft
-	 * @property {module:client/player~Player} player  The removed player.
-	 */
-
-	/**
-	 * Fired when a player has been removed from this session and
-	 * there are now less player connected to this session than stated 
-	 * in minPlayerNeeded.<br><br>
-	 * You could listen for this event to stop a running game when
-	 * the player count is getting to low.
-	 * @event module:client/session~Session#belowMinPlayerNeeded
-	 */
-
-	/**
-	 * Fired when a new player has been added to this session and
-	 * there are now exactly as many players connected to this session
-	 * as stated in minPlayerNeeded.<br><br>
-	 * You could listen for this event to start your game when
-	 * enough players have connected.
-	 * @event module:client/session~Session#aboveMinPlayerNeeded
-	 */
-
-	/**
-	* Unpacks a session object send over a socket connection.
-	* @returns {module:client/session~Session}
-	*/
-	exports.fromPackedData = function (data, socket) {
-		var messageBus = new MessageBus(socket);
-		var myself = playerModule.fromPackedData(data.player, messageBus);
-		var session = new Session(myself, messageBus, data.session);
-		return session;
-	};
-
-	return exports;
-
-});
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-
-/**
- * Here you can find some useful functions for working with colors.
- * @module
- * @private
- */
-define('../shared/color',['require','exports','module'],function(require, exports, module) {
-
-	/**
-	 * @returns {string} a random color string using the format '#RRGGBB'
-	 */
-	exports.random = function () {
-		var color = 'ffff' + (Math.random()*0xFFFFFF<<0).toString(16);
-		color = '#' + color.slice(-6);
-		return color;
-	};
-
-	return exports;
-
-});
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-
-/**
- * Collection of Error classes that multi uses to communicate that
- * something went wrong.
- * @private
- * @module shared/errors
- */
-define('../shared/errors',['require','exports','module','util'],function(require, exports, module) {
-
-	var util = require('util');
-
-	/**
-	 * The built in error object.
-	 * @external Error
-	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error}
-	 */
-
-	/**
-	 * @classdesc Generic framewok error.
-	 * @class
-	 * @memberof module:shared/errors
-	 * @mixes external:Error
-	 */
-	var MultiError = exports.MultiError = function () {
-		var err = Error.apply(this, arguments);
-		this.stack = err.stack;
-		this.message = err.message;
-	};
-	util.inherits(MultiError, Error);
-
-	/**
-	 * @classdesc The session you were looking for was not found
-	 * on the server. Most likely the token has been misspelled.
-	 * @class
-	 * @mixes module:shared/errors.MultiError
-	 */
-	exports.NoSuchSessionError = function () {
-		MultiError.call(this, 'the requested session does not exist');
-	};
-	util.inherits(exports.NoSuchSessionError, MultiError);
-
-
-	/**
-	 * @classdesc The session you wanted to create already exists.
-	 * This can happen when you have configured a static session 
-	 * token inside the {@link SessionOptions} and are trying to 
-	 * create this session more than once. Closing any open tabs
-	 * connected to this session may solve your problem.
-	 * @class
-	 * @mixes module:shared/errors.MultiError
-	 */
-	exports.TokenAlreadyExistsError = function () {
-		MultiError.call(this, 'a session with this token does already exist');
-	};
-	util.inherits(exports.TokenAlreadyExistsError, MultiError);
-
-
-	/**
-	 * @classdesc The session you wanted to join already has enough
-	 * players. This happens when there are as many or more players 
-	 * connected as defined in 
-	 * {@link module:client/session~Session#maxPlayerAllowed maxPlayerAllowed}.
-	 * @class
-	 * @mixes module:shared/errors.MultiError
-	 */
-	exports.SessionFullError = function () {
-		MultiError.call('the requested session is full');
-	};
-	util.inherits(exports.SessionFullError, MultiError);
-
-
-	/**
-	 * @classdesc You are not able to create or join a session
-	 * because there is no connection to the server. Maybe the
-	 * socket.io settings are wrong or the internet connection
-	 * dropped.
-	 * @class
-	 * @mixes module:shared/errors.MultiError
-	 */
-	exports.NoConnectionError = function () {
-		MultiError.call(this, 'no connection to server');
-	};
-	util.inherits(exports.NoConnectionError, MultiError);
-
-
-	/**
-	 * @classdesc There could be no valid session token extracted
-	 * from the url. You may want to check if the current url has
-	 * the format http://myGameUrl/some/game#myToken
-	 * @class
-	 * @mixes module:shared/errors.MultiError
-	 */
-	exports.NoSessionTokenFoundError = function () {
-		MultiError.call(this, 'no session token found in url');
-	};
-	util.inherits(exports.NoSessionTokenFoundError, MultiError);
-
-
-	/**
-	 * @classdesc New players are currently not allowed to join
-	 * this session. Maybe someone called 
-	 * {@link module:client/session~Session#disablePlayerJoining}.
-	 * @class
-	 * @mixes module:shared/errors.MultiError
-	 */
-	exports.JoiningDisabledError = function () {
-		MultiError.call(this, 'player joining is currently disabled');
-	};
-	util.inherits(exports.JoiningDisabledError, MultiError);
-
-
-	return exports;
-
-});
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-
-/**
- * This module contains classes and utils that are useful
- * for working with multiple screens. To use a ScreenArranger inside your
- * game look up the 
- * {@link module:shared/screens.HorizontalArranger|HorizontalArranger}
- * documentation.
- * @module shared/screens
- */
-define('../shared/screens/index',['require','exports','module'],function(require, exports, module) {
-
-	/**
-	 * @classdesc When any ScreenArranger is used, an instance of this 
-	 * class will be added to every player. Here you can find all
-	 * information and helper methods relevant for positioning one 
-	 * screen on a bigger playing field.
-	 * @class
-	 * @param {module:client/player~Player|module:server/player~Player} 
-	 *  player player instance this screen is added to
-	 */
-	exports.Screen = function (player) {
-		/**
-		 * width of the screen in pixel
-		 * @type {integer}
-		 */
-		this.width = player.width;
-		/**
-		 * height of the screen in pixel
-		 * @type {integer}
-		 */
-		this.height = player.height;
-		/**
-		 * player instance this screen is added to
-		 * @type {module:client/player~Player|module:server/player~Player}
-		 */
-		this.player = player;
-		/**
-		 * global x-position (from left) of this screen in pixel
-		 * @type {integer}
-		 */
-		this.x = null;
-		/**
-		 * global x-position (from top) of this screen in pixel
-		 * @type {integer}
-		 */
-		this.y = null;
-		/**
-		 * list of all player instances that border on the right
-		 * side of this screen
-		 * @type {Array}
-		 */
-		this.rightPlayers = [];
-		/**
-		 * list of all player instances that border on the left
-		 * side of this screen
-		 * @type {Array}
-		 */
-		this.leftPlayers = [];
-		/**
-		 * list of all player instances that border on the top
-		 * of this screen
-		 * @type {Array}
-		 */
-		this.topPlayers = [];
-		/**
-		 * list of all player instances that border on the bottom
-		 * of this screen
-		 * @type {Array}
-		 */
-		this.bottomPlayers = [];
-	};
-
-	/**
-	 * @param  {integer}  x  global x position in pixel
-	 * @param  {integer}  y  global y position in pixel
-	 * @return {boolean}  true if the given global coordinates lie inside 
-	 * the this screen object, else false
-	 * @private
-	 */
-	exports.Screen.prototype.isHit = function (x, y) {
-		return x >= this.x &&
-			x < this.x + this.width &&
-			y >= this.y &&
-			y < this.y + this.height;
-	};
-
-	/**
-	 * @param  {integer}  x      global x-coordinate of the upper left corner
-	 *  of the rectangle in pixel
-	 * @param  {integer}  y      global y-coordinate of the upper left corner
-	 *  of the rectangle in pixel
-	 * @param  {integer}  width  width of the rectangle in pixel
-	 * @param  {integer}  height height of the rectangle in pixel
-	 * @return {boolean}         true if the given rectangle or parts of it 
-	 *  overlap with this screen
-	 */
-	exports.Screen.prototype.isHitByRect = function (x, y, width, height) {
-		return x + width >= this.x &&
-			y + height >= this.y &&
-			x < this.x + this.width &&
-			y < this.y + this.height;
-	};
-
-	/**
-	 * Converts local pixel coordinates to global ones, using this screen
-	 * as local coordinate system.
-	 * @param  {integer} x  local x position in pixel
-	 * @param  {integer} y  local y position in pixel
-	 * @return {object}  { x: globalX, y: globalY }
-	 */
-	exports.Screen.prototype.localToGlobal = function (x, y) {
-		return { x: this.x + x, y: this.y + y };
-	};
-
-	/**
-	 * Converts global pixel coordinates to local ones, using this screen
-	 * as local coordinate system.
-	 * @param  {integer} x  global x position in pixel
-	 * @param  {integer} y  global y position in pixel
-	 * @return {object}  { x: localX, y: localY, player: this.player }
-	 */
-	exports.Screen.prototype.globalToLocal = function (x, y) {
-		return { x: x - this.x, y: y - this.y, player: this.player };
-	};
-
-
-	/**
-	 * @classdesc This is the base class for arranging players of the given
-	 * session to one big playing field. It will add a 
-	 * {@link module:shared/screens.Screen|screen} attribute to every joined 
-	 * player.<br><br>
-	 * Feel free to extend this class to create your own ScreenArranger. You
-	 * can use {@link module:shared/screens.HorizontalArranger} 
-	 * as example implementation.
-	 * @class
-	 * @param {module:client/session~Session|module:server/session~Session}
-	 *  Session that contains the players that should be arranged into
-	 *  one big screen.
-	 */
-	exports.ScreenArranger = function (session) {
-		/**
-		 * Session that is getting arranged into one big game screen
-		 * @type {module:client/session~Session|module:server/session~Session}
-		 * @readonly
-		 */
-		this.session = session;
-		/**
-		 * total width of the big screen in pixel
-		 * @type {integer}
-		 * @readonly
-		 */
-		this.width = 0;
-		/**
-		 * total height of the big screen in pixel
-		 * @type {integer}
-		 * @readonly
-		 */
-		this.height = 0;
-
-		// add a screen to every player...
-		session.getPlayerArray().forEach(function (player) {
-			player.screen = new exports.Screen(player);
-		});
-		this.refresh();
-
-		// ...and every player that will come
-		session.on('playerJoined', this.onPlayerJoined.bind(this));
-		session.on('playerLeft', this.onPlayerLeft.bind(this));
-	};
-
-	/**
-	 * Converts local pixel coordinates to global ones.
-	 * @param  {module:server/player~Player|module:client/player~Player} player 
-	 * player instance the local coordinates refer to
-	 * @param  {integer} x  local x position in pixel
-	 * @param  {integer} y  local y position in pixel
-	 * @return {object}  { x: globalX, y: globalY } or null if the given
-	 *  player is no part of this arranger
-	 */
-	exports.ScreenArranger.prototype.localToGlobal = function (player, x, y) {
-		return player.screen.localToGlobal(x, y);
-	};
-
-	/**
-	 * Determines which Player overlaps with the given rectangle.
-	 * @param  {integer}  x      global x-coordinate of the upper left corner
-	 *  of the rectangle in pixel
-	 * @param  {integer}  y      global y-coordinate of the upper left corner
-	 *  of the rectangle in pixel
-	 * @param  {integer}  width  width of the rectangle in pixel
-	 * @param  {integer}  height height of the rectangle in pixel
-	 * @return {Array}    list of local objects of the form 
-	 *  { x: localX, y: localY, player: hitPlayer }. X and y are the upper-left
-	 *  corner of the given rectangle in the players local coordinate system.
-	 * @see module:shared/screens.Screen#globalToLocal
-	 * @see module:shared/screens.Screen#isHitByRect
-	 */
-	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
-		var locals = {};
-		var screen;
-		for (var i in this.session.players) {
-			screen = this.session.players[i].screen;
-			if (screen.isHitByRect(x, y, width, height)) {
-				locals[screen.player.id] = screen.globalToLocal(x, y);
-			}
-		}
-
-		return locals;
-	};
-
-	/**
-	 * @param  {module:server/player~Player|module:client/player~Player} player 
-	 * any player object connected to the arranged session
-	 * @param  {integer}  x  global x position in pixel
-	 * @param  {integer}  y  global y position in pixel
-	 * @return {boolean}  true if the given coordinates lie within
-	 * the screen of the given player
-	 */
-	exports.ScreenArranger.prototype.isPlayerHit = function (player, x, y) {
-		return player.screen.isHit(x, y);
-	};
-
-	/*
-	 * @param  {integer}  x  global x position in pixel
-	 * @param  {integer}  y  global y position in pixel
-	 * @return {boolean}  true if the given coordinates lie within
-	 * the screen of any player, false otherwise
-	 */
-	exports.ScreenArranger.prototype.isAnyPlayerHit = function (x, y) {
-		return this.getPlayerAtCoords(x, y) !== null;
-	};
-
-	/**
-	 * @param  {integer}  x  global x position in pixel
-	 * @param  {integer}  y  global y position in pixel
-	 * @return {module:server/player~Player|module:client/player~Player}
-	 * player object whose screen lies beneath the given coordinates
-	 * or null when no player can be found at this position
-	 */
-	exports.ScreenArranger.prototype.getPlayerAtCoords = function (x, y) {
-		for (var i in this.session.players) {
-			var screen = this.session.players[i].screen;
-			if (screen.isHit(x, y)) {
-				return screen.player;
-			}
-		}
-		return null;
-	};
-
-	/**
-	 * This method by default gets called whenever a new player joins
-	 * the underlying session. It calls
-	 * {@link module:shared/screens.ScreenArranger#arrange|arrange} and 
-	 * {@link module:shared/screens.ScreenArranger#recaculateDimentions|recaculateDimentions}. <br>
-	 * You can override this method to write your own screen arranger.
-	 * In this case please make sure to arrange every player and 
-	 * update the dimentions of the whole playing field accordingly.
-	 */
-	exports.ScreenArranger.prototype.refresh = function () {
-		this.arrange();
-		this.recaculateDimentions();
-	};
-
-	/**
-	 * This method is called by the 
-	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} 
-	 * method by default. It takes the global position and dimentions of every 
-	 * player into account to update the global playing field width and height 
-	 * accordingly.<br>
-	 * You may override this method or call it from any overridden method.
-	 */
-	exports.ScreenArranger.prototype.recaculateDimentions = function () {
-		var maxX = 0;
-		var maxY = 0;
-		this.session.getPlayerArray().forEach(function (player) {
-			maxX = Math.max(maxX, player.screen.x + player.screen.width);
-			maxY = Math.max(maxY, player.screen.y + player.screen.height);
-		});
-		this.width = maxX;
-		this.height = maxY;
-	};
-
-	/**
-	 * This method is called by the 
-	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} method by default. 
-	 * It does  nothing for this base class and should be overridden by every 
-	 * child class.<br><br>
-	 * Please make sure to update the positions of every players screen here.
-	 * @abstract
-	 */
-	exports.ScreenArranger.prototype.arrange = function () {
-		// this does nothing!
-	};
-
-	/**
-	 * This method is callen whenever a new player joins the session.
-	 * Feel free to override. In this case you may want to create a new
-	 * screen for the player and call your refresh method.
-	 * @param event
-	 */
-	exports.ScreenArranger.prototype.onPlayerJoined = function (event) {
-		event.player.screen = new exports.Screen(event.player);
-		this.refresh();
-	};
-
-	/**
-	 * This method is callen whenever a new player leaves the session.
-	 * Feel free to override. In this case you may want to call your 
-	 * refresh method.
-	 * @param event
-	 */
-	exports.ScreenArranger.prototype.onPlayerLeft = function (event) {
-		this.refresh();
-	};
-
-	return exports;
-
-});
-/* 
-* To use this with require.js AND the node.js module system (on server and client side).
-* see https://github.com/jrburke/amdefine
-*/
-
-
-
-define('../shared/screens/HorizontalArranger',['require','exports','module','util','./index'],function(require, exports, module) {
-
-	var util = require('util');
-	var screensModule = require('./index');
-	var ScreenArranger = screensModule.ScreenArranger;
-
-	/**
-	 * @classdesc This class arranges the screens of the every player 
-	 * horizontally. Player with lower playerNumbers will be farer left.
-	 * @example
-	 * --------    ------------
-	 * |      |----|          |
-	 * |  p1  | p2 |    p3    |
-	 * |      |----|          |
-	 * --------    ------------
-	 * @example
-	 * var arranger = new multiModule.screens.HorizontalArranger(session);
-	 * var firstPlayer = session.getPlayerByNumber(0);
-	 * console.log(firstPlayer.screen.x);
-	 * console.log(firstPlayer.screen.y);
-	 * console.log(firstPlayer.screen.width);
-	 * console.log(firstPlayer.screen.height);
-	 * @class
-	 * @mixes module:shared/screens.ScreenArranger
-	 * @memberOf module:shared/screens
-	 * @param {module:client/session~Session|module:server/session~Session} 
-	 *  session session instance whose player you want to be arranged.
-	 */
-	var HorizontalArranger = function (session) {
-		ScreenArranger.call(this, session);
-	};
-	util.inherits(HorizontalArranger, ScreenArranger);
-
-	HorizontalArranger.prototype.refresh = function () {
-		var height = 0;
-		var xPos = 0;
-		var yPos;
-		var lastPlayer = null;
-		var players = this.session.getPlayerArray();
-		players.forEach(function (player) {
-			height = Math.max(height, player.height);
-		});
-		players.forEach(function (player) {
-			yPos = Math.round((height - player.height) / 2);
-			player.screen.x = xPos;
-			player.screen.y = yPos;
-			if (lastPlayer !== null) {
-				player.screen.leftPlayers = [ lastPlayer ];
-				lastPlayer.screen.rightPlayers = [ player ];
-			}
-			xPos += player.width;
-			lastPlayer = player;
-		});
-
-		this.width = xPos;
-		this.height = height;
-	};
-
-	screensModule.HorizontalArranger = HorizontalArranger;
-	exports = HorizontalArranger;
-	return exports;
-
-});
 // vim:ts=4:sts=4:sw=4:
 /*!
  *
@@ -4010,6 +2446,1589 @@ return Q;
 
 });
 
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+define('../shared/SyncedObject',['require','exports','module','../lib/watch','../lib/q','events','util'],function(require, exports, module) {
+
+	var WatchJS = require('../lib/watch');
+	var Q = require('../lib/q');
+	var EventEmitter = require('events').EventEmitter;
+	var util = require('util');
+
+	/**
+	 * @typedef Changeset
+	 * This object describes changes made to the attributes inside the wrapped
+	 * object.
+	 * @memberOf SyncedObject
+	 * @property {Object.<string, *>} changed  any changed top level attributes:
+	 * their new value mapped to their name
+	 * @property {Array.<string>} removed  names of all top level
+	 * attributes that have been deleted
+	 */
+
+	/**
+	 * @classdesc This class wraps an object and detects when it is changed from
+	 * the outside world.
+	 * @example
+	 * var synced = new SyncedObject();
+	 * synced.on('changed', function (changeset) {
+	 *   console.log(changeset.changed); // { 'foo': 'bar' }
+	 * });
+	 * synced.data.foo = 'bar';
+	 * @class SyncedObject
+	 * @mixes external:EventEmitter
+	 */
+	var SyncedObject = function () {
+
+		EventEmitter.call(this);
+		this._data = {};
+		this.onAttributesChange = this.onAttributesChange.bind(this);
+	};
+
+	util.inherits(SyncedObject, EventEmitter);
+
+	/**
+	 * The wrapped data object. Changes to it's top level attributes are
+	 * detected and a {@link SyncedObject#event:changed changed} event is
+	 * fired in this case.
+	 * @type {Object}
+	 * @name data
+	 * @instance
+	 * @memberOf SyncedObject
+	 */
+	Object.defineProperty(SyncedObject.prototype, 'data', {
+		get: function() {
+			return this._data;
+		},
+		set: function(val) {
+			if (typeof val === 'object') {
+				// remove
+				for (var j in this._data) {
+					if (!val.propertyIsEnumerable(j)) {
+						delete this._data[j];
+					}
+				}
+				// add
+				for (var i in val) {
+					this._data[i] = val[i];
+				}
+			}
+		}
+	});
+
+	/**
+	 * Starts detecting changes to the wrapped object.
+	 * @memberOf SyncedObject
+	 */
+	SyncedObject.prototype.startWatching = function () {
+		WatchJS.watch(this._data, this.onAttributesChange, 0, true);
+	};
+
+	/**
+	 * Stops detecting changes to the wrapped object. You can resume watching
+	 * @memberOf SyncedObject
+	 * again any time.
+	 */
+	SyncedObject.prototype.stopWatching = function () {
+		WatchJS.unwatch(this._data, this.onAttributesChange);
+	};
+
+	/**
+	 * Applies the given changeset to the wrapped object without fireing 
+	 * a {@link SyncedObject#event:changed changed} event.
+	 * @param  {SyncedObject.Changeset} changeset  changes that should be
+	 *  applied to the wrapped object
+	 * @memberOf SyncedObject
+	 */
+	SyncedObject.prototype.applyChangesetSilently = function (changeset) {
+		this.stopWatching();
+		this.applyChangeset(changeset);
+		this.startWatching();
+	};
+
+	/**
+	 * Applies the given changeset to the wrapped object. Note that this
+	 * method fires a {@link SyncedObject#event:changed changed} event if any 
+	 * attribute does change. If you don't want to receive this event, use 
+	 * {@link SyncedObject#applyChangesetSilently applyChangesetSilently} 
+	 * instead.
+	 * @fires  SyncedObject#changed
+	 * @param  {SyncedObject.Changeset} changeset  changes that should be
+	 *  applied to the wrapped object
+	 * @memberOf SyncedObject
+	 */
+	SyncedObject.prototype.applyChangeset = function (changeset) {
+		var propertyName;
+		if (changeset.hasOwnProperty('changed')) {
+			for (propertyName in changeset.changed) {
+				this._data[propertyName] = changeset.changed[propertyName];
+			}
+		}
+		if (changeset.hasOwnProperty('removed')) {
+			for (var i in changeset.removed) {
+				propertyName = changeset.removed[i];
+				delete this._data[propertyName];
+			}
+		}
+	};
+
+	/** 
+	 * @param {string} property  property that has been changed
+	 * @param {string} action    what has been done to the property
+	 * @param          newValue  new value of the changed property
+	 * @param          oldValue  old value of the changed property
+	 * @see                      https://github.com/melanke/Watch.JS
+	 * @private
+	 */
+	SyncedObject.prototype.onAttributesChange = function (property, action, newValue, oldValue) {
+		var changed = {};
+		var removed = [];
+
+		if (property === 'root' && action === 'differentattr') {
+			// some attributes have been added or deleted
+			for (var i in newValue.added) {
+				var propertyName = newValue.added[i];
+				changed[propertyName] = this._data[propertyName];
+			}
+			for (var j in newValue.removed) {
+				removed.push(newValue.removed[j]);
+			}
+		} else if (action === 'set' &&
+				JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+			// one attribute has changed
+			changed[property] = newValue;
+		}
+
+		var changeset = {};
+		if (Object.keys(changed).length > 0) {
+			changeset.changed = changed;
+		}
+		if (Object.keys(removed).length > 0) {
+			changeset.removed = removed;
+		}
+
+		this.emit('changed', changeset);
+	};
+
+	SyncedObject.prototype.get = function (name, timeout) {
+		var deferred = Q.defer();
+
+		if (this._data.hasOwnProperty(name)) {
+			deferred.resolve(this._data[name]);
+		} else {
+			var onChanged = function (changeset) {
+				if (this._data.hasOwnProperty(name)) {
+					this.removeEventListener('changed', onChanged);
+					deferred.resolve(this._data[name]);
+				}
+			};
+			this.on('changed', onChanged);
+		}
+
+		return deferred.promise.timeout(timeout || 1000);
+	};
+
+	/**
+	 * Fired when any top level attribute of the wrapped object has changed.
+	 * @event SyncedObject#changed
+	 * @property {SyncedObject.Changeset} changeset  what has changed exactly?
+	 */
+
+	exports = SyncedObject;
+	return exports;
+
+});
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+define('../shared/CustomMessageSender',['require','exports','module'],function(require, exports, module) {
+
+	/**
+	 * @classdesc Util class for all objects that allow to send custom messages
+	 *  (e.g. player.message('foo', {data: 'bar'})).
+	 * @param {module:server/messages~MessageBus|module:client/messages~MessageBus} 
+	 *  messageBus message bus instance used for sending the messages
+	 * @param {string} instance   instance identifier that should be used for
+	 *  the 'fromInstance' attribute of outgoing messages
+	 * @private
+	 */
+	var CustomMessageSender = function (messageBus, instance) {
+		this.messageBus = messageBus;
+		this.instance = instance;
+	};
+
+	/**
+	 * Sends a custom message over the message bus.
+	 * @param  {string} type     name of the custom message
+	 * @param  {*}      [data]   any data to transport
+	 * @param  {module:client/multi~toClient|module:server/multi~toClient} 
+	 *  [toClient='all'] which client should receive the message
+	 * @param  {boolean} [volatile=false] if true, the message may be dropped
+	 *  by the framework
+	 */
+	CustomMessageSender.prototype.message = function (type, data, toClient, volatile) {
+		var message = {
+			name: 'message',
+			fromInstance: this.instance,
+			type: type,
+			data: data
+		};
+
+		message.toClient = toClient || 'all';
+		if (typeof message.toClient === 'object') {
+			if (message.toClient instanceof Array) {
+				for (var i in message.toClient) {
+					message.toClient[i] = message.toClient[i].id;
+				}
+			} else {
+				message.toClient = [ message.toClient.id ];
+			}
+		}
+
+		if (volatile === true) {
+			message.volatile = true;
+		}
+
+		this.messageBus.send(message);
+	};
+
+	
+	exports = CustomMessageSender;
+	return exports;
+
+});
+/**
+ * @module client/player
+ * @private
+ */
+ 
+define('player',['require','exports','module','events','util','../shared/SyncedObject','../shared/CustomMessageSender'],function(require, exports, module) {
+
+	var EventEmitter = require('events').EventEmitter;
+	var util = require('util');
+	var SyncedObject = require('../shared/SyncedObject');
+	var MessageSender = require('../shared/CustomMessageSender');
+
+	/**
+	* @classdesc This player class represents a device connected
+	* to a session. Every player is mirrored from its original instance 
+	* on the server side.
+	* 
+	* @inner
+	* @class
+	* @protected
+	* @mixes module:client/events.EventEmitter
+	* @memberof module:client/player
+	* @fires module:client/player~Player#attributesChanged
+	* @fires module:client/player~Player#disconnected
+	*
+	* @param messageBus ........
+	*/
+	var Player = function (id, messageBus) {
+
+		EventEmitter.call(this);
+
+		/**
+		 * wrapper for this players attributes
+		 * @type {SyncedObject}
+		 * @private
+		 */
+		this.syncedAttributes = new SyncedObject();
+
+		this.messageBus = messageBus;
+
+		this.messageSender = new MessageSender(messageBus, id);
+		/** 
+		 * unique id for this player
+		 * @type {string}
+		 * @readonly
+		 */
+		this.id = id;
+		/**
+		 * Role that is fulfilled by this
+		 * player. Either 'presenter' or 'player'.
+		 * @type {string}
+		 * @readonly
+		 */
+		this.role = 'player';
+		/** 
+		 * Object with user attributes for this player.
+		 * All changes within this object will automatically
+		 * be synced to the server side and all other clients. 
+		 * Make sure not to override the hole object but only 
+		 * its attributes.
+		 * <br>
+		 * Listen for changes by subscribing to the
+		 * {@link module:client/player~Player#attributesChanged attributesChanged}
+		 * event.
+		 * @type {object}
+		 */
+		this.attributes = this.syncedAttributes.data;
+		/**
+		 * Unique player-number inside this session beginning with 0.
+		 * Free numbers from disconnected players will be reused to
+		 * avoid gaps.
+		 * @type {integer}
+		 * @readonly
+		 */
+		this.number = null;
+		/**
+		 * pixel width of this clients screen
+		 * @type {integer}
+		 * @readonly
+		 */
+		this.width = null;
+		/**
+		 * pixel height of this clients screen
+		 * @type {integer}
+		 * @readonly
+		 */
+		this.height = null;
+
+		// listeners
+		this.messageRegister = this.messageBus.register('message',
+			this.id, this.onPlayerMessage.bind(this));
+		this.attributeRegister = this.messageBus.register('attributesChanged',
+			this.id, this.onAttributesChangedOnServer.bind(this));
+		this.leftRegister = this.messageBus.register('disconnected',
+			this.id, this.onDisconnected.bind(this));
+		this.syncedAttributes.on('changed', this.onAttributesChanged.bind(this));
+		this.syncedAttributes.startWatching();
+	};
+
+	util.inherits(Player, EventEmitter);
+
+	/**
+	 * Called when any player left its session.
+	 * @private
+	 */
+	Player.prototype.onDisconnected = function (message) {
+		// I do not longer exist - inform...
+		this.emit('disconnected');
+		// ... and remove listeners
+		this.removeAllListeners();
+		this.messageBus.unregister(this.messageRegister);
+		this.messageBus.unregister(this.attributeRegister);
+		this.messageBus.unregister(this.leftRegister);
+		this.syncedAttributes.stopWatching();
+	};
+
+	/**
+	 * Called when this socket receives a message for any player.
+	 * @private
+	 */
+	Player.prototype.onPlayerMessage = function (message) {
+		this.emit(message.type, { type: message.type, data: message.data } );
+	};
+
+	/**
+	 * Called when attributes for any player have been changed
+	 * on server side.
+	 * @private
+	 */
+	Player.prototype.onAttributesChangedOnServer = function (message) {
+		this.syncedAttributes.applyChangesetSilently(message.changeset);
+		if (message.changeset.hasOwnProperty('changed')) {
+			for (var i in message.changeset.changed) {
+				this.emit('attributeChanged/' + i, this.attributes[i]);
+			}
+		}
+	};
+
+	/** 
+	 * Called when the user attributes have been changed.
+	 * @param {SyncedObject.Changeset} changeset
+	 * @private
+	 */
+	Player.prototype.onAttributesChanged = function (changeset) {
+		this.messageBus.send({
+			name: 'attributesChanged',
+			fromInstance: this.id,
+			changeset: changeset
+		});
+	};
+
+	/**
+	 * Sends the given message to all other instances of this player.
+	 * @param {string} type    type of message that should be send
+	 * @param {object} [data]  message data that should be send	
+	 * @param {module:client/multi~toClient} [toClient='all']   which client
+	 *  should receive this message
+	 * @param {boolean} [volatile=false]  if true, the message may be dropped
+	 *  by the framework. Use this option for real time data where one dropped
+	 *  message does not interrupt your application.
+	 * @example
+	 * // on client no 1
+	 * player.on('ping', function (event) {
+	 *   // outputs 'bar'
+	 *   console.log(event.data.foo);
+	 * });
+	 * // on client no 2, instance of same player
+	 * player.message('ping', { foo: 'bar' });
+	 */
+	Player.prototype.message = function (type, data, toClient, volatile) {
+		this.messageSender.message(type, data, toClient, volatile);
+	};
+
+
+	/**
+	 * Fired when the {@link module:client/player~Player#attributes attributes} of 
+	 * this player have been changed by this client, another client or 
+	 * the server.
+	 * @event module:client/player~Player#attributesChanged
+	 * @property {string} key    name of the changed attribute
+	 * @property {*}      value  new value of the changed attribute
+	 * @todo this is currently dispatched only when changed from outside
+	 */
+
+	/**
+	 * Fired when this player disconnects from the server. Don't use this
+	 * instance any longer after this event has been fired.
+	 * @event module:client/player~Player#disconnected
+	 */
+
+
+	/**
+	 * Compare function to sort an array of players by 
+	 * {@link module:client/player~Player#number player numbers}.
+	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+	 */
+	exports.compare = function (p1, p2) {
+		return p1.number - p2.number;
+	};
+
+	/**
+	* Unpacks a player object send over a socket connection.
+	* @returns {module:client/player~Player}
+	*/
+	exports.fromPackedData = function (data, messageBus) {
+		var player = new Player(data.id, messageBus);
+		for (var i in data) {
+			if (i === 'attributes') {
+				for (var j in data[i]) {
+					player.attributes[j] = data[i][j];
+				}
+			} else {
+				player[i] = data[i];
+			}
+		}
+		return player;
+	};
+
+	return exports;
+
+});
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+define('../shared/PubSub',['require','exports','module'],function(require, exports, module) {
+
+	/**
+	 * @classdesc A simple implementation of the content based
+	 * Publish/Suscribe-Pattern as described at
+	 * {@link http://msdn.microsoft.com/en-us/library/ff649664.aspx}.
+	 * @class PubSub
+	 * @private
+	 * @example
+	 * var pubSub = new PubSub();
+	 *
+	 * var myCallback = function (message) {
+	 *   // this will be called, for any message that
+	 *   // is approved by our filter function
+	 *   console.log(message);
+	 * };
+	 * 
+	 * pubSub.subscribe(myCallback, function (message) {
+	 *   // filter function returning true or false
+	 *   return message.topic === 'test' && message.sender === 42;
+	 * });
+	 *
+	 * pubSub.publish({ topic: 'test', sender: 42 }); // myCallback is called
+	 * pubSub.publish({ topic: 'test', sender: 0 });  // myCallback is not called
+	 */
+	var PubSub = function () {
+		this.listeners = [];
+	};
+
+	/**
+	 * Adds a callback funtion that is called for any message published
+	 * to this pubSub-instance that is approved by the given filter function.
+	 * @param  {function} callback  this will be called for any published message
+	 *  that matches the filter function. The massage will be passed as argument.
+	 * @param  {function} filter    a filter function acception any message as
+	 *  argument and returning true, when the message should be accepted and
+	 *  false otherwise.
+	 * @return  a token that can be used to unsubscribe this callback-filter-combo
+	 * @memberOf PubSub
+	 */
+	PubSub.prototype.subscribe = function (callback, filter) {
+		if (typeof callback !== 'function' || typeof filter !== 'function') {
+			throw 'callback and filter have to be a function';
+		}
+		var token = function (message) {
+			if (filter(message)) {
+				callback(message);
+			}
+		};
+		this.listeners.push(token);
+		return token;
+	};
+
+	/**
+	 * Removes a callback-filter-combo so they don't receive published messages
+	 * any longer.
+	 * @param  token  the token to identify the subscription that should
+	 *  be removed - returned by the subscribe method	
+	 * @memberOf PubSub
+	 * @example
+	 * var pubSub = new PubSub();
+	 *
+	 * // subscribe
+	 * var token = pubSub.subscribe(myCallback, function (message) {
+	 *   return message.receiver === 'xyz';
+	 * });
+	 * 
+	 * // unsubscribe
+	 * pubSub.unsubscribe(token);
+	 */
+	PubSub.prototype.unsubscribe = function (token) {
+		var index = this.listeners.indexOf(token);
+		if (index !== -1) {
+			this.listeners.splice(index, 1);
+		}
+	};
+
+	/**
+	 * Publishes a message in any format to all interested
+	 * subscribers.
+	 * @param  {*} message
+	 * @memberOf PubSub
+	 */
+	PubSub.prototype.publish = function (message) {
+		var listeners = this.listeners;
+		for (var i in listeners) {
+			listeners[i](message);
+		}
+	};
+
+	/**
+	 * Removes all subscriptions on this instance.
+	 * @memberOf PubSub
+	 */
+	PubSub.prototype.unsubscribeAll = function () {
+		this.listeners = [];
+	};
+
+	exports = PubSub;
+	return exports;
+
+});
+/**
+ * @module client/messages
+ * @private
+ */
+ 
+define('messages',['require','exports','module','../shared/PubSub'],function(require, exports, module) {
+
+	var PubSub = require('../shared/PubSub');
+
+	/**
+	 * @classdesc Centralized communication infrastructure for one session.
+	 * Every session or player can send messages to the outside world
+	 * and subscribe to messages, using a custom filter.
+	 * @class
+	 * @param socket socket.io socket instance that connects the
+	 *  using session to the outside world
+	 * @private
+	 */
+	exports.MessageBus = function (socket) {
+		var messageBus = this;
+
+		this.socket = socket;
+		this.pubSub = new PubSub();
+
+		socket.on('disconnect', function () {
+			messageBus.onSocketMessage({
+				name: 'disconnect',
+				fromInstance: 'session'
+			});
+		});
+		socket.on('multi', function (data) {
+			messageBus.onSocketMessage(data);
+		});
+	};
+
+	/**
+	 * The socket send a message - publish it to all subscribers.
+	 * @private
+	 */
+	exports.MessageBus.prototype.onSocketMessage = function (message) {
+		// console.log(JSON.stringify(message));
+		this.pubSub.publish(message);
+	};
+
+	/**
+	 * Sends the given message to the server and the instances of the sender
+	 * (fromInstance) on all other clients (including the sending client) by 
+	 * default. <br><br>
+	 * You can set message.toClient to: <br>
+	 * <ul>
+	 * <li>'all' - default behaviour </li>
+	 * <li>'all-but-myself' - message does not return to sending client (broadcast) </li>
+	 * <li>['id1', 'id2'] - message will be send to all clients whose IDs are 
+	 * inside the array </li>
+	 * </ul>
+	 * Use this option to save bandwidth.<br><br>
+	 * Message that have set message.volatile=true may be dropped by the framework.
+	 * 
+	 * @param  {object} message
+	 * @example
+	 * messageBus.send({
+	 *   name: 'myEvent',
+	 *   fromInstance: 'playerXYZ',
+	 *   toClient: 'all-but-myself',
+	 *   data1: 'mydata',
+	 *   data2: 42
+	 * });
+	 */
+	exports.MessageBus.prototype.send = function (message) {
+		this.socket.emit('multi', message);
+	};
+
+	/**
+	 * Register a callback for messages from the outside world.
+	 * @param  {string}   messageName  on which message name you would like to register?
+	 * @param  {string}   instance     messages from which instance do interest you?
+	 * @param  {Function} callback     function to call when a corresponding message
+	 *  is received (message name _and_ instance correspond to arguments)
+	 * @return {}                      token to unregister this callback again
+	 */
+	exports.MessageBus.prototype.register = function (messageName, instance, callback) {
+		return this.pubSub.subscribe(callback, function (message) {
+			return instance === message.fromInstance && messageName === message.name;
+		});
+	};
+
+	/**
+	 * Unrigister a callback you registered earlier.
+	 * @param  {} token  register token returned by 'register' method
+	 * @example
+	 * // register
+	 * token = messageBus.register('myEventName', myId, callback);
+	 * // ... do something ...
+	 * // unregister again
+	 * messageBus.unregister(token);
+	 */
+	exports.MessageBus.prototype.unregister = function (token) {
+		this.pubSub.unsubscribe(token);
+	};
+
+	/**
+	 * Unregister all callbacks from this MessageBus instance.
+	 */
+	exports.MessageBus.prototype.unregisterAll = function () {
+		this.pubSub.unsubscribeAll();
+	};
+
+	/**
+	 * Destroys the link to the outsie world.
+	 */
+	exports.MessageBus.prototype.disconnect = function () {
+		this.socket.disconnect();
+	};
+
+	return exports;
+
+});
+/**
+ * @module client/session
+ * @private
+ */
+
+define('session',['require','exports','module','events','util','./player','./messages','../shared/CustomMessageSender'],function(require, exports, module) {
+
+	var EventEmitter = require('events').EventEmitter;
+	var util = require('util');
+	var playerModule = require('./player');
+	var MessageBus = require('./messages').MessageBus;
+	var MessageSender = require('../shared/CustomMessageSender');
+
+
+	/* 
+	* internal module functions
+	*/
+
+	function getJoinSesionUrl(token) {
+		var url = window.location.host;
+		if (window.location.port !== '' && window.location.port !== '80') {
+			url += ':' + window.location.port;
+		}
+		url += window.location.pathname + '#' + token;
+		return url;
+	}
+
+
+	/* 
+	* session class functions
+	*/
+
+	/**
+	* @classdesc A game session that connects and manages multiple players.
+	* @inner
+	* @class
+	* @protected
+	* @mixes module:client/events.EventEmitter
+	* @memberof module:client/session
+	*
+	* @fires module:client/session~Session#playerJoined
+	* @fires module:client/session~Session#playerLeft
+	* @fires module:client/session~Session#destroyed
+	* @fires module:client/session~Session#belowMinPlayerNeeded
+	* @fires module:client/session~Session#aboveMinPlayerNeeded
+	*
+	* @param {module:client/player~Player} myself  the player instance that 
+	* represents my own client.
+	* @param {} messageBus
+	* @param {object} sessionData  data object from the server that
+	* describes this session
+	*/
+	var Session = function (myself, messageBus, sessionData) {
+
+		EventEmitter.call(this);
+		var session = this;
+
+		/**
+		 * The player instance that represents my own client.
+		 * @type {module:client/player~Player}
+		 * @readonly
+		 */
+		this.myself = myself;
+
+		this.messageBus = messageBus;
+
+		this.messageSender = new MessageSender(messageBus, 'session');
+		/**
+		 * Dictionary of all players except myself currently 
+		 * connected to this session; mapped on their ids.
+		 * @type {Object.<string, module:client/player~Player>}
+		 * @readonly
+		 */
+		this.players = {};
+		/** 
+		 * unique token identifying this session
+		 * @type {string}
+		 * @readonly
+		 */
+		this.token = null;
+		/**
+		 * @see SessionOptions
+		 * @readonly
+		 */
+		this.minPlayerNeeded = null;
+		/**
+		 * @see SessionOptions
+		 * @readonly
+		 */
+		this.maxPlayerAllowed = null;
+
+		var packedPlayers = sessionData.players;
+		delete sessionData.players;
+
+		// unpack session attributes
+		for (var i in sessionData) {
+			this[i] = sessionData[i];
+		}
+		// unpack players
+		for (i in packedPlayers) {
+			this.onPlayerConnected({ playerData: packedPlayers[i] });
+		}
+
+		// calculate attributes
+		/**
+		 * URL you have to visit in order to connect to this session.
+		 * @type {string}
+		 * @readonly
+		 */
+		this.joinSessionUrl = getJoinSesionUrl(this.token);
+
+		// add messages listeners
+		this.messageBus.register('disconnect', 'session', function (message) {
+			session.emit('destroyed');
+			session.messageBus.unregisterAll();
+			session.removeAllListeners();
+		});
+		this.messageBus.register('message', 'session', function (message) {
+			session.emit(message.type,  { type: message.type, data: message.data });
+		});
+		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
+	};
+
+	util.inherits(Session, EventEmitter);
+	util.inherits(Session, EventEmitter);
+
+	/**
+	 * @return {integer} number of currently connected players including myself
+	 */
+	Session.prototype.getPlayerCount = function () {
+		return Object.keys(this.players).length + 1;
+	};
+
+	/**
+	 * Creates a player from the given data and adds it to this session.
+	 * @private
+	 */
+	Session.prototype.onPlayerConnected = function (message) {
+		var session = this;
+		var player = playerModule.fromPackedData(message.playerData, this.messageBus);
+		this.players[player.id] = player;
+
+		player.on('disconnected', function () {
+			session.onPlayerDisconnected(player);
+		});
+
+		session.emit('playerJoined', { player: player });
+		if (session.getPlayerCount() === session.minPlayerNeeded) {
+			session.emit('aboveMinPlayerNeeded');
+		}
+	};
+
+	/**
+	 * Removes the given player from this session.
+	 * @private
+	 */
+	Session.prototype.onPlayerDisconnected = function (player) {
+		delete this.players[player.id];
+		this.emit('playerLeft', { player: player });
+
+		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
+			this.emit('belowMinPlayerNeeded');
+		}
+	};
+
+	/**
+	 * @returns {Array.<module:client/player~Player>} an array of all 
+	 * players currently connected to this session including myself.
+	 * The array is sorted by 
+	 * {@link module:client/player~Player#number player numbers} 
+	 * from small to high.
+	 */
+	Session.prototype.getPlayerArray = function () {
+		var playerArray = [];
+		for(var i in this.players) {
+			playerArray.push(this.players[i]);
+		}
+		playerArray.push(this.myself);
+		return playerArray.sort(playerModule.compare);
+	};
+
+	/**
+	 * @returns {module:client/player~Player} the player with the
+	 * given {@link module:client/player~Player#number player numbers} 
+	 * (even if this is myself) or null if no player with this number 
+	 * exists
+	 */
+	Session.prototype.getPlayerByNumber = function (number) {
+		for (var i in this.players) {
+			var player = this.players[i];
+			if (player.number === number) {
+				return player;
+			}
+		}
+		if (this.myself.number === number) {
+			return this.myself;
+		}
+		return null;
+	};
+
+	/**
+	 * @returns {module:client/player~Player} the player with the
+	 * given {@link module:client/player~Player#id id} 
+	 * (even if this is myself) or null if no player with this id 
+	 * exists
+	 */
+	Session.prototype.getPlayerById = function (id) {
+		if (this.players.hasOwnProperty(id)) {
+			return this.players[id];
+		}
+		if (this.myself.id === id) {
+			return this.myself;
+		}
+		return null;
+	};
+
+	/**
+	 * When you call this new players are not allowed to join this
+	 * session any more. Instead their promise will be rejected with a 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
+	 */
+	Session.prototype.disablePlayerJoining = function () {
+		this.messageBus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			enablePlayerJoining: false
+		});
+	};
+
+	/**
+	 * A call to this method will allow new players to join this session
+	 * again.
+	 */
+	Session.prototype.enablePlayerJoining = function () {
+		this.messageBus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			enablePlayerJoining: true
+		});
+	};
+
+	/**
+	 * Sends the given message to all other instances of this session.
+	 * @param {string} type    type of message that should be send
+	 * @param {object} [data]  message data that should be send
+	 * @param {module:client/multi~toClient} [toClient='all']  which client
+	 *  should receive this message
+	 * @param {boolean} [volatile=false]  if true, the message may be dropped
+	 *  by the framework. Use this option for real time data where one dropped
+	 *  message does not interrupt your application.
+	 * @example
+	 * // on client no 1
+	 * session.on('ping', function (event) {
+	 *   // outputs 'bar'
+	 *   console.log(event.data.foo);
+	 * });
+	 * // on client no 2, instance of same session
+	 * session.message('ping', { foo: 'bar' });
+	 */
+	Session.prototype.message = function (type, data, toClient, volatile) {
+		this.messageSender.message(type, data, toClient, volatile);
+	};
+
+	/**
+	 * Disconnects own player from this session.
+	 * This will remove this player from all existing
+	 * instances of this session.
+	 * @fires module:client/session~Session#destroyed
+	 */
+	Session.prototype.disconnectMyself = function () {
+		this.messageBus.disconnect();
+	};
+
+
+	/**
+	 * Fired when this session is no longer valid. <br>
+	 * The reason could be a broken connection or the
+	 * removal of your own player. <br><br>
+	 * Don't use this session any longer after the event 
+	 * has been fired.
+	 * @event module:client/session~Session#destroyed
+	 */
+
+	/**
+	 * Fired when a new player has been added to this session.
+	 * From now on you can safely communicate with this player.
+	 * @event module:client/session~Session#playerJoined
+	 * @property {module:client/player~Player} player  The newly added player.
+	 * @example <caption>Adding connected players to the DOM</caption>
+	 * session.on('playerJoined', function (event) {
+	 *   var playerDiv = $('#player').clone();
+	 *   $('#players').append(playerDiv);
+	 *   event.player.on('disconnected', function () {
+	 *     playerDiv.remove();
+	 *   });
+	 * }
+	 */
+
+	/**
+	 * Fired when a player has been removed from this session.
+	 * @event module:client/session~Session#playerLeft
+	 * @property {module:client/player~Player} player  The removed player.
+	 */
+
+	/**
+	 * Fired when a player has been removed from this session and
+	 * there are now less player connected to this session than stated 
+	 * in minPlayerNeeded.<br><br>
+	 * You could listen for this event to stop a running game when
+	 * the player count is getting to low.
+	 * @event module:client/session~Session#belowMinPlayerNeeded
+	 */
+
+	/**
+	 * Fired when a new player has been added to this session and
+	 * there are now exactly as many players connected to this session
+	 * as stated in minPlayerNeeded.<br><br>
+	 * You could listen for this event to start your game when
+	 * enough players have connected.
+	 * @event module:client/session~Session#aboveMinPlayerNeeded
+	 */
+
+	/**
+	* Unpacks a session object send over a socket connection.
+	* @returns {module:client/session~Session}
+	*/
+	exports.fromPackedData = function (data, socket) {
+		var messageBus = new MessageBus(socket);
+		var myself = playerModule.fromPackedData(data.player, messageBus);
+		var session = new Session(myself, messageBus, data.session);
+		return session;
+	};
+
+	return exports;
+
+});
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+/**
+ * Here you can find some useful functions for working with colors.
+ * @module
+ * @private
+ */
+define('../shared/color',['require','exports','module'],function(require, exports, module) {
+
+	/**
+	 * @returns {string} a random color string using the format '#RRGGBB'
+	 */
+	exports.random = function () {
+		var color = 'ffff' + (Math.random()*0xFFFFFF<<0).toString(16);
+		color = '#' + color.slice(-6);
+		return color;
+	};
+
+	return exports;
+
+});
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+/**
+ * Collection of Error classes that multi uses to communicate that
+ * something went wrong.
+ * @private
+ * @module shared/errors
+ */
+define('../shared/errors',['require','exports','module','util'],function(require, exports, module) {
+
+	var util = require('util');
+
+	/**
+	 * The built in error object.
+	 * @external Error
+	 * @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error}
+	 */
+
+	/**
+	 * @classdesc Generic framewok error.
+	 * @class
+	 * @memberof module:shared/errors
+	 * @mixes external:Error
+	 */
+	var MultiError = exports.MultiError = function () {
+		var err = Error.apply(this, arguments);
+		this.stack = err.stack;
+		this.message = err.message;
+	};
+	util.inherits(MultiError, Error);
+
+	/**
+	 * @classdesc The session you were looking for was not found
+	 * on the server. Most likely the token has been misspelled.
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.NoSuchSessionError = function () {
+		MultiError.call(this, 'the requested session does not exist');
+	};
+	util.inherits(exports.NoSuchSessionError, MultiError);
+
+
+	/**
+	 * @classdesc The session you wanted to create already exists.
+	 * This can happen when you have configured a static session 
+	 * token inside the {@link SessionOptions} and are trying to 
+	 * create this session more than once. Closing any open tabs
+	 * connected to this session may solve your problem.
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.TokenAlreadyExistsError = function () {
+		MultiError.call(this, 'a session with this token does already exist');
+	};
+	util.inherits(exports.TokenAlreadyExistsError, MultiError);
+
+
+	/**
+	 * @classdesc The session you wanted to join already has enough
+	 * players. This happens when there are as many or more players 
+	 * connected as defined in 
+	 * {@link module:client/session~Session#maxPlayerAllowed maxPlayerAllowed}.
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.SessionFullError = function () {
+		MultiError.call('the requested session is full');
+	};
+	util.inherits(exports.SessionFullError, MultiError);
+
+
+	/**
+	 * @classdesc You are not able to create or join a session
+	 * because there is no connection to the server. Maybe the
+	 * socket.io settings are wrong or the internet connection
+	 * dropped.
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.NoConnectionError = function () {
+		MultiError.call(this, 'no connection to server');
+	};
+	util.inherits(exports.NoConnectionError, MultiError);
+
+
+	/**
+	 * @classdesc There could be no valid session token extracted
+	 * from the url. You may want to check if the current url has
+	 * the format http://myGameUrl/some/game#myToken
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.NoSessionTokenFoundError = function () {
+		MultiError.call(this, 'no session token found in url');
+	};
+	util.inherits(exports.NoSessionTokenFoundError, MultiError);
+
+
+	/**
+	 * @classdesc New players are currently not allowed to join
+	 * this session. Maybe someone called 
+	 * {@link module:client/session~Session#disablePlayerJoining}.
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.JoiningDisabledError = function () {
+		MultiError.call(this, 'player joining is currently disabled');
+	};
+	util.inherits(exports.JoiningDisabledError, MultiError);
+
+
+	return exports;
+
+});
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+/**
+ * This module contains classes and utils that are useful
+ * for working with multiple screens. To use a ScreenArranger inside your
+ * game look up the 
+ * {@link module:shared/screens.HorizontalArranger|HorizontalArranger}
+ * documentation.
+ * @module shared/screens
+ */
+define('../shared/screens/index',['require','exports','module'],function(require, exports, module) {
+
+	/**
+	 * @classdesc When any ScreenArranger is used, an instance of this 
+	 * class will be added to every player. Here you can find all
+	 * information and helper methods relevant for positioning one 
+	 * screen on a bigger playing field.
+	 * @class
+	 * @param {module:client/player~Player|module:server/player~Player} 
+	 *  player player instance this screen is added to
+	 */
+	exports.Screen = function (player) {
+		/**
+		 * width of the screen in pixel
+		 * @type {integer}
+		 */
+		this.width = player.width;
+		/**
+		 * height of the screen in pixel
+		 * @type {integer}
+		 */
+		this.height = player.height;
+		/**
+		 * player instance this screen is added to
+		 * @type {module:client/player~Player|module:server/player~Player}
+		 */
+		this.player = player;
+		/**
+		 * global x-position (from left) of this screen in pixel
+		 * @type {integer}
+		 */
+		this.x = null;
+		/**
+		 * global x-position (from top) of this screen in pixel
+		 * @type {integer}
+		 */
+		this.y = null;
+		/**
+		 * list of all player instances that border on the right
+		 * side of this screen
+		 * @type {Array}
+		 */
+		this.rightPlayers = [];
+		/**
+		 * list of all player instances that border on the left
+		 * side of this screen
+		 * @type {Array}
+		 */
+		this.leftPlayers = [];
+		/**
+		 * list of all player instances that border on the top
+		 * of this screen
+		 * @type {Array}
+		 */
+		this.topPlayers = [];
+		/**
+		 * list of all player instances that border on the bottom
+		 * of this screen
+		 * @type {Array}
+		 */
+		this.bottomPlayers = [];
+	};
+
+	/**
+	 * @param  {integer}  x  global x position in pixel
+	 * @param  {integer}  y  global y position in pixel
+	 * @return {boolean}  true if the given global coordinates lie inside 
+	 * the this screen object, else false
+	 * @private
+	 */
+	exports.Screen.prototype.isHit = function (x, y) {
+		return x >= this.x &&
+			x < this.x + this.width &&
+			y >= this.y &&
+			y < this.y + this.height;
+	};
+
+	/**
+	 * @param  {integer}  x      global x-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  y      global y-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  width  width of the rectangle in pixel
+	 * @param  {integer}  height height of the rectangle in pixel
+	 * @return {boolean}         true if the given rectangle or parts of it 
+	 *  overlap with this screen
+	 */
+	exports.Screen.prototype.isHitByRect = function (x, y, width, height) {
+		return x + width >= this.x &&
+			y + height >= this.y &&
+			x < this.x + this.width &&
+			y < this.y + this.height;
+	};
+
+	/**
+	 * Converts local pixel coordinates to global ones, using this screen
+	 * as local coordinate system.
+	 * @param  {integer} x  local x position in pixel
+	 * @param  {integer} y  local y position in pixel
+	 * @return {object}  { x: globalX, y: globalY }
+	 */
+	exports.Screen.prototype.localToGlobal = function (x, y) {
+		return { x: this.x + x, y: this.y + y };
+	};
+
+	/**
+	 * Converts global pixel coordinates to local ones, using this screen
+	 * as local coordinate system.
+	 * @param  {integer} x  global x position in pixel
+	 * @param  {integer} y  global y position in pixel
+	 * @return {object}  { x: localX, y: localY, player: this.player }
+	 */
+	exports.Screen.prototype.globalToLocal = function (x, y) {
+		return { x: x - this.x, y: y - this.y, player: this.player };
+	};
+
+
+	/**
+	 * @classdesc This is the base class for arranging players of the given
+	 * session to one big playing field. It will add a 
+	 * {@link module:shared/screens.Screen|screen} attribute to every joined 
+	 * player.<br><br>
+	 * Feel free to extend this class to create your own ScreenArranger. You
+	 * can use {@link module:shared/screens.HorizontalArranger} 
+	 * as example implementation.
+	 * @class
+	 * @param {module:client/session~Session|module:server/session~Session}
+	 *  Session that contains the players that should be arranged into
+	 *  one big screen.
+	 */
+	exports.ScreenArranger = function (session) {
+		/**
+		 * Session that is getting arranged into one big game screen
+		 * @type {module:client/session~Session|module:server/session~Session}
+		 * @readonly
+		 */
+		this.session = session;
+		/**
+		 * total width of the big screen in pixel
+		 * @type {integer}
+		 * @readonly
+		 */
+		this.width = 0;
+		/**
+		 * total height of the big screen in pixel
+		 * @type {integer}
+		 * @readonly
+		 */
+		this.height = 0;
+
+		// add a screen to every player...
+		session.getPlayerArray().forEach(function (player) {
+			player.screen = new exports.Screen(player);
+		});
+		this.refresh();
+
+		// ...and every player that will come
+		session.on('playerJoined', this.onPlayerJoined.bind(this));
+		session.on('playerLeft', this.onPlayerLeft.bind(this));
+	};
+
+	/**
+	 * Converts local pixel coordinates to global ones.
+	 * @param  {module:server/player~Player|module:client/player~Player} player 
+	 * player instance the local coordinates refer to
+	 * @param  {integer} x  local x position in pixel
+	 * @param  {integer} y  local y position in pixel
+	 * @return {object}  { x: globalX, y: globalY } or null if the given
+	 *  player is no part of this arranger
+	 */
+	exports.ScreenArranger.prototype.localToGlobal = function (player, x, y) {
+		return player.screen.localToGlobal(x, y);
+	};
+
+	/**
+	 * Determines which Player overlaps with the given rectangle.
+	 * @param  {integer}  x      global x-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  y      global y-coordinate of the upper left corner
+	 *  of the rectangle in pixel
+	 * @param  {integer}  width  width of the rectangle in pixel
+	 * @param  {integer}  height height of the rectangle in pixel
+	 * @return {Array}    list of local objects of the form 
+	 *  { x: localX, y: localY, player: hitPlayer }. X and y are the upper-left
+	 *  corner of the given rectangle in the players local coordinate system.
+	 * @see module:shared/screens.Screen#globalToLocal
+	 * @see module:shared/screens.Screen#isHitByRect
+	 */
+	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
+		var locals = {};
+		var screen;
+		for (var i in this.session.players) {
+			screen = this.session.players[i].screen;
+			if (screen.isHitByRect(x, y, width, height)) {
+				locals[screen.player.id] = screen.globalToLocal(x, y);
+			}
+		}
+
+		return locals;
+	};
+
+	/**
+	 * @param  {module:server/player~Player|module:client/player~Player} player 
+	 * any player object connected to the arranged session
+	 * @param  {integer}  x  global x position in pixel
+	 * @param  {integer}  y  global y position in pixel
+	 * @return {boolean}  true if the given coordinates lie within
+	 * the screen of the given player
+	 */
+	exports.ScreenArranger.prototype.isPlayerHit = function (player, x, y) {
+		return player.screen.isHit(x, y);
+	};
+
+	/*
+	 * @param  {integer}  x  global x position in pixel
+	 * @param  {integer}  y  global y position in pixel
+	 * @return {boolean}  true if the given coordinates lie within
+	 * the screen of any player, false otherwise
+	 */
+	exports.ScreenArranger.prototype.isAnyPlayerHit = function (x, y) {
+		return this.getPlayerAtCoords(x, y) !== null;
+	};
+
+	/**
+	 * @param  {integer}  x  global x position in pixel
+	 * @param  {integer}  y  global y position in pixel
+	 * @return {module:server/player~Player|module:client/player~Player}
+	 * player object whose screen lies beneath the given coordinates
+	 * or null when no player can be found at this position
+	 */
+	exports.ScreenArranger.prototype.getPlayerAtCoords = function (x, y) {
+		for (var i in this.session.players) {
+			var screen = this.session.players[i].screen;
+			if (screen.isHit(x, y)) {
+				return screen.player;
+			}
+		}
+		return null;
+	};
+
+	/**
+	 * This method by default gets called whenever a new player joins
+	 * the underlying session. It calls
+	 * {@link module:shared/screens.ScreenArranger#arrange|arrange} and 
+	 * {@link module:shared/screens.ScreenArranger#recaculateDimentions|recaculateDimentions}. <br>
+	 * You can override this method to write your own screen arranger.
+	 * In this case please make sure to arrange every player and 
+	 * update the dimentions of the whole playing field accordingly.
+	 */
+	exports.ScreenArranger.prototype.refresh = function () {
+		this.arrange();
+		this.recaculateDimentions();
+	};
+
+	/**
+	 * This method is called by the 
+	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} 
+	 * method by default. It takes the global position and dimentions of every 
+	 * player into account to update the global playing field width and height 
+	 * accordingly.<br>
+	 * You may override this method or call it from any overridden method.
+	 */
+	exports.ScreenArranger.prototype.recaculateDimentions = function () {
+		var maxX = 0;
+		var maxY = 0;
+		this.session.getPlayerArray().forEach(function (player) {
+			maxX = Math.max(maxX, player.screen.x + player.screen.width);
+			maxY = Math.max(maxY, player.screen.y + player.screen.height);
+		});
+		this.width = maxX;
+		this.height = maxY;
+	};
+
+	/**
+	 * This method is called by the 
+	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} method by default. 
+	 * It does  nothing for this base class and should be overridden by every 
+	 * child class.<br><br>
+	 * Please make sure to update the positions of every players screen here.
+	 * @abstract
+	 */
+	exports.ScreenArranger.prototype.arrange = function () {
+		// this does nothing!
+	};
+
+	/**
+	 * This method is callen whenever a new player joins the session.
+	 * Feel free to override. In this case you may want to create a new
+	 * screen for the player and call your refresh method.
+	 * @param event
+	 */
+	exports.ScreenArranger.prototype.onPlayerJoined = function (event) {
+		event.player.screen = new exports.Screen(event.player);
+		this.refresh();
+	};
+
+	/**
+	 * This method is callen whenever a new player leaves the session.
+	 * Feel free to override. In this case you may want to call your 
+	 * refresh method.
+	 * @param event
+	 */
+	exports.ScreenArranger.prototype.onPlayerLeft = function (event) {
+		this.refresh();
+	};
+
+	return exports;
+
+});
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
+define('../shared/screens/HorizontalArranger',['require','exports','module','util','./index'],function(require, exports, module) {
+
+	var util = require('util');
+	var screensModule = require('./index');
+	var ScreenArranger = screensModule.ScreenArranger;
+
+	/**
+	 * @classdesc This class arranges the screens of the every player 
+	 * horizontally. Player with lower playerNumbers will be farer left.
+	 * @example
+	 * --------    ------------
+	 * |      |----|          |
+	 * |  p1  | p2 |    p3    |
+	 * |      |----|          |
+	 * --------    ------------
+	 * @example
+	 * var arranger = new multiModule.screens.HorizontalArranger(session);
+	 * var firstPlayer = session.getPlayerByNumber(0);
+	 * console.log(firstPlayer.screen.x);
+	 * console.log(firstPlayer.screen.y);
+	 * console.log(firstPlayer.screen.width);
+	 * console.log(firstPlayer.screen.height);
+	 * @class
+	 * @mixes module:shared/screens.ScreenArranger
+	 * @memberOf module:shared/screens
+	 * @param {module:client/session~Session|module:server/session~Session} 
+	 *  session session instance whose player you want to be arranged.
+	 */
+	var HorizontalArranger = function (session) {
+		ScreenArranger.call(this, session);
+	};
+	util.inherits(HorizontalArranger, ScreenArranger);
+
+	HorizontalArranger.prototype.refresh = function () {
+		var height = 0;
+		var xPos = 0;
+		var yPos;
+		var lastPlayer = null;
+		var players = this.session.getPlayerArray();
+		players.forEach(function (player) {
+			height = Math.max(height, player.height);
+		});
+		players.forEach(function (player) {
+			yPos = Math.round((height - player.height) / 2);
+			player.screen.x = xPos;
+			player.screen.y = yPos;
+			if (lastPlayer !== null) {
+				player.screen.leftPlayers = [ lastPlayer ];
+				lastPlayer.screen.rightPlayers = [ player ];
+			}
+			xPos += player.width;
+			lastPlayer = player;
+		});
+
+		this.width = xPos;
+		this.height = height;
+	};
+
+	screensModule.HorizontalArranger = HorizontalArranger;
+	exports = HorizontalArranger;
+	return exports;
+
+});
 /**
 * Entry point for the client side multi library for developing
 * multiscreen games.

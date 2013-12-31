@@ -1,4 +1,4 @@
-/* global SyncedObject, test, asyncTest, start, expect, ok, deepEqual */
+/* global SyncedObject, test, asyncTest, start, expect, ok, equal, deepEqual */
 
 test('test setup', function () {
 	var sync = new SyncedObject();
@@ -69,4 +69,26 @@ asyncTest('test delete attributes', function () {
 	});
 
 	delete sync.data.data1;
+});
+
+asyncTest('test get attribute', function () {
+	expect(3);
+
+	var sync = new SyncedObject();
+	sync.startWatching();
+
+	sync.data.foo = 'bar';
+	sync.get('foo').then(function (value) {
+		equal(value, 'bar', 'get existing attribute');
+	});
+
+	sync.get('test').then(function (value) {
+		equal(value, 123, 'get existing attribute');
+	});
+	sync.data.test = 123;
+
+	sync.get('timeout').fail(function (error) {
+		ok(true, 'timeout should occur');
+		start();
+	});
 });

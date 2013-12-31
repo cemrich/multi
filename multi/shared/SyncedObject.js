@@ -8,6 +8,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 define(function(require, exports, module) {
 
 	var WatchJS = require('../lib/watch');
+	var Q = require('../lib/q');
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 
@@ -164,6 +165,52 @@ define(function(require, exports, module) {
 		}
 
 		this.emit('changed', changeset);
+	};
+
+	/**
+	 * Get the value of a specific attribute from the synced object. If the value
+	 * is not present yet, it will be passed to the returned promise later on.
+	 * This should make handling async code a bit easier.
+	 * @param  {string} name       name of the attribute whose value you want to 
+	 *  know
+	 * @param  {integer} [timeout] time in milliseconds after which the returned
+	 *  promise will be rejected, if the attribute is not present
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the value of the requested attribute. Has the attribute not been available 
+	 * after the given timout, the promise will be rejected with a generic
+	 * error.
+	 * @memberOf SyncedObject
+	 *
+	 * @example
+	 * var sync = new SyncedObject();
+	 * sync.startWatching();
+	 * sync.get('foo').then(function (value) {
+	 *   console.log(value); // will be 'bar'
+	 * });
+	 * sync.get('na').fail(function (error) {
+	 *   // when 'na' has never been set
+	 *   console.log(error);
+	 * });
+	 * sync.data.foo = 'bar';
+	 * 
+	 */
+	SyncedObject.prototype.get = function (name, timeout) {
+		var deferred = Q.defer();
+		var syncedObject = this;
+
+		if (this._data.hasOwnProperty(name)) {
+			deferred.resolve(this._data[name]);
+		} else {
+			var onChanged = function (changeset) {
+				if (syncedObject._data.hasOwnProperty(name)) {
+					syncedObject.removeListener('changed', onChanged);
+					deferred.resolve(syncedObject._data[name]);
+				}
+			};
+			this.on('changed', onChanged);
+		}
+
+		return deferred.promise.timeout(timeout || 1000);
 	};
 
 	/**
