@@ -4,8 +4,8 @@ requirejs.config({
 	}
 });
 
-requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.min'],
-	function (Screen, multiModule, Joystick) {
+requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/jquery-2.0.0.min'],
+	function (Screen, multiModule, Joystick, SERVER) {
 
 	var screen = null;
 	var session = null;
@@ -13,7 +13,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 	var joystick = null;
 
 	var multiOptions = {
-		server: 'tinelaptopsony',
+		server: SERVER,
 		session: {
 			scriptName: 'games/serverOnescreenSnake/index.js'
 		}

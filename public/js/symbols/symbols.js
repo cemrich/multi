@@ -4,11 +4,11 @@ requirejs.config({
 	}
 });
 
-requirejs(['./sound', '../lib/multi', '/socket.io/socket.io.js', '../lib/jquery-2.0.0.min'],
-		function (sound, multiModule, socketio) {
+requirejs(['./sound', '../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
+		function (sound, multiModule, SERVER) {
 
 	var multiOptions = {
-		server: '192.168.0.100',
+		server: SERVER,
 		session: {
 			scriptName: 'games/symbols',
 			token: {

@@ -9,12 +9,13 @@ Screen of the snake game that shows all the action.
 This snake game allows one presenter and two to four controller.
 */
 
-define(['../../lib/multi', '/socket.io/socket.io.js', './game', '../sound', '../layout'], function (multiModule, socketio, Game, sound, layout) {
+define(['../../lib/multi', './game', '../sound', '../layout', '../../SERVER'],
+	function (multiModule, Game, sound, layout, SERVER) {
 
 	var SESSION_TOKEN = 'snake-multiplayer';
 
 	var multiOptions = {
-		server: '192.168.0.100',
+		server: SERVER,
 		session: {
 			minPlayerNeeded: 3,
 			maxPlayerAllowed: 5,

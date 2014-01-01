@@ -10,12 +10,12 @@ requirejs.config({
 Dumb game controller for the snake.
 */
 
-define(['../../lib/multi', '/socket.io/socket.io.js', '../../lib/joystick', '../sound', '../layout', './scoreboard'],
-	function (multiModule, socketio, Joystick, sound, layout, scoreboard) {
+define(['../../lib/multi', '../../lib/joystick', '../sound', '../layout', './scoreboard', '../../SERVER'],
+	function (multiModule, Joystick, sound, layout, scoreboard, SERVER) {
 
 	var SESSION_TOKEN = 'snake-multiplayer';
 	var multiOptions = {
-		server: '192.168.0.100'
+		server: SERVER
 	};
 
 	// init and try to connect

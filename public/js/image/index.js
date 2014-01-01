@@ -4,11 +4,11 @@ requirejs.config({
 	}
 });
 
-requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
-	function (multiModule) {
+requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
+	function (multiModule, SERVER) {
 
 	var multiOptions = {
-		server: 'tinelaptopsony'
+		server: SERVER
 	};
 
 	var session;
