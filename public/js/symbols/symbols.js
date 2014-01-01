@@ -10,7 +10,6 @@ requirejs(['./sound', '../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
 	var multiOptions = {
 		server: SERVER,
 		session: {
-			scriptName: 'games/symbols',
 			token: {
 				func: 'symbolPattern',
 				args: [1, 4]

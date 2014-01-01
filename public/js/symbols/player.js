@@ -5,29 +5,25 @@ define(function(require, exports, module) {
 	var sound = null;
 	var session = null;
 	var presenter = null;
+	var symbolArray = [
+		false,false,false,
+		false,false,false,
+		false,false,false
+	];
 
 	function onIconClick(event) {
 		sound.onSymbol();
 		var icon = $(event.currentTarget);
-		var isActive = (icon.attr('data-active') === 'active');
-		if (isActive) {
-			icon.attr('class', 'icon inactive');
-			icon.attr('data-active', '');
-		} else {
-			icon.attr('class', 'icon');
-			icon.attr('data-active', 'active');
-		}
+		var index = icon.index();
+		var isActive = symbolArray[index] =! symbolArray[index];
+		var classes = isActive ? 'icon' : 'icon inactive';
+		icon.attr('class', classes);
 	}
 
 	function onJoinSessionClick(event) {
-		var sessionCode = '';
-		$('#join .icon').each(function (i, ele) {
-			var icon = $(ele);
-			var isActive = (icon.attr('data-active') === 'active');
-			if (isActive) {
-				sessionCode += i.toString();
-			}
-		});
+		var sessionCode = symbolArray.reduce(function (x, y, index) {
+			return y ? x + index : x;
+		}, '');
 		multi.joinSession(sessionCode).then(onSessionJoined, onJoinSessionFailed).done();
 		$('#loading').show();
 	}
@@ -36,20 +32,6 @@ define(function(require, exports, module) {
 		sound.onPlayerDisconnect();
 		$('#loading').hide();
 		alert('Oh, crap - this game does not exist. Try again!');
-	}
-
-	function onUpClick() {
-		session.myself.message('move', { direction: 'up' }, presenter);
-	}
-	function onDownClick() {
-		session.myself.message('move', { direction: 'down' }, presenter);
-	}
-
-	function onStart() {
-		sound.onStart();
-		$('#created').hide();
-		$('#controls').show();
-		$('html').off('click', changeColor);
 	}
 
 	function onSessionJoined(joinedSession) {
@@ -66,15 +48,9 @@ define(function(require, exports, module) {
 			// add a reason to the destroyed event
 			alert('Opps - you have no connection. Try a reload when your connection returns.');
 		});
-		session.on('start', onStart);
 
 		changeColor();
 		$('html').click(changeColor);
-	}
-
-	function onStartGameClick(event) {
-		event.stopPropagation();
-		session.message('start');
 	}
 
 	function changeColor() {
@@ -89,9 +65,6 @@ define(function(require, exports, module) {
 		sound = soundModule;
 		$('#join .join').click(onJoinSessionClick);
 		$('#join .icon').click(onIconClick);
-		$('#controls .up').click(onUpClick);
-		$('#controls .down').click(onDownClick);
-		$('#created .start').click(onStartGameClick);
 		$('#intro').hide();
 		$('#join').show();
 	}
