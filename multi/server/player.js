@@ -251,8 +251,16 @@ Player.prototype.pack = function () {
  /**
  * Fired when the {@link module:server/player~Player#attributes attributes} 
  * of this player have been changed by the server or any client.
- * The event is a {@link SyncedObject.Changeset} object.
  * @event module:server/player~Player#attributesChanged
+ * @property {*}      value  new value of the changed attribute
+ *
+ * @example
+ * player.on('attributeChanged/score', function (score) {
+ *   console.log(score);
+ * });
+ *
+ * // on another client or server
+ * player.attributes.score++;
  */
 
  /**

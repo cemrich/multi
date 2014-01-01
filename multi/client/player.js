@@ -209,9 +209,15 @@ define(function(require, exports, module) {
 	 * this player have been changed by this client, another client or 
 	 * the server.
 	 * @event module:client/player~Player#attributesChanged
-	 * @property {string} key    name of the changed attribute
 	 * @property {*}      value  new value of the changed attribute
-	 * @todo this is currently dispatched only when changed from outside
+	 *
+	 * @example
+	 * player.on('attributeChanged/score', function (score) {
+	 *   console.log(score);
+	 * });
+	 *
+	 * // on another client or server
+	 * player.attributes.score++;
 	 */
 
 	/**

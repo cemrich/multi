@@ -126,11 +126,16 @@ requirejs(['multi'], function (multiModule) {
 	});
 
 	asyncTest('test attribute synchronization', function () {
-		expect(2);
+		expect(3);
 
 		multi.createSession().then(function (session) {
 			var data = { test: 42, foo: 'bar' };
 			var createdSession = session;
+
+			session.myself.on('attributeChanged/test', function (test) {
+				deepEqual(test, 'test', 'changing own attributes triggers callback');
+			});
+			session.myself.attributes.test = 'test';
 
 			multi.joinSession(createdSession.token).then(function (session) {
 				session.myself.on('attributeChanged/data', function (value) {
