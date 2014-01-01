@@ -173,7 +173,7 @@ define(function(require, exports, module) {
 	 * This should make handling async code a bit easier.
 	 * @param  {string} name       name of the attribute whose value you want to 
 	 *  know
-	 * @param  {integer} [timeout] time in milliseconds after which the returned
+	 * @param  {integer} [timeout=1000] time in milliseconds after which the returned
 	 *  promise will be rejected, if the attribute is not present
 	 * @return {external:Promise} On success the promise will be resolved with 
 	 * the value of the requested attribute. Has the attribute not been available 

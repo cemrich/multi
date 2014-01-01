@@ -178,6 +178,38 @@ Player.prototype.updateAttributes = function (changeset) {
 };
 
 /**
+ * Get the value of a specific 
+ * {@link module:server/player~Player#attributes attributes}
+ * field. If the value is not present yet, it will be passed to the returned 
+ * promise later on. This should make handling async code a bit easier.<br>
+ * This method is especially useful for attributes that are set just once
+ * right after the player joined a session but need a bit of time to sync to 
+ * all clients, eg. player color, name, etc.
+ * @param  {string} name       name of the attribute whose value you want to 
+ *  know
+ * @param  {integer} [timeout=1000] time in milliseconds after which the 
+ *  returned promise will be rejected, if the attribute is not present
+ * @return {external:Promise} On success the promise will be resolved with 
+ * the value of the requested attribute. Has the attribute not been available 
+ * after the given timout, the promise will be rejected with a generic
+ * error.
+ *
+ * @example
+ * session.on('playerJoined', function (event) {
+ *   event.player.getAttributeAsync('foo').then(function (value) {
+ *     console.log(value); // will be '#ff0000'
+ *   });
+ * });
+ * 
+ * // on any client:
+ * player.attributes.color = '#ff0000';
+ * 
+ */
+Player.prototype.getAttributeAsync = function (name, timeout) {
+	return this.syncedAttributes.get(name, timeout);
+};
+
+/**
  * Sends the given message to all client instances of this player.
  * @example
  * // on any client

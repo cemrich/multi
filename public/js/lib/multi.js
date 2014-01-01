@@ -127,17 +127,33 @@ define('util',['require','exports','module','socket.io'],function(require, expor
         var aplus = [],
         bplus = [];
 
-        if(!(typeof a == "string") && !(typeof b == "string") && !isArray(a) && !isArray(b)){
+        if(!(typeof a == "string") && !(typeof b == "string")){
 
-            for(var i in a){
-                if(b[i] === undefined){
-                    aplus.push(i);
+            if (isArray(a)) {
+                for (var i=0; i<a.length; i++) {
+                    if (b[i] === undefined) aplus.push(i);
+                }
+            } else {
+                for(var i in a){
+                    if (a.hasOwnProperty(i)) {
+                        if(b[i] === undefined) {
+                            aplus.push(i);
+                        }
+                    }
                 }
             }
 
-            for(var j in b){
-                if(a[j] === undefined){
-                    bplus.push(j);
+            if (isArray(b)) {
+                for (var j=0; j<b.length; j++) {
+                    if (a[j] === undefined) bplus.push(j);
+                }
+            } else {
+                for(var j in b){
+                    if (b.hasOwnProperty(j)) {
+                        if(a[j] === undefined) {
+                            bplus.push(j);
+                        }
+                    }
                 }
             }
         }
@@ -233,11 +249,13 @@ define('util',['require','exports','module','socket.io'],function(require, expor
             }
         } else {
             for (var prop2 in obj) { //for each attribute if obj is an object
-                props.push(prop2); //put in the props
+                if (obj.hasOwnProperty(prop2)) {
+                    props.push(prop2); //put in the props
+                }
             }
         }
 
-        watchMany(obj, props, watcher, level, addNRemove); //watch all itens of the props
+        watchMany(obj, props, watcher, level, addNRemove); //watch all items of the props
 
         if (addNRemove) {
             pushToLengthSubjects(obj, "$$watchlengthsubjectroot", watcher, level);
@@ -252,7 +270,9 @@ define('util',['require','exports','module','socket.io'],function(require, expor
         }
 
         for (var prop in props) { //watch each attribute of "props" if is an object
-            watchOne(obj, props[prop], watcher, level, addNRemove);
+            if (props.hasOwnProperty(prop)) {
+                watchOne(obj, props[prop], watcher, level, addNRemove);
+            }
         }
 
     };
@@ -268,15 +288,12 @@ define('util',['require','exports','module','socket.io'],function(require, expor
         }
 
         if(obj[prop] != null && (level === undefined || level > 0)){
-            if(level !== undefined){
-                level--;
-            }
-            watchAll(obj[prop], watcher, level); //recursively watch all attributes of this
+            watchAll(obj[prop], watcher, level!==undefined? level-1 : level); //recursively watch all attributes of this
         }
 
-        defineWatcher(obj, prop, watcher);
+        defineWatcher(obj, prop, watcher, level);
 
-        if(addNRemove){
+        if(addNRemove && (level === undefined || level > 0)){
             pushToLengthSubjects(obj, prop, watcher, level);
         }
 
@@ -309,7 +326,9 @@ define('util',['require','exports','module','socket.io'],function(require, expor
             }
         } else {
             for (var prop2 in obj) { //for each attribute if obj is an object
-                props.push(prop2); //put in the props
+                if (obj.hasOwnProperty(prop2)) {
+                    props.push(prop2); //put in the props
+                }
             }
         }
 
@@ -320,11 +339,13 @@ define('util',['require','exports','module','socket.io'],function(require, expor
     var unwatchMany = function (obj, props, watcher) {
 
         for (var prop2 in props) { //watch each attribute of "props" if is an object
-            unwatchOne(obj, props[prop2], watcher);
+            if (props.hasOwnProperty(prop2)) {
+                unwatchOne(obj, props[prop2], watcher);
+            }
         }
     };
 
-    var defineWatcher = function (obj, prop, watcher) {
+    var defineWatcher = function (obj, prop, watcher, level) {
 
         var val = obj[prop];
 
@@ -338,7 +359,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
             obj.watchers[prop] = [];
         }
 
-        for(var i in obj.watchers[prop]){
+        for (var i=0; i<obj.watchers[prop].length; i++) {
             if(obj.watchers[prop][i] === watcher){
                 return;
             }
@@ -357,14 +378,16 @@ define('util',['require','exports','module','socket.io'],function(require, expor
             var oldval = val;
             val = newval;
 
-            if (obj[prop]){
-                watchAll(obj[prop], watcher);
+            if (level !== 0 && obj[prop]){
+                // watch sub properties
+                watchAll(obj[prop], watcher, (level===undefined)?level:level-1);
             }
 
             watchFunctions(obj, prop);
 
             if (!WatchJS.noMore){
-                if (JSON.stringify(oldval) !== JSON.stringify(newval)) {
+                //if (JSON.stringify(oldval) !== JSON.stringify(newval)) {
+                if (oldval !== newval) {
                     callWatchers(obj, prop, "set", newval, oldval);
                     WatchJS.noMore = false;
                 }
@@ -377,14 +400,14 @@ define('util',['require','exports','module','socket.io'],function(require, expor
 
     var callWatchers = function (obj, prop, action, newval, oldval) {
         if (prop) {
-            for (var wr in obj.watchers[prop]) {
-                if (isInt(wr)) {
-                    obj.watchers[prop][wr].call(obj, prop, action, newval || obj[prop], oldval);
-                }
+            for (var wr=0; wr<obj.watchers[prop].length; wr++) {
+                obj.watchers[prop][wr].call(obj, prop, action, newval, oldval);
             }
         } else {
             for (var prop in obj) {//call all
-                callWatchers(obj, prop, action, newval, oldval);
+                if (obj.hasOwnProperty(prop)) {
+                    callWatchers(obj, prop, action, newval, oldval);
+                }
             }
         }
     };
@@ -416,7 +439,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
     };
 
     var unwatchOne = function (obj, prop, watcher) {
-        for(var i in obj.watchers[prop]){
+        for (var i=0; i<obj.watchers[prop].length; i++) {
             var w = obj.watchers[prop][i];
 
             if(w == watcher) {
@@ -429,7 +452,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
 
     var loop = function(){
 
-        for(var i in lengthsubjects){
+        for(var i=0; i<lengthsubjects.length; i++) {
 
             var subj = lengthsubjects[i];
 
@@ -453,7 +476,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
             
                 if(difference.added.length || difference.removed.length){
                     if(difference.added.length){
-                        for(var j in subj.obj.watchers[subj.prop]){
+                        for (var j=0; j<subj.obj.watchers[subj.prop].length; j++) {
                             watchMany(subj.obj[subj.prop], difference.added, subj.obj.watchers[subj.prop][j], subj.level - 1, true);
                         }
                     }
@@ -490,7 +513,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
 
     var removeFromLengthSubjects = function(obj, prop, watcher){
 
-        for (var i in lengthsubjects) {
+        for (var i=0; i<lengthsubjects.length; i++) {
             var subj = lengthsubjects[i];
 
             if (subj.obj == obj && subj.prop == prop && subj.watcher == watcher) {
@@ -2615,16 +2638,44 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','..
 		this.emit('changed', changeset);
 	};
 
+	/**
+	 * Get the value of a specific attribute from the synced object. If the value
+	 * is not present yet, it will be passed to the returned promise later on.
+	 * This should make handling async code a bit easier.
+	 * @param  {string} name       name of the attribute whose value you want to 
+	 *  know
+	 * @param  {integer} [timeout=1000] time in milliseconds after which the returned
+	 *  promise will be rejected, if the attribute is not present
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the value of the requested attribute. Has the attribute not been available 
+	 * after the given timout, the promise will be rejected with a generic
+	 * error.
+	 * @memberOf SyncedObject
+	 *
+	 * @example
+	 * var sync = new SyncedObject();
+	 * sync.startWatching();
+	 * sync.get('foo').then(function (value) {
+	 *   console.log(value); // will be 'bar'
+	 * });
+	 * sync.get('na').fail(function (error) {
+	 *   // when 'na' has never been set
+	 *   console.log(error);
+	 * });
+	 * sync.data.foo = 'bar';
+	 * 
+	 */
 	SyncedObject.prototype.get = function (name, timeout) {
 		var deferred = Q.defer();
+		var syncedObject = this;
 
 		if (this._data.hasOwnProperty(name)) {
 			deferred.resolve(this._data[name]);
 		} else {
 			var onChanged = function (changeset) {
-				if (this._data.hasOwnProperty(name)) {
-					this.removeEventListener('changed', onChanged);
-					deferred.resolve(this._data[name]);
+				if (syncedObject._data.hasOwnProperty(name)) {
+					syncedObject.removeListener('changed', onChanged);
+					deferred.resolve(syncedObject._data[name]);
 				}
 			};
 			this.on('changed', onChanged);
@@ -2855,6 +2906,38 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 			fromInstance: this.id,
 			changeset: changeset
 		});
+	};
+
+	/**
+	 * Get the value of a specific 
+	 * {@link module:client/player~Player#attributes attributes}
+	 * field. If the value is not present yet, it will be passed to the returned 
+	 * promise later on. This should make handling async code a bit easier.<br>
+	 * This method is especially useful for attributes that are set just once
+	 * right after the player joined a session but need a bit of time to sync to 
+	 * all clients, eg. player color, name, etc.
+	 * @param  {string} name       name of the attribute whose value you want to 
+	 *  know
+	 * @param  {integer} [timeout=1000] time in milliseconds after which the 
+	 *  returned promise will be rejected, if the attribute is not present
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the value of the requested attribute. Has the attribute not been available 
+	 * after the given timout, the promise will be rejected with a generic
+	 * error.
+	 *
+	 * @example
+	 * session.on('playerJoined', function (event) {
+	 *   event.player.getAttributeAsync('foo').then(function (value) {
+	 *     console.log(value); // will be '#ff0000'
+	 *   });
+	 * });
+	 * 
+	 * // on another client:
+	 * player.attributes.color = '#ff0000';
+	 * 
+	 */
+	Player.prototype.getAttributeAsync = function (name, timeout) {
+		return this.syncedAttributes.get(name, timeout);
 	};
 
 	/**
