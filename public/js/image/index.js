@@ -23,15 +23,12 @@ requirejs(['../lib/multi',  '../lib/jquery-2.0.0.min'],
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
 		playerView[0].style.order = player.number;
-
-		var setColor = function () {
-			playerView.css('background-color', player.attributes.color);
-		};
-
-		setColor();
 		$('.players').append(playerView);
 
-		player.on('attributeChanged/color', setColor);
+		player.getAttributeAsync('color').then(function (color) {
+			playerView.css('background-color', color);
+		});
+
 		player.on('disconnected', function () {
 			playerView.remove();
 		});

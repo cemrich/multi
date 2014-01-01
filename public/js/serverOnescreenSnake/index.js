@@ -30,15 +30,11 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../lib/jquery-2.0.0.m
 		playerView.css('height', player.height/10);
 		playerView.css('max-width', player.width/10);
 		playerView[0].style.order = player.number;
-
-		var setColor = function () {
-			playerView.css('background-color', player.attributes.color);
-		};
-
-		setColor();
 		$('.players').append(playerView);
 
-		player.on('attributeChanged/color', setColor);
+		player.getAttributeAsync('color').then(function (color) {
+			playerView.css('background-color', color);
+		});
 		player.on('draw', function (event) {
 			var data = event.data;
 			screen.drawPlayer(player, data.x, data.y, data.width, data.height);
