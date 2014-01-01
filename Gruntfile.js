@@ -69,8 +69,8 @@ module.exports = function(grunt) {
 			},
 			// test server lib on file change
 			server: {
-				files: ['multi/server/**/*.js', 'multi/shared/**/*.js'],
-				tasks: ['qunitServer'] //, 'qunitShared']
+				files: ['multi/server/**/*.js', 'multi/shared/**/*.js']
+				// tasks: ['qunitServer'] //, 'qunitShared']
 			},
 			// test server on test change
 			testsServer: {
