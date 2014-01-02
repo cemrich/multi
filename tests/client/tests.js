@@ -46,13 +46,13 @@ requirejs(['multi'], function (multiModule) {
 				joinedSession = session;
 				ok(joinedSession, 'session can be joined');
 				ok(joinedSession.myself, 'session has own player added');
-				equal(joinedSession.myself.role, 'player', 'joined player has a player role');
+				ok(!joinedSession.myself.isFirst(), 'joined player is not first one');
 				equal(joinedSession.token, createdSession.token, 'session tokens are equal');
 				ok(joinedSession.players[createdSession.myself.id], 'old player added to new session');
 
 				function checkNewPlayer() {
 					ok(createdSession.players[joinedSession.myself.id], 'new player added to created session');
-					equal(createdSession.myself.role, 'presenter', 'first player has a presenter role');
+					ok(createdSession.myself.isFirst(), 'first player is first one');
 					equal(createdSession.getPlayerCount(), 2, 'getPlayerCount of created session should be two');
 					equal(joinedSession.getPlayerCount(), 2, 'getPlayerCount of joined session should be two');
 					start();

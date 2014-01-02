@@ -2804,13 +2804,6 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		 * @readonly
 		 */
 		this.id = id;
-		/**
-		 * Role that is fulfilled by this
-		 * player. Either 'presenter' or 'player'.
-		 * @type {string}
-		 * @readonly
-		 */
-		this.role = 'player';
 		/** 
 		 * Object with user attributes for this player.
 		 * All changes within this object will automatically
@@ -2962,6 +2955,16 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		this.messageSender.message(type, data, toClient, volatile);
 	};
 
+	/**
+	 * Determines if this player is the first one inside its session (has player
+	 * number 0). Use this method to find out if this player has opened the 
+	 * session or has joined later on.
+	 * @return {boolean} true if the player number is 0, false otherwise
+	 */
+	Player.prototype.isFirst = function () {
+		return this.number === 0;
+	};
+	
 
 	/**
 	 * Fired when the {@link module:client/player~Player#attributes attributes} of 

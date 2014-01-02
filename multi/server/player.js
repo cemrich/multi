@@ -54,13 +54,6 @@ var Player = function (socket, messageBus, playerParams) {
 	this.id = socket.id;
 	this.messageBus = messageBus;
 	this.messageSender = new MessageSender(messageBus, this.id);
-	/**
-	 * Role that is fulfilled by this
-	 * player. Either 'presenter' or 'player'.
-	 * @type {string}
-	 * @readonly
-	 */
-	this.role = 'player';
 	/** 
 	 * Object with user attributes for this player.
 	 * All changes within this object will automatically
@@ -232,6 +225,16 @@ Player.prototype.message = function (type, data, toClient, volatile) {
 };
 
 /**
+ * Determines if this player is the first one inside its session (has player
+ * number 0). Use this method to find out if this player has opened the 
+ * session or has joined later on.
+ * @return {boolean} true if the player number is 0, false otherwise
+ */
+Player.prototype.isFirst = function () {
+	return this.number === 0;
+};
+
+/**
  * Prepares this player for sending it via socket message
  * while avoiding circular dependencies.
  * @return {object} packed player object (without socket)
@@ -239,7 +242,6 @@ Player.prototype.message = function (type, data, toClient, volatile) {
 Player.prototype.pack = function () {
 	return {
 		id: this.id,
-		role: this.role,
 		number: this.number,
 		attributes: this.attributes,
 		width: this.width,

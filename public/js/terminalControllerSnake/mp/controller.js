@@ -61,7 +61,7 @@ define(['../../lib/multi', '../../lib/joystick', '../sound', '../layout', './sco
 		}
 
 		function onPlayerLeft(event) {
-			if (event.player.role === 'presenter') {
+			if (event.player.isFirst()) {
 				// our presenter disconnected - no reason to resume
 				session.disconnectMyself();
 			}

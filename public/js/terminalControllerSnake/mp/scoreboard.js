@@ -23,7 +23,7 @@ define(['../../lib/jquery-2.0.0.min'], function () {
 
 	// adds one player column to the scoreboard
 	function addToScoreboard(player) {
-		if (player.role === 'player') {
+		if (!player.isFirst()) {
 			var playerEle = $('<li class="player"></li>');
 			playerEle.text(getText(player));
 			playerEle.attr('data-points', player.attributes.points);
