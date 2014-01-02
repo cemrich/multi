@@ -39,10 +39,12 @@ var token = require('./token');
  * @param {SessionOptions} options to tweak this sessions behaviour
  */
 var Session = function (io, options) {
+	options = options || {};
 
 	// parse session options
 	var tokenFunction = token.numeric;
 	var tokenFunctionArgs = [];
+	var messageFilters = options.filter;
 
 	/**
 	 * @see SessionOptions
@@ -55,17 +57,15 @@ var Session = function (io, options) {
 	 */
 	this.maxPlayerAllowed = 10;
 
-	if (options !== undefined) {
-		if (options.token !== undefined) {
-			tokenFunction = token[options.token.func] || tokenFunction;
-			tokenFunctionArgs = options.token.args || tokenFunctionArgs;
-		}
-		if (options.minPlayerNeeded !== undefined && options.minPlayerNeeded > 0) {
-			this.minPlayerNeeded = options.minPlayerNeeded;
-		}
-		if (options.maxPlayerAllowed !== undefined && options.maxPlayerAllowed >= this.minPlayerNeeded) {
-			this.maxPlayerAllowed = options.maxPlayerAllowed;
-		}
+	if (options.token !== undefined) {
+		tokenFunction = token[options.token.func] || tokenFunction;
+		tokenFunctionArgs = options.token.args || tokenFunctionArgs;
+	}
+	if (options.minPlayerNeeded !== undefined && options.minPlayerNeeded > 0) {
+		this.minPlayerNeeded = options.minPlayerNeeded;
+	}
+	if (options.maxPlayerAllowed !== undefined && options.maxPlayerAllowed >= this.minPlayerNeeded) {
+		this.maxPlayerAllowed = options.maxPlayerAllowed;
 	}
 
 	/** 
@@ -75,7 +75,7 @@ var Session = function (io, options) {
 	 */
 	this.token = tokenFunction.apply(this, tokenFunctionArgs);
 
-	this.messageBus = new MessageBus(io, this.token, options.filter);
+	this.messageBus = new MessageBus(io, this.token, messageFilters);
 	this.messageSender = new MessageSender(this.messageBus, 'session');
 
 	/**
