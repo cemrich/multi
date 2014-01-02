@@ -4269,6 +4269,33 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	};
 
 	/**
+	 * Opens a socket connection to the configured server.
+	 * @return {external:Promise} On success the promise will be resolved with
+	 *  the connected socket object. When the connection fails or another error
+	 *  (eg. a timeout) occurs, the promise will be rejected with a
+	 *  {@link module:shared/errors.NoConnectionError NoConnectionError}.
+	 * @private
+	 */
+	Multi.prototype.openSocketConnection = function () {
+		var deferred = Q.defer();
+		var socket = io.connect(this.server, {
+				reconnect: false,
+				'force new connection': true
+			});
+		socket.on('connect', function () {
+			deferred.resolve(socket);
+		});
+
+		var onError = function () {
+			deferred.reject(new errors.NoConnectionError());
+		};
+		socket.on('connect_failed', onError);
+		socket.on('error', onError);
+
+		return deferred.promise;
+	};
+
+	/**
 	 * Tries to connect to a session that does already exist on the server. 
 	 * As this operation is executed asynchrony a Q promise will be returned.
 	 * @param {string} sessionToken  unique token of the session you want
@@ -4299,39 +4326,34 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 */
 	Multi.prototype.joinSession = function (sessionToken) {
 		var multi = this;
-		var deferred = Q.defer();
-		var socket = io.connect(this.server, {
-				reconnect: false,
-				'force new connection': true
-			});
-		socket.on('connect', function () {
-			socket.emit('joinSession', {
-				token: sessionToken,
-				playerParams: multi.getPlayerParams()
-			});
+		
+		return this.openSocketConnection().then(function (socket) {
+			var deferred = Q.defer();
+
 			socket.on('sessionJoined', function (data) {
 				var session = sessionModule.fromPackedData(data, socket);
 				deferred.resolve(session);
 			});
+
+			socket.on('joinSessionFailed', function (data) {
+				var error;
+				if (data.reason === 'sessionNotFound') {
+					error = new errors.NoSuchSessionError();
+				} else if (data.reason === 'sessionFull') {
+					error = new errors.SessionFullError();
+				} else if (data.reason === 'joiningDisabled') {
+					error = new errors.JoiningDisabledError();
+				}
+				deferred.reject(error);
+			});
+
+			socket.emit('joinSession', {
+				token: sessionToken,
+				playerParams: multi.getPlayerParams()
+			});
+
+			return deferred.promise;
 		});
-		socket.on('connect_failed', function () {
-			deferred.reject(new errors.NoConnectionError());
-		});
-		socket.on('error', function (reason) {
-			deferred.reject(new errors.NoConnectionError());
-		});
-		socket.on('joinSessionFailed', function (data) {
-			var error;
-			if (data.reason === 'sessionNotFound') {
-				error = new errors.NoSuchSessionError();
-			} else if (data.reason === 'sessionFull') {
-				error = new errors.SessionFullError();
-			} else if (data.reason === 'joiningDisabled') {
-				error = new errors.JoiningDisabledError();
-			}
-			deferred.reject(error);
-		});
-		return deferred.promise;
 	};
 
 	/**
@@ -4368,36 +4390,30 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * multi.createSession().then(onSession, onSessionFailed).done();
 	 */
 	Multi.prototype.createSession = function (options) {
+		var multi = this;
 		options = options || this.sessionOptions || {};
 
-		var multi = this;
-		var deferred = Q.defer();
-		var socket = io.connect(this.server, {
-				reconnect: false,
-				'force new connection': true
-			});
-		socket.on('connect', function () {
-			socket.emit('createSession', {
-				options: options,
-				playerParams: multi.getPlayerParams()
-			});
+		return this.openSocketConnection().then(function (socket) {
+			var deferred = Q.defer();
+
 			socket.on('sessionCreated', function (data) {
 				var session = sessionModule.fromPackedData(data, socket);
 				deferred.resolve(session);
 			});
+
+			socket.on('createSessionFailed', function (event) {
+				if (event.reason === 'tokenAlreadyExists') {
+					deferred.reject(new errors.TokenAlreadyExistsError());
+				}
+			});
+
+			socket.emit('createSession', {
+				options: options,
+				playerParams: multi.getPlayerParams()
+			});
+
+			return deferred.promise;
 		});
-		socket.on('createSessionFailed', function (event) {
-			if (event.reason === 'tokenAlreadyExists') {
-				deferred.reject(new errors.TokenAlreadyExistsError());
-			}
-		});
-		socket.on('connect_failed', function () {
-			deferred.reject(new errors.NoConnectionError());
-		});
-		socket.on('error', function (reason) {
-			deferred.reject(new errors.NoConnectionError());
-		});
-		return deferred.promise;
 	};
 
 	/**
