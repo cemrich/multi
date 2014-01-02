@@ -113,10 +113,8 @@ define(function(require, exports, module) {
 	Multi.prototype.autoJoinSession = function () {
 		var sessionToken = getSessionToken();
 		if (sessionToken === null) {
-			var deferred = Q.defer();
 			var error = new errors.NoSessionTokenFoundError();
-			deferred.reject(error);
-			return deferred.promise;
+			return Q.reject(error);
 		} else {
 			return this.joinSession(sessionToken);
 		}
@@ -140,28 +138,14 @@ define(function(require, exports, module) {
 	 */
 	Multi.prototype.autoJoinElseCreateSession = function () {
 		var that = this;
-		var deferred = Q.defer();
 
-		// TODO: this does work but it stinks!
-		// ask someone how to actually code this in a clean way
-		this.autoJoinSession().then(
-			function (session) {
-				deferred.resolve(session);
-			},
-			function (error) {
-				if (error instanceof errors.NoSessionTokenFoundError) {
-					that.createSession().then(
-						function (session) {
-							deferred.resolve(session);
-						},
-						function (error) {
-							deferred.reject(error);
-						});
-				} else {
-					deferred.reject(error);
-				}
-			});
-		return deferred.promise;
+		return this.autoJoinSession().catch(function (error) {
+			if (error instanceof errors.NoSessionTokenFoundError) {
+				return that.createSession();
+			} else {
+				throw error;
+			}
+		});
 	};
 
 	/**
