@@ -3727,6 +3727,36 @@ define('../shared/errors',['require','exports','module','util'],function(require
 	return exports;
 
 });
+/**
+* Util functions and classes to make working with session tokens a bit
+* easier.
+* @module client/token
+*/
+
+define('token',['require','exports','module','../lib/q','../shared/errors'],function(require, exports, module) {
+
+	var Q = require('../lib/q');
+	var errors = require('../shared/errors');
+
+	/**
+	 * Extracts the session token from the current URL. At the moment it has to 
+	 * follow the format "http://path.to/my/server#myToken".
+	 * @return {external:Promise} On success the promise will be resolved with 
+	 * the parsed session token. On error it will be rejected with a 
+	 * {@link module:shared/errors.NoSuchSessionError NoSuchSessionError}.
+	 * @see module:client/multi~Multi#autoJoinSession
+	 */
+	exports.extractTokenFromURL = function () {
+		var sessionToken = window.location.hash.substring(1);
+
+		if (sessionToken === undefined || sessionToken === '') {
+			return Q.reject(new errors.NoSessionTokenFoundError());
+		} else {
+			return Q.resolve(sessionToken);
+		}
+	};
+
+});
 /* 
 * To use this with require.js AND the node.js module system (on server and client side).
 * see https://github.com/jrburke/amdefine
@@ -4144,13 +4174,14 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 
 
-define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','../shared/screens/index','../shared/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
+define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','./token','../shared/screens/index','../shared/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
 	var sessionModule = require('./session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
+	var token = require('./token');
 	var screensModule = require('../shared/screens/index');
 	var HorizontalArranger = require('../shared/screens/HorizontalArranger');
 	var Q = require('../lib/q');
@@ -4208,16 +4239,6 @@ define('multi',['require','exports','module','events','util','./session','../sha
 		this.sessionOptions = options.session;
 	};
 
-	function getSessionToken() {
-		var sessionToken = window.location.hash.substring(1);
-
-		if (sessionToken === undefined || sessionToken === '') {
-			return null;
-		} else {
-			return sessionToken;
-		}
-	}
-
 	/**
 	 * Tries to connect to a session that does already exist on the server. 
 	 * The session token will be extracted from the URL by using characters 
@@ -4234,13 +4255,10 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
 	Multi.prototype.autoJoinSession = function () {
-		var sessionToken = getSessionToken();
-		if (sessionToken === null) {
-			var error = new errors.NoSessionTokenFoundError();
-			return Q.reject(error);
-		} else {
-			return this.joinSession(sessionToken);
-		}
+		var multi = this;
+		return token.extractTokenFromURL().then(function (token) {
+			return multi.joinSession(token);
+		});
 	};
 
 	/**
@@ -4496,6 +4514,11 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * @type module:shared/color
 	 */
 	exports.color = color;
+
+	/**
+	 * @type module:client/token
+	 */
+	exports.token = token;
 
 	/**
 	 * @type module:shared/screens

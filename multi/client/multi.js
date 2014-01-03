@@ -28,6 +28,7 @@ define(function(require, exports, module) {
 	var sessionModule = require('./session');
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
+	var token = require('./token');
 	var screensModule = require('../shared/screens/index');
 	var HorizontalArranger = require('../shared/screens/HorizontalArranger');
 	var Q = require('../lib/q');
@@ -85,16 +86,6 @@ define(function(require, exports, module) {
 		this.sessionOptions = options.session;
 	};
 
-	function getSessionToken() {
-		var sessionToken = window.location.hash.substring(1);
-
-		if (sessionToken === undefined || sessionToken === '') {
-			return null;
-		} else {
-			return sessionToken;
-		}
-	}
-
 	/**
 	 * Tries to connect to a session that does already exist on the server. 
 	 * The session token will be extracted from the URL by using characters 
@@ -111,13 +102,10 @@ define(function(require, exports, module) {
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
 	Multi.prototype.autoJoinSession = function () {
-		var sessionToken = getSessionToken();
-		if (sessionToken === null) {
-			var error = new errors.NoSessionTokenFoundError();
-			return Q.reject(error);
-		} else {
-			return this.joinSession(sessionToken);
-		}
+		var multi = this;
+		return token.extractTokenFromURL().then(function (token) {
+			return multi.joinSession(token);
+		});
 	};
 
 	/**
@@ -373,6 +361,11 @@ define(function(require, exports, module) {
 	 * @type module:shared/color
 	 */
 	exports.color = color;
+
+	/**
+	 * @type module:client/token
+	 */
+	exports.token = token;
 
 	/**
 	 * @type module:shared/screens
