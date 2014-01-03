@@ -122,7 +122,6 @@ define(function(require, exports, module) {
 	};
 
 	util.inherits(Session, EventEmitter);
-	util.inherits(Session, EventEmitter);
 
 	/**
 	 * @return {integer} number of currently connected players including myself
@@ -186,16 +185,10 @@ define(function(require, exports, module) {
 	 * exists
 	 */
 	Session.prototype.getPlayerByNumber = function (number) {
-		for (var i in this.players) {
-			var player = this.players[i];
-			if (player.number === number) {
-				return player;
-			}
-		}
-		if (this.myself.number === number) {
-			return this.myself;
-		}
-		return null;
+		var players = this.getPlayerArray().filter(function (player) {
+			return player.number === number;
+		});
+		return players[0] || null;
 	};
 
 	/**
