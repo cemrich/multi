@@ -199,7 +199,7 @@ define(function(require, exports, module) {
 			var deferred = Q.defer();
 
 			socket.on('sessionJoined', function (data) {
-				var session = sessionModule.fromPackedData(data, socket);
+				var session = sessionModule.deserialize(data, socket);
 				deferred.resolve(session);
 			});
 
@@ -265,7 +265,7 @@ define(function(require, exports, module) {
 			var deferred = Q.defer();
 
 			socket.on('sessionCreated', function (data) {
-				var session = sessionModule.fromPackedData(data, socket);
+				var session = sessionModule.deserialize(data, socket);
 				deferred.resolve(session);
 			});
 

@@ -240,10 +240,10 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	* Unpacks a player object send over a socket connection.
+	* Deserializes a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
-	exports.fromPackedData = function (data, messageBus) {
+	exports.deserialize = function (data, messageBus) {
 		var player = new Player(data.id, messageBus);
 		for (var i in data) {
 			if (i === 'attributes') {

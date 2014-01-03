@@ -237,9 +237,9 @@ Player.prototype.isFirst = function () {
 /**
  * Prepares this player for sending it via socket message
  * while avoiding circular dependencies.
- * @return {object} packed player object (without socket)
+ * @return {object} serialized player object (without socket)
  */
-Player.prototype.pack = function () {
+Player.prototype.serialize = function () {
 	return {
 		id: this.id,
 		number: this.number,

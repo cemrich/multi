@@ -78,7 +78,7 @@ var Multi = function (server) {
 				} else {
 					var player = playerModule.create(socket, session.messageBus, event.playerParams);
 					player.number = session.getNextFreePlayerNumber();
-					socket.emit('sessionJoined', { session: session.pack(), player: player.pack() });
+					socket.emit('sessionJoined', { session: session.serialize(), player: player.serialize() });
 					session.addPlayer(player);
 				}
 			}
@@ -95,7 +95,7 @@ var Multi = function (server) {
 				multi.emit('sessionCreated', { session: session });
 				var player = playerModule.create(socket, session.messageBus, event.playerParams);
 				player.number = session.getNextFreePlayerNumber();
-				socket.emit('sessionCreated', { session: session.pack(), player: player.pack() });
+				socket.emit('sessionCreated', { session: session.serialize(), player: player.serialize() });
 				session.addPlayer(player);
 			}
 		});

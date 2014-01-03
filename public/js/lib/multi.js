@@ -2999,10 +2999,10 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	};
 
 	/**
-	* Unpacks a player object send over a socket connection.
+	* Deserializes a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
-	exports.fromPackedData = function (data, messageBus) {
+	exports.deserialize = function (data, messageBus) {
 		var player = new Player(data.id, messageBus);
 		for (var i in data) {
 			if (i === 'attributes') {
@@ -3336,16 +3336,16 @@ define('session',['require','exports','module','events','util','./player','./mes
 		 */
 		this.maxPlayerAllowed = null;
 
-		var packedPlayers = sessionData.players;
+		var seializedPlayers = sessionData.players;
 		delete sessionData.players;
 
-		// unpack session attributes
+		// deserialize session attributes
 		for (var i in sessionData) {
 			this[i] = sessionData[i];
 		}
-		// unpack players
-		for (i in packedPlayers) {
-			this.onPlayerConnected({ playerData: packedPlayers[i] });
+		// deserialize players
+		for (i in seializedPlayers) {
+			this.onPlayerConnected({ playerData: seializedPlayers[i] });
 		}
 
 		// calculate attributes
@@ -3384,7 +3384,7 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 */
 	Session.prototype.onPlayerConnected = function (message) {
 		var session = this;
-		var player = playerModule.fromPackedData(message.playerData, this.messageBus);
+		var player = playerModule.deserialize(message.playerData, this.messageBus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
@@ -3568,12 +3568,12 @@ define('session',['require','exports','module','events','util','./player','./mes
 	 */
 
 	/**
-	* Unpacks a session object send over a socket connection.
+	* Deserializes a session object send over a socket connection.
 	* @returns {module:client/session~Session}
 	*/
-	exports.fromPackedData = function (data, socket) {
+	exports.deserialize = function (data, socket) {
 		var messageBus = new MessageBus(socket);
-		var myself = playerModule.fromPackedData(data.player, messageBus);
+		var myself = playerModule.deserialize(data.player, messageBus);
 		var session = new Session(myself, messageBus, data.session);
 		return session;
 	};
@@ -4352,7 +4352,7 @@ define('multi',['require','exports','module','events','util','./session','../sha
 			var deferred = Q.defer();
 
 			socket.on('sessionJoined', function (data) {
-				var session = sessionModule.fromPackedData(data, socket);
+				var session = sessionModule.deserialize(data, socket);
 				deferred.resolve(session);
 			});
 
@@ -4418,7 +4418,7 @@ define('multi',['require','exports','module','events','util','./session','../sha
 			var deferred = Q.defer();
 
 			socket.on('sessionCreated', function (data) {
-				var session = sessionModule.fromPackedData(data, socket);
+				var session = sessionModule.deserialize(data, socket);
 				deferred.resolve(session);
 			});
 

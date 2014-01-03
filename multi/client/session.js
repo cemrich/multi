@@ -89,16 +89,16 @@ define(function(require, exports, module) {
 		 */
 		this.maxPlayerAllowed = null;
 
-		var packedPlayers = sessionData.players;
+		var seializedPlayers = sessionData.players;
 		delete sessionData.players;
 
-		// unpack session attributes
+		// deserialize session attributes
 		for (var i in sessionData) {
 			this[i] = sessionData[i];
 		}
-		// unpack players
-		for (i in packedPlayers) {
-			this.onPlayerConnected({ playerData: packedPlayers[i] });
+		// deserialize players
+		for (i in seializedPlayers) {
+			this.onPlayerConnected({ playerData: seializedPlayers[i] });
 		}
 
 		// calculate attributes
@@ -137,7 +137,7 @@ define(function(require, exports, module) {
 	 */
 	Session.prototype.onPlayerConnected = function (message) {
 		var session = this;
-		var player = playerModule.fromPackedData(message.playerData, this.messageBus);
+		var player = playerModule.deserialize(message.playerData, this.messageBus);
 		this.players[player.id] = player;
 
 		player.on('disconnected', function () {
@@ -321,12 +321,12 @@ define(function(require, exports, module) {
 	 */
 
 	/**
-	* Unpacks a session object send over a socket connection.
+	* Deserializes a session object send over a socket connection.
 	* @returns {module:client/session~Session}
 	*/
-	exports.fromPackedData = function (data, socket) {
+	exports.deserialize = function (data, socket) {
 		var messageBus = new MessageBus(socket);
-		var myself = playerModule.fromPackedData(data.player, messageBus);
+		var myself = playerModule.deserialize(data.player, messageBus);
 		var session = new Session(myself, messageBus, data.session);
 		return session;
 	};

@@ -166,12 +166,12 @@ Session.prototype.message = function (type, data, toClient, volatile) {
 /**
  * Prepares this session and all its players for sending 
  * it via socket message while avoiding circular dependencies.
- * @return {object} packed session object including players
+ * @return {object} serialized session object including players
  */
-Session.prototype.pack = function() {
+Session.prototype.serialize = function() {
 	var players = [];
 	for (var i in this.players) {
-		players.push(this.players[i].pack());
+		players.push(this.players[i].serialize());
 	}
 	return {
 		token: this.token,
@@ -239,7 +239,7 @@ Session.prototype.addPlayer = function (player) {
 	this.messageBus.send({
 		name: 'playerJoined',
 		fromInstance: 'session',
-		playerData: player.pack()
+		playerData: player.serialize()
 	});
 
 	// add to collections
