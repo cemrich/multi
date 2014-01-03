@@ -54,20 +54,6 @@ var Player = function (socket, messageBus, playerParams) {
 	this.id = socket.id;
 	this.messageBus = messageBus;
 	this.messageSender = new MessageSender(messageBus, this.id);
-	/** 
-	 * Object with user attributes for this player.
-	 * All changes within this object will automatically
-	 * be synced to all other clients. 
-	 * Make sure not to override the hole object but only 
-	 * its attributes. To change the whole object use 
-	 * {@link module:server/player~Player#updateAttributes updateAttributes}.
-	 * <br><br>
-	 * Listen for changes by subscribing to the
-	 * {@link module:server/player~Player#attributesChanged attributesChanged}
-	 * event.
-	 * @type {object}
-	 */
-	this.attributes = this.syncedAttributes.data;
 	/**
 	 * Unique player-number inside this session beginning with 0.
 	 * Free numbers from disconnected players will be reused to
@@ -105,6 +91,27 @@ var Player = function (socket, messageBus, playerParams) {
 
 /* class methods */
 util.inherits(Player, EventEmitter);
+
+/** 
+ * Object with user attributes for this player.
+ * All changes within this object will automatically
+ * be synced to all other clients.<br>
+ * Listen for changes by subscribing to the
+ * {@link module:server/player~Player#event:attributesChanged attributesChanged}
+ * event.
+ * @type {object}
+ * @name attributes
+ * @memberOf module:server/player~Player
+ * @instance
+ */
+Object.defineProperty(Player.prototype, 'attributes', {
+	get: function() {
+		return this.syncedAttributes.data;
+	},
+	set: function(val) {
+		this.syncedAttributes.data = val;
+	}
+});
 
 /**
  * Any player send a player message. is it mine?
@@ -165,6 +172,7 @@ Player.prototype.onAttributesChanged = function (changeset) {
  * @param {object} attributesObject an object containing all 
  * new attributes
  * @fires module:server/player~Player#attributesChanged
+ * @private
  */
 Player.prototype.updateAttributes = function (changeset) {
 	this.syncedAttributes.applyChangeset(changeset);

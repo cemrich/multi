@@ -45,19 +45,6 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.id = id;
-		/** 
-		 * Object with user attributes for this player.
-		 * All changes within this object will automatically
-		 * be synced to the server side and all other clients. 
-		 * Make sure not to override the hole object but only 
-		 * its attributes.
-		 * <br>
-		 * Listen for changes by subscribing to the
-		 * {@link module:client/player~Player#attributesChanged attributesChanged}
-		 * event.
-		 * @type {object}
-		 */
-		this.attributes = this.syncedAttributes.data;
 		/**
 		 * Unique player-number inside this session beginning with 0.
 		 * Free numbers from disconnected players will be reused to
@@ -91,6 +78,27 @@ define(function(require, exports, module) {
 	};
 
 	util.inherits(Player, EventEmitter);
+
+	/** 
+	 * Object with user attributes for this player.
+	 * All changes within this object will automatically
+	 * be synced to the server side and all other clients.<br>
+	 * Listen for changes by subscribing to the
+	 * {@link module:client/player~Player#event:attributesChanged attributesChanged}
+	 * event.
+	 * @type {object}
+	 * @name attributes
+	 * @memberOf module:client/player~Player
+	 * @instance
+	 */
+	Object.defineProperty(Player.prototype, 'attributes', {
+		get: function() {
+			return this.syncedAttributes.data;
+		},
+		set: function(val) {
+			this.syncedAttributes.data = val;
+		}
+	});
 
 	/**
 	 * Called when any player left its session.
@@ -246,13 +254,7 @@ define(function(require, exports, module) {
 	exports.deserialize = function (data, messageBus) {
 		var player = new Player(data.id, messageBus);
 		for (var i in data) {
-			if (i === 'attributes') {
-				for (var j in data[i]) {
-					player.attributes[j] = data[i][j];
-				}
-			} else {
-				player[i] = data[i];
-			}
+			player[i] = data[i];
 		}
 		return player;
 	};
