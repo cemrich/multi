@@ -2757,47 +2757,48 @@ define('../shared/CustomMessageSender',['require','exports','module'],function(r
 	return exports;
 
 });
+/* 
+* To use this with require.js AND the node.js module system (on server and client side).
+* see https://github.com/jrburke/amdefine
+*/
+
+
+
 /**
- * @module client/player
+ * @module shared/player
  * @private
  */
- 
-define('player',['require','exports','module','events','util','../shared/SyncedObject','../shared/CustomMessageSender'],function(require, exports, module) {
+define('../shared/player',['require','exports','module','./SyncedObject','./CustomMessageSender','events','util'],function(require, exports, module) {
 
+	var SyncedObject = require('./SyncedObject');
+	var MessageSender = require('./CustomMessageSender');
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
-	var SyncedObject = require('../shared/SyncedObject');
-	var MessageSender = require('../shared/CustomMessageSender');
 
 	/**
-	* @classdesc This player class represents a device connected
-	* to a session. Every player is mirrored from its original instance 
-	* on the server side.
-	* 
-	* @inner
-	* @class
-	* @protected
-	* @mixes module:client/events.EventEmitter
-	* @memberof module:client/player
-	* @fires module:client/player~Player#attributesChanged
-	* @fires module:client/player~Player#disconnected
-	*
-	* @param messageBus ........
-	*/
+	 * @classdesc This player class represents a device connected
+	 * to a session. Every player will be mirrored to the server and
+	 * all connected devices. This class can be used the same way on
+	 * server and client side.
+	 *
+	 * @mixes external:EventEmitter
+	 * @fires module:shared/player~Player#attributesChanged
+	 * @fires module:shared/player~Player#disconnected
+	 * @memberof module:shared/player
+	 * @class
+	 * @inner
+	 * @protected
+	 *
+	 * @param {string} id  unique identifier of this player
+	 * @param {module:client/messages~MessageBus|module:server/messages~MessageBus} 
+	 *  messageBus  message bus instance this player should use to communicate
+	 */
 	var Player = function (id, messageBus) {
 
 		EventEmitter.call(this);
 
-		/**
-		 * wrapper for this players attributes
-		 * @type {SyncedObject}
-		 * @private
-		 */
-		this.syncedAttributes = new SyncedObject();
+		// PUBLIC
 
-		this.messageBus = messageBus;
-
-		this.messageSender = new MessageSender(messageBus, id);
 		/** 
 		 * unique id for this player
 		 * @type {string}
@@ -2825,14 +2826,31 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		 */
 		this.height = null;
 
-		// listeners
-		this.messageRegister = this.messageBus.register('message',
-			this.id, this.onPlayerMessage.bind(this));
-		this.attributeRegister = this.messageBus.register('attributesChanged',
-			this.id, this.onAttributesChangedOnServer.bind(this));
-		this.leftRegister = this.messageBus.register('disconnected',
-			this.id, this.onDisconnected.bind(this));
-		this.syncedAttributes.on('changed', this.onAttributesChanged.bind(this));
+
+		// PROTECTED
+
+		this.messageBus = messageBus;
+		this.messageSender = new MessageSender(messageBus, id);
+		/**
+		 * wrapper for this players attributes
+		 * @type {SyncedObject}
+		 * @private
+		 */
+		this.syncedAttributes = new SyncedObject();
+
+
+		// LISTENERS
+	
+		this.messageToken = this.messageBus.register('message',
+			this.id, this.onMessage.bind(this));
+
+		this.attributesChangedToken = this.messageBus.register('attributesChanged',
+			this.id, this.onAttributesChangedRemotely.bind(this));
+
+		this.disconnectToken = this.messageBus.register('disconnect',
+			this.id, this.onDisconnect.bind(this));
+
+		this.syncedAttributes.on('changed', this.onAttributesChangedLocally.bind(this));
 		this.syncedAttributes.startWatching();
 	};
 
@@ -2841,13 +2859,13 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	/** 
 	 * Object with user attributes for this player.
 	 * All changes within this object will automatically
-	 * be synced to the server side and all other clients.<br>
+	 * be synced to all other clients.<br>
 	 * Listen for changes by subscribing to the
-	 * {@link module:client/player~Player#event:attributesChanged attributesChanged}
+	 * {@link module:shared/player~Player#event:attributesChanged attributesChanged}
 	 * event.
 	 * @type {object}
 	 * @name attributes
-	 * @memberOf module:client/player~Player
+	 * @memberOf module:shared/player~Player
 	 * @instance
 	 */
 	Object.defineProperty(Player.prototype, 'attributes', {
@@ -2859,49 +2877,12 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 		}
 	});
 
-	/**
-	 * Called when any player left its session.
-	 * @private
-	 */
-	Player.prototype.onDisconnected = function (message) {
-		// I do not longer exist - inform...
-		this.emit('disconnected');
-		// ... and remove listeners
-		this.removeAllListeners();
-		this.messageBus.unregister(this.messageRegister);
-		this.messageBus.unregister(this.attributeRegister);
-		this.messageBus.unregister(this.leftRegister);
-		this.syncedAttributes.stopWatching();
-	};
-
-	/**
-	 * Called when this socket receives a message for any player.
-	 * @private
-	 */
-	Player.prototype.onPlayerMessage = function (message) {
-		this.emit(message.type, { type: message.type, data: message.data } );
-	};
-
-	/**
-	 * Called when attributes for any player have been changed
-	 * on server side.
-	 * @private
-	 */
-	Player.prototype.onAttributesChangedOnServer = function (message) {
-		this.syncedAttributes.applyChangesetSilently(message.changeset);
-		if (message.changeset.hasOwnProperty('changed')) {
-			for (var i in message.changeset.changed) {
-				this.emit('attributeChanged/' + i, this.attributes[i]);
-			}
-		}
-	};
-
 	/** 
-	 * Called when the user attributes have been changed.
+	 * Called when the user attributes have been changed locally.
 	 * @param {SyncedObject.Changeset} changeset
 	 * @private
 	 */
-	Player.prototype.onAttributesChanged = function (changeset) {
+	Player.prototype.onAttributesChangedLocally = function (changeset) {
 		this.messageBus.send({
 			name: 'attributesChanged',
 			fromInstance: this.id,
@@ -2910,8 +2891,56 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	};
 
 	/**
+	 * Some players attributes were changed remotely. 
+	 * Apply the changes.
+	 * @abstract
+	 * @private
+	 */
+	Player.prototype.onAttributesChangedRemotely = function (message) {
+
+	};
+
+	/**
+	 * Called when this socket receives a message for any player.
+	 * @private
+	 */
+	Player.prototype.onMessage = function (message) {
+		this.emit(message.type, { type: message.type, data: message.data } );
+	};
+
+	/**
+	 * Handles disconnection by removing listeners, stopping attribute
+	 * syncing and emitting a disconnected event.
+	 * @private
+	 */
+	Player.prototype.onDisconnect = function () {
+		// I do not longer exist - inform...
+		this.emit('disconnected');
+		// ... and remove listeners
+		this.removeAllListeners();
+		this.messageBus.unregister(this.messageToken);
+		this.messageBus.unregister(this.attributesChangedToken);
+		this.messageBus.unregister(this.disconnectToken);
+		this.syncedAttributes.removeAllListeners();
+		this.syncedAttributes.stopWatching();
+	};
+
+	/**
+	 * Notifies the user about every change inside the given changeset.
+	 * @param  {SyncedObject.Changeset} changeset
+	 * @private
+	 */
+	Player.prototype.emitAttributeChanges = function (changeset) {
+		if (changeset.hasOwnProperty('changed')) {
+			for (var i in changeset.changed) {
+				this.emit('attributeChanged/' + i, this.attributes[i]);
+			}
+		}
+	};
+
+	/**
 	 * Get the value of a specific 
-	 * {@link module:client/player~Player#attributes attributes}
+	 * {@link module:shared/player~Player#attributes attributes}
 	 * field. If the value is not present yet, it will be passed to the returned 
 	 * promise later on. This should make handling async code a bit easier.<br>
 	 * This method is especially useful for attributes that are set just once
@@ -2942,22 +2971,22 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	};
 
 	/**
-	 * Sends the given message to all other instances of this player.
-	 * @param {string} type    type of message that should be send
-	 * @param {object} [data]  message data that should be send	
-	 * @param {module:client/multi~toClient} [toClient='all']   which client
-	 *  should receive this message
-	 * @param {boolean} [volatile=false]  if true, the message may be dropped
-	 *  by the framework. Use this option for real time data where one dropped
-	 *  message does not interrupt your application.
+	 * Sends the given message to all client instances of this player.
 	 * @example
-	 * // on client no 1
+	 * // on any client
 	 * player.on('ping', function (event) {
 	 *   // outputs 'bar'
 	 *   console.log(event.data.foo);
 	 * });
-	 * // on client no 2, instance of same player
+	 * // on server, instance of same player
 	 * player.message('ping', { foo: 'bar' });
+	 * @param {string} type    type of message that should be send
+	 * @param {object} [data]  message data that should be send
+	 * @param {module:server/multi~toClient|module:client/multi~toClient} 
+	 *  [toClient='all']  which client should receive this message
+	 * @param {boolean} [volatile=false]  if true, the message may be dropped
+	 *  by the framework. Use this option for real time data where one dropped
+	 *  message does not interrupt your application.
 	 */
 	Player.prototype.message = function (type, data, toClient, volatile) {
 		this.messageSender.message(type, data, toClient, volatile);
@@ -2972,13 +3001,26 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	Player.prototype.isFirst = function () {
 		return this.number === 0;
 	};
-	
 
 	/**
-	 * Fired when the {@link module:client/player~Player#attributes attributes} of 
-	 * this player have been changed by this client, another client or 
-	 * the server.
-	 * @event module:client/player~Player#attributesChanged
+	 * Prepares this player for sending it via socket message
+	 * while avoiding circular dependencies.
+	 * @return {object} serialized player object (without socket)
+	 */
+	Player.prototype.serialize = function () {
+		return {
+			id: this.id,
+			number: this.number,
+			attributes: this.attributes,
+			width: this.width,
+			height: this.height
+		};
+	};
+	
+	/**
+	 * Fired when the {@link module:shared/player~Player#attributes attributes} 
+	 * of this player have been changed by any client or the server.
+	 * @event module:shared/player~Player#attributesChanged
 	 * @property {*}      value  new value of the changed attribute
 	 *
 	 * @example
@@ -2993,9 +3035,53 @@ define('player',['require','exports','module','events','util','../shared/SyncedO
 	/**
 	 * Fired when this player disconnects from the server. Don't use this
 	 * instance any longer after this event has been fired.
-	 * @event module:client/player~Player#disconnected
+	 * @event module:shared/player~Player#disconnected
 	 */
 
+
+	exports.Player = Player;
+	return exports;
+
+});
+/**
+ * @module client/player
+ * @private
+ */
+ 
+define('player',['require','exports','module','../shared/player','util'],function(require, exports, module) {
+
+	var AbstractPlayer = require('../shared/player').Player;
+	var util = require('util');
+
+	/**
+	 * @classdesc Client side representation of a player object.
+	 * @mixes module:shared/player~Player
+	 * @inner
+	 * @class
+	 * @private
+	 * @memberof module:client/player
+	 * @param {string} id  unique identifier of this player
+	 * @param {module:client/messages~MessageBus} messageBus  message bus 
+	 *  instance this player should use to communicate
+	*/
+	var Player = function (id, messageBus) {
+
+		AbstractPlayer.call(this, id, messageBus);
+
+	};
+
+	util.inherits(Player, AbstractPlayer);
+
+
+	/* override */
+
+	Player.prototype.onAttributesChangedRemotely = function (message) {
+		this.syncedAttributes.applyChangesetSilently(message.changeset);
+		this.emitAttributeChanges(message.changeset);
+	};
+
+
+	/* exports */
 
 	/**
 	 * Compare function to sort an array of players by 
