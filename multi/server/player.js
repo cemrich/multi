@@ -62,15 +62,6 @@ Player.prototype.onAttributesChangedLocally = function (changeset) {
 /* exports */
 
 /**
- * Compare function to sort an array of players by 
- * {@link module:server/player~Player#number player numbers}.
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
- */
-exports.compare = function (p1, p2) {
-	return p1.number - p2.number;
-};
-
-/**
  * Creates a new player.
  * @param {string} id  unique identifier of this player
  * @param {module:server/messages~MessageBus} messageBus  message bus instance 

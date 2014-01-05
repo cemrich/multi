@@ -5,7 +5,7 @@
 
 define(function(require, exports, module) {
 
-	var EventEmitter = require('events').EventEmitter;
+	var AbstractSession = require('../shared/session').Session;
 	var util = require('util');
 	var playerModule = require('./player');
 	var MessageBus = require('./messages').MessageBus;
@@ -52,7 +52,7 @@ define(function(require, exports, module) {
 	*/
 	var Session = function (myself, messageBus, sessionData) {
 
-		EventEmitter.call(this);
+		AbstractSession.call(this);
 		var session = this;
 
 		/**
@@ -61,33 +61,11 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.myself = myself;
+		this.players[myself.id] = myself;
 
 		this.messageBus = messageBus;
 
 		this.messageSender = new MessageSender(messageBus, 'session');
-		/**
-		 * Dictionary of all players except myself currently 
-		 * connected to this session; mapped on their ids.
-		 * @type {Object.<string, module:client/player~Player>}
-		 * @readonly
-		 */
-		this.players = {};
-		/** 
-		 * unique token identifying this session
-		 * @type {string}
-		 * @readonly
-		 */
-		this.token = null;
-		/**
-		 * @see SessionOptions
-		 * @readonly
-		 */
-		this.minPlayerNeeded = null;
-		/**
-		 * @see SessionOptions
-		 * @readonly
-		 */
-		this.maxPlayerAllowed = null;
 
 		var seializedPlayers = sessionData.players;
 		delete sessionData.players;
@@ -121,14 +99,7 @@ define(function(require, exports, module) {
 		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 
-	util.inherits(Session, EventEmitter);
-
-	/**
-	 * @return {integer} number of currently connected players including myself
-	 */
-	Session.prototype.getPlayerCount = function () {
-		return Object.keys(this.players).length + 1;
-	};
+	util.inherits(Session, AbstractSession);
 
 	/**
 	 * Creates a player from the given data and adds it to this session.
@@ -160,51 +131,6 @@ define(function(require, exports, module) {
 		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
 			this.emit('belowMinPlayerNeeded');
 		}
-	};
-
-	/**
-	 * @returns {Array.<module:client/player~Player>} an array of all 
-	 * players currently connected to this session including myself.
-	 * The array is sorted by 
-	 * {@link module:client/player~Player#number player numbers} 
-	 * from small to high.
-	 */
-	Session.prototype.getPlayerArray = function () {
-		var playerArray = [];
-		for(var i in this.players) {
-			playerArray.push(this.players[i]);
-		}
-		playerArray.push(this.myself);
-		return playerArray.sort(playerModule.compare);
-	};
-
-	/**
-	 * @returns {module:client/player~Player} the player with the
-	 * given {@link module:client/player~Player#number player numbers} 
-	 * (even if this is myself) or null if no player with this number 
-	 * exists
-	 */
-	Session.prototype.getPlayerByNumber = function (number) {
-		var players = this.getPlayerArray().filter(function (player) {
-			return player.number === number;
-		});
-		return players[0] || null;
-	};
-
-	/**
-	 * @returns {module:client/player~Player} the player with the
-	 * given {@link module:client/player~Player#id id} 
-	 * (even if this is myself) or null if no player with this id 
-	 * exists
-	 */
-	Session.prototype.getPlayerById = function (id) {
-		if (this.players.hasOwnProperty(id)) {
-			return this.players[id];
-		}
-		if (this.myself.id === id) {
-			return this.myself;
-		}
-		return null;
 	};
 
 	/**

@@ -280,6 +280,15 @@ define(function(require, exports, module) {
 	 */
 
 
+	/**
+	 * Compare function to sort an array of players by 
+	 * {@link module:shared/player~Player#number player numbers}.
+	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+	 */
+	exports.compare = function (p1, p2) {
+		return p1.number - p2.number;
+	};
+
 	exports.Player = Player;
 	return exports;
 

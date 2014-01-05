@@ -58,7 +58,7 @@ requirejs(['multi'], function (multiModule) {
 					start();
 				}
 
-				if (Object.keys(createdSession.players).length === 1) {
+				if (createdSession.getPlayerCount() === 2) {
 					checkNewPlayer();
 				} else {
 					createdSession.on('playerJoined', checkNewPlayer);
@@ -116,7 +116,7 @@ requirejs(['multi'], function (multiModule) {
 					session.myself.message('ping', null, session.getPlayerArray());
 				}
 
-				if (Object.keys(createdSession.players).length === 1) {
+				if (createdSession.getPlayerCount() === 2) {
 					startPing();
 				} else {
 					createdSession.on('playerJoined', startPing);
@@ -149,7 +149,7 @@ requirejs(['multi'], function (multiModule) {
 					otherPlayer.attributes.data = data;
 				}
 
-				if (Object.keys(createdSession.players).length === 1) {
+				if (createdSession.getPlayerCount() === 2) {
 					startSync();
 				} else {
 					createdSession.on('playerJoined', startSync);
@@ -196,7 +196,7 @@ requirejs(['multi'], function (multiModule) {
 					createdSession.disconnectMyself();
 				}
 
-				if (Object.keys(createdSession.players).length === 1) {
+				if (session.getPlayerCount() === 2) {
 					disconnect();
 				} else {
 					createdSession.on('playerJoined', disconnect);

@@ -39,15 +39,6 @@ define(function(require, exports, module) {
 	/* exports */
 
 	/**
-	 * Compare function to sort an array of players by 
-	 * {@link module:client/player~Player#number player numbers}.
-	 * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
-	 */
-	exports.compare = function (p1, p2) {
-		return p1.number - p2.number;
-	};
-
-	/**
 	* Deserializes a player object send over a socket connection.
 	* @returns {module:client/player~Player}
 	*/
