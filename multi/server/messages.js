@@ -42,12 +42,9 @@ exports.MessageBus = function (io, token, filters) {
  *  should _not_ be distributed, false if it's not filtered
  */
 exports.MessageBus.prototype.filter = function (message, fromSocket) {
-	this.filterMethods.forEach(function (method) {
-		if (method(message, fromSocket) === true) {
-			return true;
-		}
+	return this.filterMethods.every(function (method) {
+		return method(message, fromSocket) === true;
 	});
-	return false;
 };
 
 /**
