@@ -55,6 +55,7 @@ define(function(require, exports, module) {
 		this.onSessionReady();
 		this.messageBus.register('disconnect', 'session', this.destroy.bind(this));
 		this.messageBus.register('playerJoined', 'session', this.onPlayerJoined.bind(this));
+		window.addEventListener('unload', this.disconnectMyself.bind(this));
 	};
 
 	util.inherits(Session, AbstractSession);
