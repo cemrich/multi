@@ -18,9 +18,7 @@ define(['../../lib/multi', '../snake', '../points', '../grid', '../layout', '../
 		this.interval = null;
 		this.snakes = [];
 		
-		for (var i in session.players) {
-			this.addPlayer(session.players[i]);
-		}
+		session.getPlayerArray().splice(1).forEach(this.addPlayer.bind(this));
 	};
 
 	multi.util.inherits(Game, multi.EventEmitter);
