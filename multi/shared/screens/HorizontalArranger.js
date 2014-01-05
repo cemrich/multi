@@ -30,7 +30,7 @@ define(function(require, exports, module) {
 	 * @class
 	 * @mixes module:shared/screens.ScreenArranger
 	 * @memberOf module:shared/screens
-	 * @param {module:client/session~Session|module:server/session~Session} 
+	 * @param {module:shared/session~Session} 
 	 *  session session instance whose player you want to be arranged.
 	 */
 	var HorizontalArranger = function (session) {

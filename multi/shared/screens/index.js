@@ -21,7 +21,7 @@ define(function(require, exports, module) {
 	 * information and helper methods relevant for positioning one 
 	 * screen on a bigger playing field.
 	 * @class
-	 * @param {module:client/player~Player|module:server/player~Player} 
+	 * @param {module:shared/player~Player} 
 	 *  player player instance this screen is added to
 	 */
 	exports.Screen = function (player) {
@@ -37,7 +37,7 @@ define(function(require, exports, module) {
 		this.height = player.height;
 		/**
 		 * player instance this screen is added to
-		 * @type {module:client/player~Player|module:server/player~Player}
+		 * @type {module:shared/player~Player}
 		 */
 		this.player = player;
 		/**
@@ -139,14 +139,14 @@ define(function(require, exports, module) {
 	 * can use {@link module:shared/screens.HorizontalArranger} 
 	 * as example implementation.
 	 * @class
-	 * @param {module:client/session~Session|module:server/session~Session}
+	 * @param {module:shared/session~Session}
 	 *  Session that contains the players that should be arranged into
 	 *  one big screen.
 	 */
 	exports.ScreenArranger = function (session) {
 		/**
 		 * Session that is getting arranged into one big game screen
-		 * @type {module:client/session~Session|module:server/session~Session}
+		 * @type {module:shared/session~Session}
 		 * @readonly
 		 */
 		this.session = session;
@@ -176,8 +176,8 @@ define(function(require, exports, module) {
 
 	/**
 	 * Converts local pixel coordinates to global ones.
-	 * @param  {module:server/player~Player|module:client/player~Player} player 
-	 * player instance the local coordinates refer to
+	 * @param  {module:shared/player~Player} player 
+	 *  player instance the local coordinates refer to
 	 * @param  {integer} x  local x position in pixel
 	 * @param  {integer} y  local y position in pixel
 	 * @return {object}  { x: globalX, y: globalY } or null if the given
@@ -215,8 +215,8 @@ define(function(require, exports, module) {
 	};
 
 	/**
-	 * @param  {module:server/player~Player|module:client/player~Player} player 
-	 * any player object connected to the arranged session
+	 * @param  {module:shared/player~Player} player 
+	 *  any player object connected to the arranged session
 	 * @param  {integer}  x  global x position in pixel
 	 * @param  {integer}  y  global y position in pixel
 	 * @return {boolean}  true if the given coordinates lie within
@@ -239,9 +239,9 @@ define(function(require, exports, module) {
 	/**
 	 * @param  {integer}  x  global x position in pixel
 	 * @param  {integer}  y  global y position in pixel
-	 * @return {module:server/player~Player|module:client/player~Player}
-	 * player object whose screen lies beneath the given coordinates
-	 * or null when no player can be found at this position
+	 * @return {module:shared/player~Player}
+	 *  player object whose screen lies beneath the given coordinates
+	 *  or null when no player can be found at this position
 	 */
 	exports.ScreenArranger.prototype.getPlayerAtCoords = function (x, y) {
 		for (var i in this.session.players) {

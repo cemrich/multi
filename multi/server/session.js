@@ -13,8 +13,9 @@ var token = require('./token');
 
 
 /**
- * @classdesc A game session that connects and manages multiple players.
- * @mixes external:EventEmitter
+ * @classdesc A game session that connects and manages multiple players on 
+ * the server side.
+ * @mixes module:shared/session~Session
  * @class
  * @protected
  * @param {socket.io} io  ready to use and listening socket.io instance

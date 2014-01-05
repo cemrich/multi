@@ -44,6 +44,9 @@ define(function(require, exports, module) {
 	 * @inner
 	 * @protected
 	 *
+	 * @see module:client/session~Session
+	 * @see module:server/session~Session
+	 *
 	 * @fires module:shared/session~Session#playerJoined
 	 * @fires module:shared/session~Session#playerLeft
 	 * @fires module:shared/session~Session#destroyed

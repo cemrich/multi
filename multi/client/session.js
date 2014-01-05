@@ -13,11 +13,12 @@ define(function(require, exports, module) {
 
 
 	/**
-	* @classdesc A game session that connects and manages multiple players.
+	* @classdesc A game session that connects and manages multiple players on 
+	* the client side.
 	* @inner
 	* @class
 	* @protected
-	* @mixes module:client/events.EventEmitter
+	* @mixes module:shared/session~Session
 	* @memberof module:client/session
 	*
 	* @param {module:client/player~Player} myself  the player instance that 
