@@ -58,8 +58,7 @@ define(function(require, exports, module) {
 		this.players[myself.id] = myself;
 
 		this.messageBus = messageBus;
-
-		this.messageSender = new MessageSender(messageBus, 'session');
+		this.messageSender = new MessageSender(this.messageBus, 'session');
 
 		var seializedPlayers = sessionData.players;
 		delete sessionData.players;
@@ -82,13 +81,11 @@ define(function(require, exports, module) {
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
 		// add messages listeners
+		this.onSessionReady();
 		this.messageBus.register('disconnect', 'session', function (message) {
 			session.emit('destroyed');
 			session.messageBus.unregisterAll();
 			session.removeAllListeners();
-		});
-		this.messageBus.register('message', 'session', function (message) {
-			session.emit(message.type,  { type: message.type, data: message.data });
 		});
 		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};

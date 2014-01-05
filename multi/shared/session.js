@@ -83,15 +83,21 @@ define(function(require, exports, module) {
 		// PROTECTED
 		this.messageBus = null;
 		this.messageSender = null;
-
-
-		// LISTENERS
-	
-
 	};
 
 	util.inherits(Session, EventEmitter);
 
+	/**
+	 * Child classes should call this method when they are finished building 
+	 * and are ready to add listeners to themselves.
+	 * @private
+	 */
+	Session.prototype.onSessionReady = function () {
+		var session = this;
+		this.messageBus.register('message', 'session', function (message) {
+			session.emit(message.type,  { type: message.type, data: message.data });
+		});
+	};
 
 	/**
 	 * @returns {Array.<module:shared/player~Player>} an array of all 

@@ -3137,15 +3137,21 @@ define('../shared/session',['require','exports','module','events','util','./play
 		// PROTECTED
 		this.messageBus = null;
 		this.messageSender = null;
-
-
-		// LISTENERS
-	
-
 	};
 
 	util.inherits(Session, EventEmitter);
 
+	/**
+	 * Child classes should call this method when they are finished building 
+	 * and are ready to add listeners to themselves.
+	 * @private
+	 */
+	Session.prototype.onSessionReady = function () {
+		var session = this;
+		this.messageBus.register('message', 'session', function (message) {
+			session.emit(message.type,  { type: message.type, data: message.data });
+		});
+	};
 
 	/**
 	 * @returns {Array.<module:shared/player~Player>} an array of all 
@@ -3649,8 +3655,7 @@ define('session',['require','exports','module','../shared/session','util','./pla
 		this.players[myself.id] = myself;
 
 		this.messageBus = messageBus;
-
-		this.messageSender = new MessageSender(messageBus, 'session');
+		this.messageSender = new MessageSender(this.messageBus, 'session');
 
 		var seializedPlayers = sessionData.players;
 		delete sessionData.players;
@@ -3673,13 +3678,11 @@ define('session',['require','exports','module','../shared/session','util','./pla
 		this.joinSessionUrl = getJoinSesionUrl(this.token);
 
 		// add messages listeners
+		this.onSessionReady();
 		this.messageBus.register('disconnect', 'session', function (message) {
 			session.emit('destroyed');
 			session.messageBus.unregisterAll();
 			session.removeAllListeners();
-		});
-		this.messageBus.register('message', 'session', function (message) {
-			session.emit(message.type,  { type: message.type, data: message.data });
 		});
 		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};

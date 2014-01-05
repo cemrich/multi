@@ -24,13 +24,40 @@ var Session = function (io, options) {
 
 	AbstractSession.call(this);
 
+	/**
+	 * if false no more clients are allowed to join this session
+	 * @private
+	 */
+	this.enablePlayerJoining = true;
+	this.freeNumbers = [];
+
+	this.applyOptions(options);
+
+	this.messageBus = new MessageBus(io, this.token, this.messageFilters);
+	this.messageSender = new MessageSender(this.messageBus, 'session');
+
+	this.onSessionReady();
+	this.messageBus.register('changePlayerJoining', 'session', this.onChangePlayerJoining.bind(this));
+
+	if (this.scriptName !== null) {
+		var gameModule = require('../../' + options.scriptName);
+		gameModule.Game(this);
+	}
+};
+
+util.inherits(Session, AbstractSession);
+
+/**
+ * Validates the given session options and adds them to this session.
+ * @private
+ */
+Session.prototype.applyOptions = function (options) {
 	options = options || {};
 
-	// parse session options
 	var tokenFunction = token.numeric;
 	var tokenFunctionArgs = [];
-	var messageFilters = options.filter;
-
+	this.messageFilters = options.filter;
+	this.scriptName = options.scriptName || null;
 
 	if (options.token !== undefined) {
 		tokenFunction = token[options.token.func] || tokenFunction;
@@ -44,28 +71,7 @@ var Session = function (io, options) {
 	}
 
 	this.token = tokenFunction.apply(this, tokenFunctionArgs);
-
-	this.messageBus = new MessageBus(io, this.token, messageFilters);
-	this.messageSender = new MessageSender(this.messageBus, 'session');
-
-	/**
-	 * if false no more clients are allowed to join this session
-	 * @private
-	 */
-	this.enablePlayerJoining = true;
-
-	this.freeNumbers = [];
-
-	this.messageBus.register('message', 'session', this.onSessionMessage.bind(this));
-	this.messageBus.register('changePlayerJoining', 'session', this.onChangePlayerJoining.bind(this));
-
-	if (options !== undefined && options.scriptName !== undefined) {
-		var gameModule = require('../../' + options.scriptName);
-		gameModule.Game(this);
-	}
 };
-
-util.inherits(Session, AbstractSession);
 
 /**
  * Some client decided that the player policy should change
@@ -74,14 +80,6 @@ util.inherits(Session, AbstractSession);
  */
 Session.prototype.onChangePlayerJoining = function (message) {
 	this.enablePlayerJoining = message.enablePlayerJoining;
-};
-
-/**
- * Some session instance emitted a message. Distribute to _all_ clients. 
- * @private
- */
-Session.prototype.onSessionMessage = function (message) {
-	this.emit(message.type, { type: message.type, data: message.data });
 };
 
 Session.prototype.disablePlayerJoining = function () {
