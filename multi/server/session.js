@@ -110,52 +110,31 @@ Session.prototype.getNextFreePlayerNumber = function () {
  * Adds the given player to this session.
  * @param player {module:server/player~Player} player instance to add
  * @param {socket.io-socket} socket commuication socket of the given player
- * @fires module:shared/session~Session#playerJoined
+ * @see module:shared/player~Player#addPlayer
+ * @private
  */
 Session.prototype.addPlayer = function (player, socket) {
-	var session = this;
-
-	// inform clients expect added player about this player
 	this.messageBus.send({
 		name: 'playerJoined',
 		fromInstance: 'session',
 		playerData: player.serialize()
 	});
 
-	// add to collections
 	this.messageBus.addSocket(socket);
-	this.players[player.id] = player;
-
-	// add listeners
-	player.on('disconnected', function(event) {
-		session.removePlayer(player);
-	});
-
-	// inform others about this player
-	this.emit('playerJoined', { player: player });
-	if (this.getPlayerCount() === this.minPlayerNeeded) {
-		this.emit('aboveMinPlayerNeeded');
-	}
+	AbstractSession.prototype.addPlayer.call(this, player);
 };
 
-/**
- * Removes the given player from this session.
- * @param player {module:server/player~Player} player instance to remove
- * @fires module:shared/session~Session#playerRemoved
- * @private
- */
 Session.prototype.removePlayer = function (player) {
 	this.freeNumbers.push(player.number);
-	delete this.players[player.id];
-	this.emit('playerLeft', { player: player });
+
+	AbstractSession.prototype.removePlayer.call(this, player);
+
 	this.messageBus.send({
 		name: 'playerLeft',
 		fromInstance: 'session',
 		playerId: player.id
 	});
-	if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
-		this.emit('belowMinPlayerNeeded');
-	}
+
 	if (this.getPlayerCount() === 0) {
 		this.destroy();
 	}
@@ -163,6 +142,7 @@ Session.prototype.removePlayer = function (player) {
 
 
 /* module functions */
+
 var sessions = {};
 
 /**

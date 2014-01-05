@@ -90,7 +90,7 @@ define(function(require, exports, module) {
 	/**
 	 * Child classes should call this method when they are finished building 
 	 * and are ready to add listeners to themselves.
-	 * @private
+	 * @protected
 	 */
 	Session.prototype.onSessionReady = function () {
 		var session = this;
@@ -102,12 +102,51 @@ define(function(require, exports, module) {
 	/**
 	 * Deconstructs this session when no longer needed and informs listening
 	 * objects.
-	 * @private
+	 * @protected
 	 */
 	Session.prototype.destroy = function () {
 		this.emit('destroyed');
 		this.messageBus.unregisterAll();
 		this.removeAllListeners();
+	};
+
+	/**
+	 * Adds the given player to this session. Override if needed.
+	 * @param player {module:shared/player~Player} player instance to add
+	 * @fires module:shared/session~Session#playerJoined
+	 * @protected
+	 */
+	Session.prototype.addPlayer = function (player) {
+		var session = this;
+
+		// add to collection
+		this.players[player.id] = player;
+
+		// add listeners
+		player.on('disconnected', function () {
+			session.removePlayer(player);
+		});
+
+		// inform others about this player
+		session.emit('playerJoined', { player: player });
+		if (session.getPlayerCount() === session.minPlayerNeeded) {
+			session.emit('aboveMinPlayerNeeded');
+		}
+	};
+
+	/**
+	 * Removes the given player from this session. Override if needed.
+	 * @param player {module:shared/player~Player} player instance to remove
+	 * @fires module:shared/session~Session#playerRemoved
+	 * @protected
+	 */
+	Session.prototype.removePlayer = function (player) {
+		delete this.players[player.id];
+		this.emit('playerLeft', { player: player });
+
+		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
+			this.emit('belowMinPlayerNeeded');
+		}
 	};
 
 	/**

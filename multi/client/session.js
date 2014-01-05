@@ -68,7 +68,7 @@ define(function(require, exports, module) {
 		}
 		// deserialize players
 		for (i in seializedPlayers) {
-			this.onPlayerConnected({ playerData: seializedPlayers[i] });
+			this.onPlayerJoined({ playerData: seializedPlayers[i] });
 		}
 
 		// calculate attributes
@@ -82,7 +82,7 @@ define(function(require, exports, module) {
 		// add messages listeners
 		this.onSessionReady();
 		this.messageBus.register('disconnect', 'session', this.destroy.bind(this));
-		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
+		this.messageBus.register('playerJoined', 'session', this.onPlayerJoined.bind(this));
 	};
 
 	util.inherits(Session, AbstractSession);
@@ -91,32 +91,9 @@ define(function(require, exports, module) {
 	 * Creates a player from the given data and adds it to this session.
 	 * @private
 	 */
-	Session.prototype.onPlayerConnected = function (message) {
-		var session = this;
+	Session.prototype.onPlayerJoined = function (message) {
 		var player = playerModule.deserialize(message.playerData, this.messageBus);
-		this.players[player.id] = player;
-
-		player.on('disconnected', function () {
-			session.onPlayerDisconnected(player);
-		});
-
-		session.emit('playerJoined', { player: player });
-		if (session.getPlayerCount() === session.minPlayerNeeded) {
-			session.emit('aboveMinPlayerNeeded');
-		}
-	};
-
-	/**
-	 * Removes the given player from this session.
-	 * @private
-	 */
-	Session.prototype.onPlayerDisconnected = function (player) {
-		delete this.players[player.id];
-		this.emit('playerLeft', { player: player });
-
-		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
-			this.emit('belowMinPlayerNeeded');
-		}
+		this.addPlayer(player);
 	};
 
 	Session.prototype.disablePlayerJoining = function () {
