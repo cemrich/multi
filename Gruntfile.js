@@ -56,36 +56,13 @@ module.exports = function(grunt) {
 		watch: {
 			// test js files on file change
 			all: {
-				files: ['Gruntfile.js', 'app.js', 'package.json', 'multi/**/*.js', 'tests/**/*.js', 'public/js/**/*.js'],
-				tasks: ['jshint'],
-				options: {
-					spawn: false
-				}
+				files: ['<%= jshint.files %>'],
+				tasks: ['jshint']
 			},
-			// build and test client lib on file change
+			// build client lib on file change
 			client: {
 				files: ['multi/client/**/*.js', 'multi/shared/**/*.js'],
-				tasks: ['requirejs:client'] //, 'qunit', 'qunitShared']
-			},
-			// test server lib on file change
-			server: {
-				files: ['multi/server/**/*.js', 'multi/shared/**/*.js']
-				// tasks: ['qunitServer'] //, 'qunitShared']
-			},
-			// test server on test change
-			testsServer: {
-				files: ['tests/server/**/*.js'],
-				tasks: ['qunitServer']
-			},
-			// test shared on test change
-			testsShared: {
-				files: ['tests/shared/**/*.js'],
-				tasks: ['qunitShared']
-			},
-			// test client on test change
-			testsClient: {
-				files: ['tests/client/**/*.js'],
-				tasks: []
+				tasks: ['requirejs:client']
 			}
 		}
 	});
@@ -95,11 +72,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-qunit');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-requirejs');
-
-	// on watch events configure jshint to only run on changed file
-	grunt.event.on('watch', function(action, filepath) {
-		grunt.config('jshint.files', filepath);
-	});
 
 	function filterQunitResult(error, result, code) {
 		if (error) {

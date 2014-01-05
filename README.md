@@ -9,7 +9,13 @@ Before starting run `npm install` in your terminal.
 
 To start the application run `node app` in your terminal and visit http://localhost. The application tries to bind to port 80 - so this command may require root permission on unix systems.
 
-For development run `grunt jsdoc` to generate documentation and `grunt watch` to jshint all javascript files and run tests on file change.
+
+For development run:
+
+- `grunt jsdoc` to generate documentation
+- `grunt requirejs` to build the client side library
+- `grunt test` to run jshit and unit tests
+- `grunt watch` to jshint files on change and build client side library when required
 
 ### Bundled libraries ###
 Multi comes with bundled libraries on client and server side:
