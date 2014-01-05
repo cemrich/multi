@@ -193,7 +193,10 @@ requirejs(['multi'], function (multiModule) {
 				});
 
 				function disconnect() {
-					createdSession.disconnectMyself();
+					setTimeout(function () {
+						// setTimeout: otherwise socket.io does weird stuff
+						createdSession.disconnectMyself();
+					}, 500);
 				}
 
 				if (session.getPlayerCount() === 2) {
