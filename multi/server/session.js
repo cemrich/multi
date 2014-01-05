@@ -230,9 +230,10 @@ Session.prototype.getNextFreePlayerNumber = function () {
 /**
  * Adds the given player to this session.
  * @param player {module:server/player~Player} player instance to add
+ * @param {socket.io-socket} socket commuication socket of the given player
  * @fires module:server/session~Session#playerJoined
  */
-Session.prototype.addPlayer = function (player) {
+Session.prototype.addPlayer = function (player, socket) {
 	var session = this;
 
 	// inform clients expect added player about this player
@@ -243,7 +244,7 @@ Session.prototype.addPlayer = function (player) {
 	});
 
 	// add to collections
-	this.messageBus.addSocket(player.socket);
+	this.messageBus.addSocket(socket);
 	this.players[player.id] = player;
 
 	// add listeners

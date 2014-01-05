@@ -22,20 +22,15 @@ var util = require('util');
  * @mixes module:shared/player~Player
  * @class
  * @private
- * @param {socket.io-socket} socket  communication socket for the new player
+ * @param {string} id  unique identifier of this player
  * @param {module:server/messages~MessageBus} messageBus  message bus instance 
  *  this player should use to communicate
  * @param {module:server/player~PlayerParams} playerParams
  */
-var Player = function (socket, messageBus, playerParams) {
+var Player = function (id, messageBus, playerParams) {
 
-	AbstractPlayer.call(this, socket.id, messageBus);
-	/** 
-	 * communication socket for this player
-	 * @type {socket.io-socket}
-	 * @private
-	 */
-	this.socket = socket;
+	AbstractPlayer.call(this, id, messageBus);
+
 	this.width = playerParams.width || 0;
 	this.height = playerParams.height || 0;
 
@@ -77,10 +72,12 @@ exports.compare = function (p1, p2) {
 
 /**
  * Creates a new player.
- * @param {socket.io-socket} socket        communication socket for the new player
+ * @param {string} id  unique identifier of this player
+ * @param {module:server/messages~MessageBus} messageBus  message bus instance 
+ *  this player should use to communicate
  * @param {module:server/player~PlayerParams} playerParams
  * @returns {module:server/player~Player}  newly created player
  */
-exports.create = function(socket, messageBus, playerParams) {
-	return new Player(socket, messageBus, playerParams);
+exports.create = function(id, messageBus, playerParams) {
+	return new Player(id, messageBus, playerParams);
 };

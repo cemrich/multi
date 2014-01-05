@@ -76,10 +76,10 @@ var Multi = function (server) {
 						reason: 'joiningDisabled'
 					});
 				} else {
-					var player = playerModule.create(socket, session.messageBus, event.playerParams);
+					var player = playerModule.create(socket.id, session.messageBus, event.playerParams);
 					player.number = session.getNextFreePlayerNumber();
 					socket.emit('sessionJoined', { session: session.serialize(), player: player.serialize() });
-					session.addPlayer(player);
+					session.addPlayer(player, socket);
 				}
 			}
 		});
@@ -93,10 +93,10 @@ var Multi = function (server) {
 				});
 			} else {
 				multi.emit('sessionCreated', { session: session });
-				var player = playerModule.create(socket, session.messageBus, event.playerParams);
+				var player = playerModule.create(socket.id, session.messageBus, event.playerParams);
 				player.number = session.getNextFreePlayerNumber();
 				socket.emit('sessionCreated', { session: session.serialize(), player: player.serialize() });
-				session.addPlayer(player);
+				session.addPlayer(player, socket);
 			}
 		});
 	
