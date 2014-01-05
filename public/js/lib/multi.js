@@ -3710,19 +3710,8 @@ define('session',['require','exports','module','../shared/session','util','./pla
 		this.messageBus = messageBus;
 		this.messageSender = new MessageSender(this.messageBus, 'session');
 
-		var seializedPlayers = sessionData.players;
-		delete sessionData.players;
+		this.applySessionData(sessionData);
 
-		// deserialize session attributes
-		for (var i in sessionData) {
-			this[i] = sessionData[i];
-		}
-		// deserialize players
-		for (i in seializedPlayers) {
-			this.onPlayerJoined({ playerData: seializedPlayers[i] });
-		}
-
-		// calculate attributes
 		/**
 		 * URL you have to visit in order to connect to this session.
 		 * @type {string}
@@ -3740,6 +3729,24 @@ define('session',['require','exports','module','../shared/session','util','./pla
 
 
 	/* private */
+
+	/**
+	 * Deserializes the given sessionData onto this session.
+	 * @private
+	 */
+	Session.prototype.applySessionData = function (sessionData) {
+		var seializedPlayers = sessionData.players;
+		delete sessionData.players;
+
+		// deserialize session attributes
+		for (var i in sessionData) {
+			this[i] = sessionData[i];
+		}
+		// deserialize players
+		for (i in seializedPlayers) {
+			this.onPlayerJoined({ playerData: seializedPlayers[i] });
+		}
+	};
 
 	/**
 	 * Creates a player from the given data and adds it to this session.
