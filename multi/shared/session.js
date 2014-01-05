@@ -78,6 +78,11 @@ define(function(require, exports, module) {
 		 * @readonly
 		 */
 		this.maxPlayerAllowed = 10;
+		/**
+		 * if false no more clients are allowed to join this session
+		 * @private
+		 */
+		this.playerJoiningEnabled = true;
 
 
 		// PROTECTED
@@ -94,8 +99,13 @@ define(function(require, exports, module) {
 	 */
 	Session.prototype.onSessionReady = function () {
 		var session = this;
+
 		this.messageBus.register('message', 'session', function (message) {
 			session.emit(message.type,  { type: message.type, data: message.data });
+		});
+
+		this.messageBus.register('changePlayerJoining', 'session', function (message) {
+			session.playerJoiningEnabled = message.playerJoiningEnabled;
 		});
 	};
 
@@ -206,16 +216,28 @@ define(function(require, exports, module) {
 	 * When you call this new players are not allowed to join this
 	 * session any more. Instead their promise will be rejected with a 
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
-	 * @abstract
+	 * @protected
 	 */
-	Session.prototype.disablePlayerJoining = function () { };
+	Session.prototype.disablePlayerJoining = function () {
+		this.messageBus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			playerJoiningEnabled: false
+		});
+	};
 
 	/**
 	 * A call to this method will allow new players to join this session
 	 * again.
-	 * @abstract
+	 * @protected
 	 */
-	Session.prototype.enablePlayerJoining = function () { };
+	Session.prototype.enablePlayerJoining = function () {
+		this.messageBus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			playerJoiningEnabled: true
+		});
+	};
 
 	/**
 	 * Sends the given message to all other instances of this session.

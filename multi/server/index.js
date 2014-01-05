@@ -70,7 +70,7 @@ var Multi = function (server) {
 						token: event.token,
 						reason: 'sessionFull'
 					});
-				} else if (!session.enablePlayerJoining) {
+				} else if (!session.playerJoiningEnabled) {
 					socket.emit('joinSessionFailed', {
 						token: event.token,
 						reason: 'joiningDisabled'

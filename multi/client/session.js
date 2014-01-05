@@ -12,24 +12,6 @@ define(function(require, exports, module) {
 	var MessageSender = require('../shared/CustomMessageSender');
 
 
-	/* 
-	* internal module functions
-	*/
-
-	function getJoinSesionUrl(token) {
-		var url = window.location.host;
-		if (window.location.port !== '' && window.location.port !== '80') {
-			url += ':' + window.location.port;
-		}
-		url += window.location.pathname + '#' + token;
-		return url;
-	}
-
-
-	/* 
-	* session class functions
-	*/
-
 	/**
 	* @classdesc A game session that connects and manages multiple players.
 	* @inner
@@ -87,6 +69,9 @@ define(function(require, exports, module) {
 
 	util.inherits(Session, AbstractSession);
 
+
+	/* private */
+
 	/**
 	 * Creates a player from the given data and adds it to this session.
 	 * @private
@@ -94,22 +79,6 @@ define(function(require, exports, module) {
 	Session.prototype.onPlayerJoined = function (message) {
 		var player = playerModule.deserialize(message.playerData, this.messageBus);
 		this.addPlayer(player);
-	};
-
-	Session.prototype.disablePlayerJoining = function () {
-		this.messageBus.send({
-			name: 'changePlayerJoining',
-			fromInstance: 'session',
-			enablePlayerJoining: false
-		});
-	};
-
-	Session.prototype.enablePlayerJoining = function () {
-		this.messageBus.send({
-			name: 'changePlayerJoining',
-			fromInstance: 'session',
-			enablePlayerJoining: true
-		});
 	};
 
 	/**
@@ -122,6 +91,18 @@ define(function(require, exports, module) {
 		this.messageBus.disconnect();
 	};
 
+
+
+	/* module functions */
+
+	function getJoinSesionUrl(token) {
+		var url = window.location.host;
+		if (window.location.port !== '' && window.location.port !== '80') {
+			url += ':' + window.location.port;
+		}
+		url += window.location.pathname + '#' + token;
+		return url;
+	}
 
 	/**
 	* Deserializes a session object send over a socket connection.

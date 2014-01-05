@@ -3132,6 +3132,11 @@ define('../shared/session',['require','exports','module','events','util','./play
 		 * @readonly
 		 */
 		this.maxPlayerAllowed = 10;
+		/**
+		 * if false no more clients are allowed to join this session
+		 * @private
+		 */
+		this.playerJoiningEnabled = true;
 
 
 		// PROTECTED
@@ -3148,8 +3153,13 @@ define('../shared/session',['require','exports','module','events','util','./play
 	 */
 	Session.prototype.onSessionReady = function () {
 		var session = this;
+
 		this.messageBus.register('message', 'session', function (message) {
 			session.emit(message.type,  { type: message.type, data: message.data });
+		});
+
+		this.messageBus.register('changePlayerJoining', 'session', function (message) {
+			session.playerJoiningEnabled = message.playerJoiningEnabled;
 		});
 	};
 
@@ -3260,16 +3270,28 @@ define('../shared/session',['require','exports','module','events','util','./play
 	 * When you call this new players are not allowed to join this
 	 * session any more. Instead their promise will be rejected with a 
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
-	 * @abstract
+	 * @protected
 	 */
-	Session.prototype.disablePlayerJoining = function () { };
+	Session.prototype.disablePlayerJoining = function () {
+		this.messageBus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			playerJoiningEnabled: false
+		});
+	};
 
 	/**
 	 * A call to this method will allow new players to join this session
 	 * again.
-	 * @abstract
+	 * @protected
 	 */
-	Session.prototype.enablePlayerJoining = function () { };
+	Session.prototype.enablePlayerJoining = function () {
+		this.messageBus.send({
+			name: 'changePlayerJoining',
+			fromInstance: 'session',
+			playerJoiningEnabled: true
+		});
+	};
 
 	/**
 	 * Sends the given message to all other instances of this session.
@@ -3659,24 +3681,6 @@ define('session',['require','exports','module','../shared/session','util','./pla
 	var MessageSender = require('../shared/CustomMessageSender');
 
 
-	/* 
-	* internal module functions
-	*/
-
-	function getJoinSesionUrl(token) {
-		var url = window.location.host;
-		if (window.location.port !== '' && window.location.port !== '80') {
-			url += ':' + window.location.port;
-		}
-		url += window.location.pathname + '#' + token;
-		return url;
-	}
-
-
-	/* 
-	* session class functions
-	*/
-
 	/**
 	* @classdesc A game session that connects and manages multiple players.
 	* @inner
@@ -3734,6 +3738,9 @@ define('session',['require','exports','module','../shared/session','util','./pla
 
 	util.inherits(Session, AbstractSession);
 
+
+	/* private */
+
 	/**
 	 * Creates a player from the given data and adds it to this session.
 	 * @private
@@ -3741,22 +3748,6 @@ define('session',['require','exports','module','../shared/session','util','./pla
 	Session.prototype.onPlayerJoined = function (message) {
 		var player = playerModule.deserialize(message.playerData, this.messageBus);
 		this.addPlayer(player);
-	};
-
-	Session.prototype.disablePlayerJoining = function () {
-		this.messageBus.send({
-			name: 'changePlayerJoining',
-			fromInstance: 'session',
-			enablePlayerJoining: false
-		});
-	};
-
-	Session.prototype.enablePlayerJoining = function () {
-		this.messageBus.send({
-			name: 'changePlayerJoining',
-			fromInstance: 'session',
-			enablePlayerJoining: true
-		});
 	};
 
 	/**
@@ -3769,6 +3760,18 @@ define('session',['require','exports','module','../shared/session','util','./pla
 		this.messageBus.disconnect();
 	};
 
+
+
+	/* module functions */
+
+	function getJoinSesionUrl(token) {
+		var url = window.location.host;
+		if (window.location.port !== '' && window.location.port !== '80') {
+			url += ':' + window.location.port;
+		}
+		url += window.location.pathname + '#' + token;
+		return url;
+	}
 
 	/**
 	* Deserializes a session object send over a socket connection.

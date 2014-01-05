@@ -24,11 +24,6 @@ var Session = function (io, options) {
 
 	AbstractSession.call(this);
 
-	/**
-	 * if false no more clients are allowed to join this session
-	 * @private
-	 */
-	this.enablePlayerJoining = true;
 	this.freeNumbers = [];
 
 	this.applyOptions(options);
@@ -37,7 +32,6 @@ var Session = function (io, options) {
 	this.messageSender = new MessageSender(this.messageBus, 'session');
 
 	this.onSessionReady();
-	this.messageBus.register('changePlayerJoining', 'session', this.onChangePlayerJoining.bind(this));
 
 	if (this.scriptName !== null) {
 		var gameModule = require('../../' + options.scriptName);
@@ -47,47 +41,17 @@ var Session = function (io, options) {
 
 util.inherits(Session, AbstractSession);
 
-/**
- * Validates the given session options and adds them to this session.
- * @private
- */
-Session.prototype.applyOptions = function (options) {
-	options = options || {};
 
-	var tokenFunction = token.numeric;
-	var tokenFunctionArgs = [];
-	this.messageFilters = options.filter;
-	this.scriptName = options.scriptName || null;
-
-	if (options.token !== undefined) {
-		tokenFunction = token[options.token.func] || tokenFunction;
-		tokenFunctionArgs = options.token.args || tokenFunctionArgs;
-	}
-	if (options.minPlayerNeeded !== undefined && options.minPlayerNeeded > 0) {
-		this.minPlayerNeeded = options.minPlayerNeeded;
-	}
-	if (options.maxPlayerAllowed !== undefined && options.maxPlayerAllowed >= this.minPlayerNeeded) {
-		this.maxPlayerAllowed = options.maxPlayerAllowed;
-	}
-
-	this.token = tokenFunction.apply(this, tokenFunctionArgs);
-};
-
-/**
- * Some client decided that the player policy should change
- * for this session.
- * @private
- */
-Session.prototype.onChangePlayerJoining = function (message) {
-	this.enablePlayerJoining = message.enablePlayerJoining;
-};
+/* override */
 
 Session.prototype.disablePlayerJoining = function () {
 	this.enablePlayerJoining = false;
+	AbstractSession.prototype.disablePlayerJoining.call(this);
 };
 
 Session.prototype.enablePlayerJoining = function () {
 	this.enablePlayerJoining = true;
+	AbstractSession.prototype.enablePlayerJoining.call(this);
 };
 
 /**
@@ -139,6 +103,36 @@ Session.prototype.removePlayer = function (player) {
 		this.destroy();
 	}
 };
+
+
+/* private */
+
+/**
+ * Validates the given session options and adds them to this session.
+ * @private
+ */
+Session.prototype.applyOptions = function (options) {
+	options = options || {};
+
+	var tokenFunction = token.numeric;
+	var tokenFunctionArgs = [];
+	this.messageFilters = options.filter;
+	this.scriptName = options.scriptName || null;
+
+	if (options.token !== undefined) {
+		tokenFunction = token[options.token.func] || tokenFunction;
+		tokenFunctionArgs = options.token.args || tokenFunctionArgs;
+	}
+	if (options.minPlayerNeeded !== undefined && options.minPlayerNeeded > 0) {
+		this.minPlayerNeeded = options.minPlayerNeeded;
+	}
+	if (options.maxPlayerAllowed !== undefined && options.maxPlayerAllowed >= this.minPlayerNeeded) {
+		this.maxPlayerAllowed = options.maxPlayerAllowed;
+	}
+
+	this.token = tokenFunction.apply(this, tokenFunctionArgs);
+};
+
 
 
 /* module functions */
