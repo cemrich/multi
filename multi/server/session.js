@@ -84,52 +84,12 @@ Session.prototype.onSessionMessage = function (message) {
 	this.emit(message.type, { type: message.type, data: message.data });
 };
 
-
-/**
- * When you call this new players are not allowed to join this
- * session any more. Instead their promise will be rejected with a 
- * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
- */
 Session.prototype.disablePlayerJoining = function () {
 	this.enablePlayerJoining = false;
 };
 
-/**
- * A call to this method will allow new players to join this session
- * again.
- */
 Session.prototype.enablePlayerJoining = function () {
 	this.enablePlayerJoining = true;
-};
-
-/**
- * Sends the given message to all client instances of this session.
- * @param {string} type    type of message that should be send
- * @param {object} [data]  message data that should be send
- * @param {module:server/multi~toClient} [toClient='all']  which client
- *  should receive this message
- * @param {boolean} [volatile=false]  if true, the message may be dropped
- *  by the framework. Use this option for real time data where one dropped
- *  message does not interrupt your application.
- * @example
- * // on client no 1
- * session.on('ping', function (event) {
- *   // outputs 'bar'
- *   console.log(event.data.foo);
- * });
- * // on server, instance of same session
- * session.message('ping', { foo: 'bar' });
- */
-Session.prototype.message = function (type, data, toClient, volatile) {
-	this.messageSender.message(type, data, toClient, volatile);
-};
-
-/**
- * @return {boolean} true if there are as many ore more players 
- * connected to this session as are allowed
- */
-Session.prototype.isFull = function () {
-	return this.getPlayerCount() >= this.maxPlayerAllowed;
 };
 
 /**
@@ -152,7 +112,7 @@ Session.prototype.getNextFreePlayerNumber = function () {
  * Adds the given player to this session.
  * @param player {module:server/player~Player} player instance to add
  * @param {socket.io-socket} socket commuication socket of the given player
- * @fires module:server/session~Session#playerJoined
+ * @fires module:shared/session~Session#playerJoined
  */
 Session.prototype.addPlayer = function (player, socket) {
 	var session = this;
@@ -183,7 +143,7 @@ Session.prototype.addPlayer = function (player, socket) {
 /**
  * Removes the given player from this session.
  * @param player {module:server/player~Player} player instance to remove
- * @fires module:server/session~Session#playerRemoved
+ * @fires module:shared/session~Session#playerRemoved
  * @private
  */
 Session.prototype.removePlayer = function (player) {
@@ -238,40 +198,3 @@ exports.create = function(io, options) {
 	});
 	return session;
 };
-
-/**
- * Fired when a new player has been added to this session.
- * From now on you can safely communicate with this player.
- * @event module:server/session~Session#playerJoined
- * @property {module:server/player~Player} player  The newly added player.
- */
-
-/**
- * Fired when a player has been removed from this session.
- * @event module:server/session~Session#playerLeft
- * @property {module:server/player~Player} player  The removed player.
- */
- 
-/**
- * Fired when this session is no longer valid. Don't use this
- * session any longer after the event has been fired.
- * @event module:server/session~Session#destroyed
- */
- 
-/**
- * Fired when a player has been removed from this session and
- * there are now less player connected to this session than stated 
- * in minPlayerNeeded.<br><br>
- * You could listen for this event to stop a running game when
- * the player count is getting to low.
- * @event module:server/session~Session#belowMinPlayerNeeded
- */
- 
-/**
- * Fired when a new player has been added to this session and
- * there are now exactly as many players connected to this session
- * as stated in minPlayerNeeded.<br><br>
- * You could listen for this event to start your game when
- * enough players have connected.
- * @event module:server/session~Session#aboveMinPlayerNeeded
- */

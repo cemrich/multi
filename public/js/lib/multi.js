@@ -3097,6 +3097,12 @@ define('../shared/session',['require','exports','module','events','util','./play
 	 * @class
 	 * @inner
 	 * @protected
+	 *
+	 * @fires module:shared/session~Session#playerJoined
+	 * @fires module:shared/session~Session#playerLeft
+	 * @fires module:shared/session~Session#destroyed
+	 * @fires module:shared/session~Session#belowMinPlayerNeeded
+	 * @fires module:shared/session~Session#aboveMinPlayerNeeded
 	 */
 	var Session = function (messageBus) {
 
@@ -3187,6 +3193,51 @@ define('../shared/session',['require','exports','module','events','util','./play
 	};
 
 	/**
+	 * @return {boolean} true if there are as many ore more players 
+	 * connected to this session as are allowed
+	 */
+	Session.prototype.isFull = function () {
+		return this.getPlayerCount() >= this.maxPlayerAllowed;
+	};
+
+	/**
+	 * When you call this new players are not allowed to join this
+	 * session any more. Instead their promise will be rejected with a 
+	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
+	 * @abstract
+	 */
+	Session.prototype.disablePlayerJoining = function () { };
+
+	/**
+	 * A call to this method will allow new players to join this session
+	 * again.
+	 * @abstract
+	 */
+	Session.prototype.enablePlayerJoining = function () { };
+
+	/**
+	 * Sends the given message to all other instances of this session.
+	 * @param {string} type    type of message that should be send
+	 * @param {object} [data]  message data that should be send
+	 * @param {module:client/multi~toClient|module:server/multi~toClient} 
+	 *  [toClient='all']  which client should receive this message
+	 * @param {boolean} [volatile=false]  if true, the message may be dropped
+	 *  by the framework. Use this option for real time data where one dropped
+	 *  message does not interrupt your application.
+	 * @example
+	 * // on client no 1 or server
+	 * session.on('ping', function (event) {
+	 *   // outputs 'bar'
+	 *   console.log(event.data.foo);
+	 * });
+	 * // on client no 2 or server, instance of same session
+	 * session.message('ping', { foo: 'bar' });
+	 */
+	Session.prototype.message = function (type, data, toClient, volatile) {
+		this.messageSender.message(type, data, toClient, volatile);
+	};
+
+	/**
 	 * Prepares this session and all its players for sending 
 	 * it via socket message while avoiding circular dependencies.
 	 * @return {object} serialized session object including players
@@ -3203,6 +3254,55 @@ define('../shared/session',['require','exports','module','events','util','./play
 			maxPlayerAllowed: this.maxPlayerAllowed
 		};
 	};
+
+	/**
+	 * Fired when this session is no longer valid. <br>
+	 * The reason could be a broken connection or the
+	 * removal of your own player. <br><br>
+	 * Don't use this session any longer after the event 
+	 * has been fired.
+	 * @event module:shared/session~Session#destroyed
+	 */
+
+	/**
+	 * Fired when a new player has been added to this session.
+	 * From now on you can safely communicate with this player.
+	 * @event module:shared/session~Session#playerJoined
+	 * @property {module:shared/player~Player} player  The newly added player.
+	 * @example <caption>Adding connected players to the DOM</caption>
+	 * session.on('playerJoined', function (event) {
+	 *   var playerDiv = $('#player').clone();
+	 *   $('#players').append(playerDiv);
+	 *   event.player.on('disconnected', function () {
+	 *     playerDiv.remove();
+	 *   });
+	 * }
+	 */
+
+	/**
+	 * Fired when a player has been removed from this session.
+	 * @event module:shared/session~Session#playerLeft
+	 * @property {module:shared/player~Player} player  The removed player.
+	 */
+
+	/**
+	 * Fired when a player has been removed from this session and
+	 * there are now less player connected to this session than stated 
+	 * in minPlayerNeeded.<br><br>
+	 * You could listen for this event to stop a running game when
+	 * the player count is getting to low.
+	 * @event module:shared/session~Session#belowMinPlayerNeeded
+	 */
+
+	/**
+	 * Fired when a new player has been added to this session and
+	 * there are now exactly as many players connected to this session
+	 * as stated in minPlayerNeeded.<br><br>
+	 * You could listen for this event to start your game when
+	 * enough players have connected.
+	 * @event module:shared/session~Session#aboveMinPlayerNeeded
+	 */
+
 
 	exports.Session = Session;
 	return exports;
@@ -3529,12 +3629,6 @@ define('session',['require','exports','module','../shared/session','util','./pla
 	* @mixes module:client/events.EventEmitter
 	* @memberof module:client/session
 	*
-	* @fires module:client/session~Session#playerJoined
-	* @fires module:client/session~Session#playerLeft
-	* @fires module:client/session~Session#destroyed
-	* @fires module:client/session~Session#belowMinPlayerNeeded
-	* @fires module:client/session~Session#aboveMinPlayerNeeded
-	*
 	* @param {module:client/player~Player} myself  the player instance that 
 	* represents my own client.
 	* @param {} messageBus
@@ -3624,11 +3718,6 @@ define('session',['require','exports','module','../shared/session','util','./pla
 		}
 	};
 
-	/**
-	 * When you call this new players are not allowed to join this
-	 * session any more. Instead their promise will be rejected with a 
-	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
-	 */
 	Session.prototype.disablePlayerJoining = function () {
 		this.messageBus.send({
 			name: 'changePlayerJoining',
@@ -3637,10 +3726,6 @@ define('session',['require','exports','module','../shared/session','util','./pla
 		});
 	};
 
-	/**
-	 * A call to this method will allow new players to join this session
-	 * again.
-	 */
 	Session.prototype.enablePlayerJoining = function () {
 		this.messageBus.send({
 			name: 'changePlayerJoining',
@@ -3650,85 +3735,15 @@ define('session',['require','exports','module','../shared/session','util','./pla
 	};
 
 	/**
-	 * Sends the given message to all other instances of this session.
-	 * @param {string} type    type of message that should be send
-	 * @param {object} [data]  message data that should be send
-	 * @param {module:client/multi~toClient} [toClient='all']  which client
-	 *  should receive this message
-	 * @param {boolean} [volatile=false]  if true, the message may be dropped
-	 *  by the framework. Use this option for real time data where one dropped
-	 *  message does not interrupt your application.
-	 * @example
-	 * // on client no 1
-	 * session.on('ping', function (event) {
-	 *   // outputs 'bar'
-	 *   console.log(event.data.foo);
-	 * });
-	 * // on client no 2, instance of same session
-	 * session.message('ping', { foo: 'bar' });
-	 */
-	Session.prototype.message = function (type, data, toClient, volatile) {
-		this.messageSender.message(type, data, toClient, volatile);
-	};
-
-	/**
 	 * Disconnects own player from this session.
 	 * This will remove this player from all existing
 	 * instances of this session.
-	 * @fires module:client/session~Session#destroyed
+	 * @fires module:shared/session~Session#destroyed
 	 */
 	Session.prototype.disconnectMyself = function () {
 		this.messageBus.disconnect();
 	};
 
-
-	/**
-	 * Fired when this session is no longer valid. <br>
-	 * The reason could be a broken connection or the
-	 * removal of your own player. <br><br>
-	 * Don't use this session any longer after the event 
-	 * has been fired.
-	 * @event module:client/session~Session#destroyed
-	 */
-
-	/**
-	 * Fired when a new player has been added to this session.
-	 * From now on you can safely communicate with this player.
-	 * @event module:client/session~Session#playerJoined
-	 * @property {module:client/player~Player} player  The newly added player.
-	 * @example <caption>Adding connected players to the DOM</caption>
-	 * session.on('playerJoined', function (event) {
-	 *   var playerDiv = $('#player').clone();
-	 *   $('#players').append(playerDiv);
-	 *   event.player.on('disconnected', function () {
-	 *     playerDiv.remove();
-	 *   });
-	 * }
-	 */
-
-	/**
-	 * Fired when a player has been removed from this session.
-	 * @event module:client/session~Session#playerLeft
-	 * @property {module:client/player~Player} player  The removed player.
-	 */
-
-	/**
-	 * Fired when a player has been removed from this session and
-	 * there are now less player connected to this session than stated 
-	 * in minPlayerNeeded.<br><br>
-	 * You could listen for this event to stop a running game when
-	 * the player count is getting to low.
-	 * @event module:client/session~Session#belowMinPlayerNeeded
-	 */
-
-	/**
-	 * Fired when a new player has been added to this session and
-	 * there are now exactly as many players connected to this session
-	 * as stated in minPlayerNeeded.<br><br>
-	 * You could listen for this event to start your game when
-	 * enough players have connected.
-	 * @event module:client/session~Session#aboveMinPlayerNeeded
-	 */
 
 	/**
 	* Deserializes a session object send over a socket connection.
