@@ -94,12 +94,6 @@ Session.prototype.removePlayer = function (player) {
 
 	AbstractSession.prototype.removePlayer.call(this, player);
 
-	this.messageBus.send({
-		name: 'playerLeft',
-		fromInstance: 'session',
-		playerId: player.id
-	});
-
 	if (this.getPlayerCount() === 0) {
 		this.destroy();
 	}
