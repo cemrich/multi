@@ -3154,6 +3154,17 @@ define('../shared/session',['require','exports','module','events','util','./play
 	};
 
 	/**
+	 * Deconstructs this session when no longer needed and informs listening
+	 * objects.
+	 * @private
+	 */
+	Session.prototype.destroy = function () {
+		this.emit('destroyed');
+		this.messageBus.unregisterAll();
+		this.removeAllListeners();
+	};
+
+	/**
 	 * @returns {Array.<module:shared/player~Player>} an array of all 
 	 * players currently connected to this session.
 	 * The array is sorted by 
@@ -3644,7 +3655,6 @@ define('session',['require','exports','module','../shared/session','util','./pla
 	var Session = function (myself, messageBus, sessionData) {
 
 		AbstractSession.call(this);
-		var session = this;
 
 		/**
 		 * The player instance that represents my own client.
@@ -3679,11 +3689,7 @@ define('session',['require','exports','module','../shared/session','util','./pla
 
 		// add messages listeners
 		this.onSessionReady();
-		this.messageBus.register('disconnect', 'session', function (message) {
-			session.emit('destroyed');
-			session.messageBus.unregisterAll();
-			session.removeAllListeners();
-		});
+		this.messageBus.register('disconnect', 'session', this.destroy.bind(this));
 		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 

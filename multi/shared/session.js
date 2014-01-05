@@ -100,6 +100,17 @@ define(function(require, exports, module) {
 	};
 
 	/**
+	 * Deconstructs this session when no longer needed and informs listening
+	 * objects.
+	 * @private
+	 */
+	Session.prototype.destroy = function () {
+		this.emit('destroyed');
+		this.messageBus.unregisterAll();
+		this.removeAllListeners();
+	};
+
+	/**
 	 * @returns {Array.<module:shared/player~Player>} an array of all 
 	 * players currently connected to this session.
 	 * The array is sorted by 

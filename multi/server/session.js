@@ -157,9 +157,7 @@ Session.prototype.removePlayer = function (player) {
 		this.emit('belowMinPlayerNeeded');
 	}
 	if (this.getPlayerCount() === 0) {
-		this.emit('destroyed');
-		this.messageBus.unregisterAll();
-		this.removeAllListeners();
+		this.destroy();
 	}
 };
 

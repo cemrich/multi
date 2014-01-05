@@ -47,7 +47,6 @@ define(function(require, exports, module) {
 	var Session = function (myself, messageBus, sessionData) {
 
 		AbstractSession.call(this);
-		var session = this;
 
 		/**
 		 * The player instance that represents my own client.
@@ -82,11 +81,7 @@ define(function(require, exports, module) {
 
 		// add messages listeners
 		this.onSessionReady();
-		this.messageBus.register('disconnect', 'session', function (message) {
-			session.emit('destroyed');
-			session.messageBus.unregisterAll();
-			session.removeAllListeners();
-		});
+		this.messageBus.register('disconnect', 'session', this.destroy.bind(this));
 		this.messageBus.register('playerJoined', 'session', this.onPlayerConnected.bind(this));
 	};
 
