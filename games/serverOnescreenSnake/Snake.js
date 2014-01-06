@@ -30,10 +30,10 @@ Segment.prototype.intersects = function (segment) {
 	var x2 = this.getRight();
 	var y1 = this.getTop();
 	var y2 = this.getBottom();
-	return !((segment.x1 >= x2 && segment.x2 >= x2) ||
-		(segment.x1 <= x1 && segment.x2 <= x2) ||
-		(segment.y1 <= y1 && segment.y2 <= y1) ||
-		(segment.y1 >= y2 && segment.y2 >= y2));
+	return ((segment.x1 < x2 || segment.x2 < x2) &&
+		(segment.x1 > x1 || segment.x2 > x2) &&
+		(segment.y1 > y1 || segment.y2 > y1) &&
+		(segment.y1 < y2 || segment.y2 < y2));
 };
 
 
