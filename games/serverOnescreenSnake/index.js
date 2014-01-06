@@ -61,11 +61,7 @@ exports.Game = function (session) {
 		session.on('playerLeft', onPlayerLeft);
 
 		// very, very simple gameloop for the start
-		interval = setInterval(function () {
-			move();
-			console.log('tick');
-		}, 100);
-		// session.message('finished');
+		interval = setInterval(move, 100);
 	}
 
 };
