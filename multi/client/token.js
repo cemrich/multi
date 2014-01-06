@@ -27,4 +27,55 @@ define(function(require, exports, module) {
 		}
 	};
 
+
+	/**
+	 * Small helper class for managing symbol fields to connect to existing
+	 * sessions. The user can click on each symbol to toggle its state - all
+	 * activated symbols will then build the session token.<br>
+	 * -  -  #<br>
+	 * #  -  -<br>
+	 * -  -  #<br>
+	 * for example will convert to the token '238' - the indices of all activated
+	 * symbols.
+	 * @param {integer} symbolCount  number of symbols you want to have
+	 *  in your grid
+	 *  
+	 * @example
+	 * var symbols = SymbolArray(9);
+	 *
+	 * function onIconClick(event) {
+	 *   var icon = $(event.currentTarget);
+	 *   var isActive = symbolArray.toggle(icon.index());
+	 *   var classes = isActive ? 'active' : 'inactive';
+	 *   icon.attr('class', classes);
+	 * }
+	 *
+	 * // .... later on:
+	 * var token = symbols.toToken();
+	 * multi.joinSession(token);
+	 */
+	exports.SymbolArray = function (symbolCount) {
+		this.symbols = new Array(symbolCount);
+	};
+
+	/**
+	 * Toggles the selected state of the symbol at the given index.
+	 * @param  {integer} position index of the symbol you want to change
+	 * @return {boolean}         true if the symbol at the given index
+	 *  is now selected, false otherwise
+	 */
+	exports.SymbolArray.prototype.toggle = function (position) {
+		this.symbols[position] =! this.symbols[position];
+		return this.symbols[position];
+	};
+
+	/**
+	 * @return {string} the token representation of this symbol array
+	 */
+	exports.SymbolArray.prototype.toToken = function () {
+		return this.symbols.reduce(function (x, y, index) {
+			return y ? x + index : x;
+		}, '');
+	};
+
 });

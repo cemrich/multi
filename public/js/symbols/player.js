@@ -5,25 +5,18 @@ define(function(require, exports, module) {
 	var sound = null;
 	var session = null;
 	var presenter = null;
-	var symbolArray = [
-		false,false,false,
-		false,false,false,
-		false,false,false
-	];
+	var symbolArray = new multiModule.token.SymbolArray(9);
 
 	function onIconClick(event) {
 		sound.onSymbol();
 		var icon = $(event.currentTarget);
-		var index = icon.index();
-		var isActive = symbolArray[index] =! symbolArray[index];
+		var isActive = symbolArray.toggle(icon.index());
 		var classes = isActive ? 'icon' : 'icon inactive';
 		icon.attr('class', classes);
 	}
 
 	function onJoinSessionClick(event) {
-		var sessionCode = symbolArray.reduce(function (x, y, index) {
-			return y ? x + index : x;
-		}, '');
+		var sessionCode = symbolArray.toToken();
 		multi.joinSession(sessionCode).then(onSessionJoined, onJoinSessionFailed).done();
 		$('#loading').show();
 	}
