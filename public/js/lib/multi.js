@@ -3814,8 +3814,8 @@ define('session',['require','exports','module','../shared/session','util','./pla
 
 /**
  * Here you can find some useful functions for working with colors.
+ * This is not multis core functionality but might be convenient to use.
  * @module
- * @private
  */
 define('../shared/color',['require','exports','module'],function(require, exports, module) {
 

@@ -30,6 +30,7 @@ define(['../../lib/joystick', '../sound', '../layout'],
 		function onExitClick(event) {
 			// with one player bored the game is over
 			window.close();
+			session.myself.disconnect();
 		}
 
 		function onFinished() {

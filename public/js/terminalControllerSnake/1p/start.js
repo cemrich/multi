@@ -11,15 +11,12 @@ requirejs.config({
 One player snake as minimal example.
 One screen as controller, one sreen as presenter.
 */
-// TODO: add possibility to destroy a session when presenter disconnects
 
 requirejs(['../../lib/multi', '../sound', '../layout', '../../SERVER', '../../lib/jquery-2.0.0.min'],
 	function (multiModule, sound, layout, SERVER) {
 
 	var SESSION_TOKEN = 'myOnlySession';
 
-	// TODO: allow some of the callbacks to be passed through options
-	// is this possible with promises, too?
 	var multiOptions = {
 		server: SERVER,
 		session: {

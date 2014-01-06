@@ -7,8 +7,8 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 /**
  * Here you can find some useful functions for working with colors.
+ * This is not multis core functionality but might be convenient to use.
  * @module
- * @private
  */
 define(function(require, exports, module) {
 

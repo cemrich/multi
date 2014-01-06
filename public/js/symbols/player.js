@@ -44,9 +44,7 @@ define(function(require, exports, module) {
 		$('#loading').hide();
 
 		session.on('destroyed', function () {
-			// TODO: throw this when presenter disconnects
-			// add a reason to the destroyed event
-			alert('Opps - you have no connection. Try a reload when your connection returns.');
+			alert('Opps - you have no connection to the terminal. Try a reload when your connection returns.');
 		});
 
 		changeColor();
@@ -54,7 +52,6 @@ define(function(require, exports, module) {
 	}
 
 	function changeColor() {
-		// TODO: remove color from multi module
 		var color = multiModule.color.random();
 		session.myself.attributes.color = color;
 		$('body').css('background-color', color);
