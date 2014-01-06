@@ -63,7 +63,7 @@ define(['../../lib/multi', '../../lib/joystick', '../sound', '../layout', './sco
 		function onPlayerLeft(event) {
 			if (event.player.isFirst()) {
 				// our presenter disconnected - no reason to resume
-				session.disconnectMyself();
+				session.myself.disconnect();
 			}
 		}
 
@@ -76,7 +76,7 @@ define(['../../lib/multi', '../../lib/joystick', '../sound', '../layout', './sco
 		function onExitClick(event) {
 			// with one player bored the game is over
 			window.close();
-			session.disconnectMyself();
+			session.myself.disconnect();
 		}
 
 		function onDead() {

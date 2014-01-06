@@ -43,8 +43,7 @@ define(['../../lib/joystick', '../sound', '../layout'],
 		function onBelowMinPlayerNeeded() {
 			// we don't have enough players any longer
 			// means our presenter has disconnected - quit
-			// TODO: nicer syntax like session.myself.disconnect()
-			session.disconnectMyself();
+			session.myself.disconnect();
 		}
 
 		session.on('belowMinPlayerNeeded', onBelowMinPlayerNeeded);
