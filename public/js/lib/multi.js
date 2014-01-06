@@ -2850,6 +2850,9 @@ define('../shared/player',['require','exports','module','./SyncedObject','./Cust
 		this.disconnectToken = this.messageBus.register('disconnect',
 			this.id, this.onDisconnect.bind(this));
 
+		this.userDisconnectToken = this.messageBus.register('user-disconnect',
+			this.id, this.onUserDisconnect.bind(this));
+
 		this.syncedAttributes.on('changed', this.onAttributesChangedLocally.bind(this));
 		this.syncedAttributes.startWatching();
 	};
@@ -2896,9 +2899,7 @@ define('../shared/player',['require','exports','module','./SyncedObject','./Cust
 	 * @abstract
 	 * @private
 	 */
-	Player.prototype.onAttributesChangedRemotely = function (message) {
-
-	};
+	Player.prototype.onAttributesChangedRemotely = function (message) { };
 
 	/**
 	 * Called when this socket receives a message for any player.
@@ -2920,10 +2921,19 @@ define('../shared/player',['require','exports','module','./SyncedObject','./Cust
 		this.removeAllListeners();
 		this.messageBus.unregister(this.messageToken);
 		this.messageBus.unregister(this.attributesChangedToken);
+		this.messageBus.unregister(this.userDisconnectToken);
 		this.messageBus.unregister(this.disconnectToken);
 		this.syncedAttributes.removeAllListeners();
 		this.syncedAttributes.stopWatching();
 	};
+
+	/**
+	 * Gets called when this player has been disconnected by the user
+	 * on any client or the server.
+	 * @private
+	 * @abstract
+	 */
+	Player.prototype.onUserDisconnect = function () {};
 
 	/**
 	 * Notifies the user about every change inside the given changeset.
@@ -2990,6 +3000,17 @@ define('../shared/player',['require','exports','module','./SyncedObject','./Cust
 	 */
 	Player.prototype.message = function (type, data, toClient, volatile) {
 		this.messageSender.message(type, data, toClient, volatile);
+	};
+
+	/**
+	 * Disconnect the client represented by this player from the framework.
+	 * @fires module:shared/player~Player#disconnected
+	 */
+	Player.prototype.disconnect = function () {
+		this.messageBus.send({
+			name: 'user-disconnect',
+			fromInstance: this.id
+		});
 	};
 
 	/**
@@ -3660,13 +3681,6 @@ define('messages',['require','exports','module','../shared/PubSub'],function(req
 		this.pubSub.unsubscribeAll();
 	};
 
-	/**
-	 * Destroys the link to the outsie world.
-	 */
-	exports.MessageBus.prototype.disconnect = function () {
-		this.socket.disconnect();
-	};
-
 	return exports;
 
 });
@@ -3727,7 +3741,9 @@ define('session',['require','exports','module','../shared/session','util','./pla
 		this.onSessionReady();
 		this.messageBus.register('disconnect', 'session', this.destroy.bind(this));
 		this.messageBus.register('playerJoined', 'session', this.onPlayerJoined.bind(this));
-		window.addEventListener('unload', this.disconnectMyself.bind(this));
+		window.addEventListener('unload', function () {
+			myself.disconnect();
+		});
 	};
 
 	util.inherits(Session, AbstractSession);
@@ -3760,16 +3776,6 @@ define('session',['require','exports','module','../shared/session','util','./pla
 	Session.prototype.onPlayerJoined = function (message) {
 		var player = playerModule.deserialize(message.playerData, this.messageBus);
 		this.addPlayer(player);
-	};
-
-	/**
-	 * Disconnects own player from this session.
-	 * This will remove this player from all existing
-	 * instances of this session.
-	 * @fires module:shared/session~Session#destroyed
-	 */
-	Session.prototype.disconnectMyself = function () {
-		this.messageBus.disconnect();
 	};
 
 

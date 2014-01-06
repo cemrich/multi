@@ -55,7 +55,9 @@ define(function(require, exports, module) {
 		this.onSessionReady();
 		this.messageBus.register('disconnect', 'session', this.destroy.bind(this));
 		this.messageBus.register('playerJoined', 'session', this.onPlayerJoined.bind(this));
-		window.addEventListener('unload', this.disconnectMyself.bind(this));
+		window.addEventListener('unload', function () {
+			myself.disconnect();
+		});
 	};
 
 	util.inherits(Session, AbstractSession);
@@ -88,16 +90,6 @@ define(function(require, exports, module) {
 	Session.prototype.onPlayerJoined = function (message) {
 		var player = playerModule.deserialize(message.playerData, this.messageBus);
 		this.addPlayer(player);
-	};
-
-	/**
-	 * Disconnects own player from this session.
-	 * This will remove this player from all existing
-	 * instances of this session.
-	 * @fires module:shared/session~Session#destroyed
-	 */
-	Session.prototype.disconnectMyself = function () {
-		this.messageBus.disconnect();
 	};
 
 

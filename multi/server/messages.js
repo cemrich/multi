@@ -165,6 +165,14 @@ exports.MessageBus.prototype.register = function (messageName, instance, callbac
 };
 
 /**
+ * Disconnects the socket with the given id.
+ */
+exports.MessageBus.prototype.disconnect = function (id) {
+	var sockets = this.io.sockets.in(this.token).sockets;
+	sockets[id].disconnect();
+};
+
+/**
  * Unrigister a callback you registered earlier.
  * @param  {} token  register token returned by 'register' method
  * @example

@@ -105,13 +105,6 @@ define(function(require, exports, module) {
 		this.pubSub.unsubscribeAll();
 	};
 
-	/**
-	 * Destroys the link to the outsie world.
-	 */
-	exports.MessageBus.prototype.disconnect = function () {
-		this.socket.disconnect();
-	};
-
 	return exports;
 
 });

@@ -169,13 +169,13 @@ requirejs(['multi'], function (multiModule) {
 		multi.createSession(sessionParams).then(function (session) {
 			multi.createSession(sessionParams).fail(function (error) {
 				ok(error instanceof multiModule.TokenAlreadyExistsError, 'throwing an TokenAlreadyExistsError');
-				session.disconnectMyself();
+				session.myself.disconnect();
 				start();
 			}).done();
 		}).done();
 	});
 
-	asyncTest('test disconnectMyself', function () {
+	asyncTest('test disconnect myself', function () {
 		expect(3);
 		multi.createSession().then(function (session) {
 			var createdSession = session;
@@ -193,10 +193,7 @@ requirejs(['multi'], function (multiModule) {
 				});
 
 				function disconnect() {
-					setTimeout(function () {
-						// setTimeout: otherwise socket.io does weird stuff
-						createdSession.disconnectMyself();
-					}, 500);
+					createdSession.myself.disconnect();
 				}
 
 				if (session.getPlayerCount() === 2) {

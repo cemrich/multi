@@ -49,6 +49,10 @@ Player.prototype.onDisconnect = function () {
 	AbstractPlayer.prototype.onDisconnect.call(this);
 };
 
+Player.prototype.onUserDisconnect = function () {
+	this.messageBus.disconnect(this.id);
+};
+
 Player.prototype.onAttributesChangedRemotely = function (message) {
 	this.syncedAttributes.applyChangeset(message.changeset);
 };

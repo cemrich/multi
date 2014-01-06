@@ -91,6 +91,9 @@ define(function(require, exports, module) {
 		this.disconnectToken = this.messageBus.register('disconnect',
 			this.id, this.onDisconnect.bind(this));
 
+		this.userDisconnectToken = this.messageBus.register('user-disconnect',
+			this.id, this.onUserDisconnect.bind(this));
+
 		this.syncedAttributes.on('changed', this.onAttributesChangedLocally.bind(this));
 		this.syncedAttributes.startWatching();
 	};
@@ -137,9 +140,7 @@ define(function(require, exports, module) {
 	 * @abstract
 	 * @private
 	 */
-	Player.prototype.onAttributesChangedRemotely = function (message) {
-
-	};
+	Player.prototype.onAttributesChangedRemotely = function (message) { };
 
 	/**
 	 * Called when this socket receives a message for any player.
@@ -161,10 +162,19 @@ define(function(require, exports, module) {
 		this.removeAllListeners();
 		this.messageBus.unregister(this.messageToken);
 		this.messageBus.unregister(this.attributesChangedToken);
+		this.messageBus.unregister(this.userDisconnectToken);
 		this.messageBus.unregister(this.disconnectToken);
 		this.syncedAttributes.removeAllListeners();
 		this.syncedAttributes.stopWatching();
 	};
+
+	/**
+	 * Gets called when this player has been disconnected by the user
+	 * on any client or the server.
+	 * @private
+	 * @abstract
+	 */
+	Player.prototype.onUserDisconnect = function () {};
 
 	/**
 	 * Notifies the user about every change inside the given changeset.
@@ -231,6 +241,17 @@ define(function(require, exports, module) {
 	 */
 	Player.prototype.message = function (type, data, toClient, volatile) {
 		this.messageSender.message(type, data, toClient, volatile);
+	};
+
+	/**
+	 * Disconnect the client represented by this player from the framework.
+	 * @fires module:shared/player~Player#disconnected
+	 */
+	Player.prototype.disconnect = function () {
+		this.messageBus.send({
+			name: 'user-disconnect',
+			fromInstance: this.id
+		});
 	};
 
 	/**
