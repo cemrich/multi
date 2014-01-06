@@ -2,38 +2,38 @@
 
 
 function Segment(startX, startY) {
-	this.startX = startX;
-	this.startY = startY;
-	this.x = startX;
-	this.y = startY;
+	this.x1 = startX;
+	this.y1 = startY;
+	this.x2 = startX;
+	this.y2 = startY;
 }
 Segment.prototype.getWidth = function () {
-	return Math.abs(this.x - this.startX);
+	return Math.abs(this.x2 - this.x1);
 };
 Segment.prototype.getHeight = function () {
-	return Math.abs(this.y - this.startY);
+	return Math.abs(this.y2 - this.y1);
 };
 Segment.prototype.getTop = function () {
-	return this.y - this.startY < 0 ? this.y : this.startY;
+	return this.y2 - this.y1 < 0 ? this.y2 : this.y1;
 };
 Segment.prototype.getLeft = function () {
-	return this.x - this.startX < 0 ? this.x : this.startX;
+	return this.x2 - this.x1 < 0 ? this.x2 : this.x1;
 };
 Segment.prototype.getBottom = function () {
-	return this.y - this.startY < 0 ? this.startY : this.y;
+	return this.y2 - this.y1 < 0 ? this.y1 : this.y2;
 };
 Segment.prototype.getRight = function () {
-	return this.x - this.startX < 0 ? this.startX : this.x;
+	return this.x2 - this.x1 < 0 ? this.x1 : this.x2;
 };
 Segment.prototype.intersects = function (segment) {
 	var x1 = this.getLeft();
 	var x2 = this.getRight();
 	var y1 = this.getTop();
 	var y2 = this.getBottom();
-	return !((segment.startX >= x2 && segment.x >= x2) ||
-		(segment.startX <= x1 && segment.x <= x2) ||
-		(segment.startY <= y1 && segment.y <= y1) ||
-		(segment.startY >= y2 && segment.y >= y2));
+	return !((segment.x1 >= x2 && segment.x2 >= x2) ||
+		(segment.x1 <= x1 && segment.x2 <= x2) ||
+		(segment.y1 <= y1 && segment.y2 <= y1) ||
+		(segment.y1 >= y2 && segment.y2 >= y2));
 };
 
 
@@ -66,22 +66,22 @@ Snake.prototype.move = function () {
 
 	if (this.dir !== this.lastDir) {
 		// direction changed - start a new segment
-		this.curSegment = new Segment(this.curSegment.x, this.curSegment.y);
+		this.curSegment = new Segment(this.curSegment.x2, this.curSegment.y2);
 		this.segments.push(this.curSegment);
 	}
 
 	switch (this.dir) {
 	case 0:
-		this.curSegment.y -= this.speed;
+		this.curSegment.y2 -= this.speed;
 		break;
 	case 1:
-		this.curSegment.x += this.speed;
+		this.curSegment.x2 += this.speed;
 		break;
 	case 2:
-		this.curSegment.y += this.speed;
+		this.curSegment.y2 += this.speed;
 		break;
 	case 3:
-		this.curSegment.x -= this.speed;
+		this.curSegment.x2 -= this.speed;
 		break;
 	}
 };
@@ -91,7 +91,7 @@ Snake.prototype.isDead = function (snakes) {
 };
 
 Snake.prototype.isInsidePlayingField = function () {
-	return this.arranger.isAnyPlayerHit(this.curSegment.x, this.curSegment.y);
+	return this.arranger.isAnyPlayerHit(this.curSegment.x2, this.curSegment.y2);
 };
 
 Snake.prototype.hits = function (snakes) {
