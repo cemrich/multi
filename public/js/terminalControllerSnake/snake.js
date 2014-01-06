@@ -17,7 +17,6 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 		this.expired = 0;
 		this.fps = 1/2 * 1000; // speed in fps * 1000
 		this.segmetsToAdd = 0;
-		this.direction = 0;
 		this.directionObject = player.attributes;
 		this.directionObject.direction = 0;
 		player.attributes.points = 0;
@@ -69,11 +68,8 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 	// which direction?
 	Snake.prototype.updateDirection = function () {
 		this.head.isFree = true;
-		var oppositeDir = (this.directionObject.direction + 2) % 4;
-		if (this.direction !== oppositeDir) {
-			this.direction = this.directionObject.direction;
-		}
-		switch (this.direction) {
+
+		switch (this.directionObject.direction) {
 		case 0: // up
 			this.head.y -= this.grid.tileSize;
 			this.head.rotateTo(-90);

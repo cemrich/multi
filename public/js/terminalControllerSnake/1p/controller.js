@@ -7,7 +7,7 @@ define(['../../lib/joystick', '../sound', '../layout'],
 
 	function start(session) {
 
-		var joystick = new Joystick(30, onDirectionChange, $('#marker'), $('html'));
+		var joystick = new Joystick(30, onDirectionChange, false, $('#marker'), $('html'));
 
 		function onDirectionChange(direction) {
 			$('#marker').attr('class', 'dir' + direction);

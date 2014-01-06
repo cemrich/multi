@@ -14,6 +14,9 @@ define(function () {
 	 * @param {function} directionCallback  function that should be called when
 	 *  the direction has changed. The new direction is passed as an integer:
 	 *  up=0, right=1, down=2, left=3
+	 * @param {boolean} allowOppositeDir true if every direction should be allowed
+	 *  in any order. False if user should not change direction to the opposite
+	 *  direction directly.
 	 * @param {jQueryElement} container  dom element containing a marker that's
 	 *  shown when the user starts touching or dragging (with the css class
 	 *  'down') and a marker that indicates the current direction (with the css
@@ -21,7 +24,7 @@ define(function () {
 	 * @param {jQueryElement} eventArea  dom element that contains the area in
 	 *  which the user can use the joystick (e.g. $('html'))
 	 */
-	function Joystick(threshold, directionCallback, container, eventArea) {
+	function Joystick(threshold, directionCallback, allowOppositeDir, container, eventArea) {
 
 		var eventEmitter = eventArea;
 		var downMarker = container.find('.down');
@@ -58,7 +61,9 @@ define(function () {
 					pos.y = startPos.y;
 					newDirection = (pos.x < startPos.x) ? 3 : 1;
 				}
-				if (newDirection !== direction) {
+				var oppositeDir = (direction + 2) % 4;
+				if (newDirection !== direction && 
+					(allowOppositeDir || newDirection != oppositeDir)) {
 					direction = newDirection;
 					directionCallback(direction);
 				}

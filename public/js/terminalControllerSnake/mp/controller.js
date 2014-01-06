@@ -26,7 +26,7 @@ define(['../../lib/multi', '../../lib/joystick', '../sound', '../layout', './sco
 	// joined session successfully
 	function onSession(session) {
 
-		var joystick = new Joystick(30, onDirectionChange, $('#marker'), $('html'));
+		var joystick = new Joystick(30, onDirectionChange, false, $('#marker'), $('html'));
 		layout.showSection('#waiting');
 		$('#waiting .start').click(onStartClick);
 		$('button.exit').click(onExitClick);

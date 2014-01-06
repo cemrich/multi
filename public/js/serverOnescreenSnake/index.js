@@ -75,7 +75,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/j
 
 		arranger = new multiModule.screens.HorizontalArranger(session);
 		screen = new Screen(session, arranger);
-		joystick = new Joystick(30, onDirectionChange, $('.joystick'), $('html'));
+		joystick = new Joystick(30, onDirectionChange, false, $('.joystick'), $('html'));
 		screen.updateBorders();
 		showSection('joined');
 		$('#status').text('connected');
