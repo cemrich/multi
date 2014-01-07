@@ -94,6 +94,9 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/j
 		$('button.start').click(function () {
 			session.message('startGame');
 		});
+		session.myself.getAttributeAsync('color').then(function (color) {
+			$('.joystick > *').css('background-color', color);
+		});
 		session.myself.on('died', onDied);
 		session.on('startGame', onStartGame);
 		session.on('finished', onGameFinished);
