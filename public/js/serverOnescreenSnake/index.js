@@ -41,7 +41,6 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/j
 		});
 		player.on('disconnected', function () {
 			playerView.remove();
-			screen.updateBorders();
 		});
 	}
 
@@ -77,29 +76,33 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/j
 		arranger = new multiModule.screens.HorizontalArranger(session);
 		screen = new Screen(session, arranger);
 		joystick = new Joystick(30, onDirectionChange, false, $('.joystick'), $('html'));
+		
 		screen.updateBorders();
 		showSection('joined');
 		$('#status').text('connected');
 		$('.join-url').text(session.joinSessionUrl);
 		$('.join-url').attr('href', 'http://' + session.joinSessionUrl);
+
 		session.getPlayerArray().forEach(addPlayer);
+
 		session.on('destroyed', onSessionDestroyed);
-		session.on('playerLeft', function () {
-			screen.updateBorders();
-		});
 		session.on('playerJoined', function (event) {
 			addPlayer(event.player);
-			screen.updateBorders();
 		});
+		session.on('startGame', onStartGame);
+		session.on('finished', onGameFinished);
+
 		$('button.start').click(function () {
 			session.message('startGame');
 		});
+		arranger.on('arrangementChanged', function () {
+			screen.updateBorders();
+		});
+
+		session.myself.on('died', onDied);
 		session.myself.getAttributeAsync('color').then(function (color) {
 			$('.joystick > *').css('background-color', color);
 		});
-		session.myself.on('died', onDied);
-		session.on('startGame', onStartGame);
-		session.on('finished', onGameFinished);
 	}
 
 	function onSessionDestroyed() {
