@@ -52,6 +52,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/j
 	}
 
 	function onStartGame() {
+		screen.drawStartingPoint();
 		showSection('game');
 		joystick.start();
 	}

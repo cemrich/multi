@@ -22,6 +22,13 @@ define(function () {
 		this.updateBorders();
 	};
 
+	Screen.prototype.drawStartingPoint = function () {
+		context.beginPath();
+		context.strokeStyle = this.session.myself.attributes.color;
+		context.arc(canvas.width/2, canvas.height/2, 5, 0, 2 * Math.PI);
+		context.stroke();
+	};
+
 	Screen.prototype.drawPlayer = function (player, x, y, width, height) {
 		context.beginPath();
 		context.strokeStyle = player.attributes.color;
