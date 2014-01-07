@@ -75,7 +75,7 @@ define(function () {
 		function onUp(event) {
 			eventEmitter.off('touchmove mousemove', onMove);
 			downMarker.hide();
-			moveMarker.fadeOut();
+			moveMarker.hide();
 		}
 
 		// controller starting point
@@ -89,7 +89,7 @@ define(function () {
 			moveMarker.css('top', startPos.y);
 			moveMarker.css('left', startPos.x);
 			downMarker.show();
-			moveMarker.fadeIn();
+			moveMarker.show();
 		}
 
 

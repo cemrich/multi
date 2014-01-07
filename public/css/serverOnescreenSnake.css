@@ -15,15 +15,20 @@ body {
 }
 a {
   color: white;
+  letter-spacing: -0.1em;
 }
 a:hover {
   color: grey;
 }
 button {
   border: 2px solid #FFF;
-  background-color: #000;
+  background: #000;
   color: #FFF;
   padding: 0.5em 2em;
+  text-transform: uppercase;
+}
+button:visited {
+  color: #FFF;
 }
 button:hover {
   border-color: grey;

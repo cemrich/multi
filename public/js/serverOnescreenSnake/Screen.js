@@ -67,7 +67,7 @@ define(function () {
 		context.stroke();
 		context.closePath();
 		context.globalCompositeOperation = 'source-over';
-		context.lineWidth = 1;
+		context.lineWidth = 2;
 	};
 
 	return Screen;
