@@ -4047,7 +4047,10 @@ define('token',['require','exports','module','../lib/q','../shared/errors'],func
  * documentation.
  * @module shared/screens
  */
-define('../shared/screens/index',['require','exports','module'],function(require, exports, module) {
+define('../shared/screens/index',['require','exports','module','events','util'],function(require, exports, module) {
+
+	var EventEmitter = require('events').EventEmitter;
+	var util = require('util');
 
 	/**
 	 * @classdesc When any ScreenArranger is used, an instance of this 
@@ -4173,11 +4176,15 @@ define('../shared/screens/index',['require','exports','module'],function(require
 	 * can use {@link module:shared/screens.HorizontalArranger} 
 	 * as example implementation.
 	 * @class
+	 * @mixes external:EventEmitter
 	 * @param {module:shared/session~Session}
 	 *  Session that contains the players that should be arranged into
 	 *  one big screen.
 	 */
 	exports.ScreenArranger = function (session) {
+
+		EventEmitter.call(this);
+
 		/**
 		 * Session that is getting arranged into one big game screen
 		 * @type {module:shared/session~Session}
@@ -4207,6 +4214,8 @@ define('../shared/screens/index',['require','exports','module'],function(require
 		session.on('playerJoined', this.onPlayerJoined.bind(this));
 		session.on('playerLeft', this.onPlayerLeft.bind(this));
 	};
+
+	util.inherits(exports.ScreenArranger, EventEmitter);
 
 	/**
 	 * Converts local pixel coordinates to global ones.
@@ -4299,6 +4308,7 @@ define('../shared/screens/index',['require','exports','module'],function(require
 	exports.ScreenArranger.prototype.refresh = function () {
 		this.arrange();
 		this.recaculateDimentions();
+		this.emit('arrangementChanged');
 	};
 
 	/**
@@ -4353,6 +4363,12 @@ define('../shared/screens/index',['require','exports','module'],function(require
 		this.refresh();
 	};
 
+	/**
+	 * Fired when the screen layout changes. This may be because a player
+	 * joined or left the session.
+	 * @event module:shared/screens.ScreenArranger#arrangementChanged
+	 */
+
 	return exports;
 
 });
@@ -4396,7 +4412,7 @@ define('../shared/screens/HorizontalArranger',['require','exports','module','uti
 	};
 	util.inherits(HorizontalArranger, ScreenArranger);
 
-	HorizontalArranger.prototype.refresh = function () {
+	HorizontalArranger.prototype.arrange = function () {
 		var height = 0;
 		var xPos = 0;
 		var yPos;
@@ -4420,6 +4436,9 @@ define('../shared/screens/HorizontalArranger',['require','exports','module','uti
 		this.width = xPos;
 		this.height = height;
 	};
+
+	// this is already done inside arrange
+	HorizontalArranger.prototype.recaculateDimentions = function () {};
 
 	screensModule.HorizontalArranger = HorizontalArranger;
 	exports = HorizontalArranger;

@@ -15,6 +15,9 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define(function(require, exports, module) {
 
+	var EventEmitter = require('events').EventEmitter;
+	var util = require('util');
+
 	/**
 	 * @classdesc When any ScreenArranger is used, an instance of this 
 	 * class will be added to every player. Here you can find all
@@ -139,11 +142,15 @@ define(function(require, exports, module) {
 	 * can use {@link module:shared/screens.HorizontalArranger} 
 	 * as example implementation.
 	 * @class
+	 * @mixes external:EventEmitter
 	 * @param {module:shared/session~Session}
 	 *  Session that contains the players that should be arranged into
 	 *  one big screen.
 	 */
 	exports.ScreenArranger = function (session) {
+
+		EventEmitter.call(this);
+
 		/**
 		 * Session that is getting arranged into one big game screen
 		 * @type {module:shared/session~Session}
@@ -173,6 +180,8 @@ define(function(require, exports, module) {
 		session.on('playerJoined', this.onPlayerJoined.bind(this));
 		session.on('playerLeft', this.onPlayerLeft.bind(this));
 	};
+
+	util.inherits(exports.ScreenArranger, EventEmitter);
 
 	/**
 	 * Converts local pixel coordinates to global ones.
@@ -265,6 +274,7 @@ define(function(require, exports, module) {
 	exports.ScreenArranger.prototype.refresh = function () {
 		this.arrange();
 		this.recaculateDimentions();
+		this.emit('arrangementChanged');
 	};
 
 	/**
@@ -318,6 +328,12 @@ define(function(require, exports, module) {
 	exports.ScreenArranger.prototype.onPlayerLeft = function (event) {
 		this.refresh();
 	};
+
+	/**
+	 * Fired when the screen layout changes. This may be because a player
+	 * joined or left the session.
+	 * @event module:shared/screens.ScreenArranger#arrangementChanged
+	 */
 
 	return exports;
 

@@ -38,7 +38,7 @@ define(function(require, exports, module) {
 	};
 	util.inherits(HorizontalArranger, ScreenArranger);
 
-	HorizontalArranger.prototype.refresh = function () {
+	HorizontalArranger.prototype.arrange = function () {
 		var height = 0;
 		var xPos = 0;
 		var yPos;
@@ -62,6 +62,9 @@ define(function(require, exports, module) {
 		this.width = xPos;
 		this.height = height;
 	};
+
+	// this is already done inside arrange
+	HorizontalArranger.prototype.recaculateDimentions = function () {};
 
 	screensModule.HorizontalArranger = HorizontalArranger;
 	exports = HorizontalArranger;
