@@ -4420,6 +4420,8 @@ define('../shared/screens/HorizontalArranger',['require','exports','module','uti
 		var players = this.session.getPlayerArray();
 		players.forEach(function (player) {
 			height = Math.max(height, player.height);
+			player.screen.leftPlayers = [];
+			player.screen.rightPlayers = [];
 		});
 		players.forEach(function (player) {
 			yPos = Math.round((height - player.height) / 2);
