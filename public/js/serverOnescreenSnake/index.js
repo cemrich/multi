@@ -63,7 +63,7 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/j
 	}
 
 	function onDied() {
-		console.log('I am dead!');
+		joystick.stop();
 	}
 
 	function onSession(s) {
