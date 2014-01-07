@@ -7,6 +7,10 @@ var Snake = require('./snake');
 
 exports.Game = function (session) {
 
+	var COLORS = ['#01E2EC', '#EB0067', '#33D92C',
+		'#DA6A03', '#9D32FF','#F2F311', '#FD3333',
+		'#0000FF', '#FD00F3'];
+
 	var snakes = null;
 	var interval = null;
 	var arranger = new ScreenArranger(session);
@@ -34,7 +38,7 @@ exports.Game = function (session) {
 	}
 
 	function onPlayerJoined(event) {
-		event.player.attributes.color = multiModule.color.random();
+		event.player.attributes.color = COLORS[event.player.number%COLORS.length];
 	}
 
 	function onSessionDestroyed() {

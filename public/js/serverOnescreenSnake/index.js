@@ -102,6 +102,8 @@ requirejs(['./Screen', '../lib/multi', '../lib/joystick', '../SERVER', '../lib/j
 		session.myself.on('died', onDied);
 		session.myself.getAttributeAsync('color').then(function (color) {
 			$('.joystick > *').css('background-color', color);
+			$('html').css('color', color);
+			$('button').css('border-color', color);
 		});
 	}
 
