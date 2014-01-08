@@ -42,19 +42,6 @@ var Session = function (io, options) {
 
 util.inherits(Session, AbstractSession);
 
-
-/* override */
-
-Session.prototype.disablePlayerJoining = function () {
-	this.enablePlayerJoining = false;
-	AbstractSession.prototype.disablePlayerJoining.call(this);
-};
-
-Session.prototype.enablePlayerJoining = function () {
-	this.enablePlayerJoining = true;
-	AbstractSession.prototype.enablePlayerJoining.call(this);
-};
-
 /**
  * @return The next unused player number. Gaps from disconnected
  * players will be filled first.

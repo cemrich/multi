@@ -219,9 +219,9 @@ define(function(require, exports, module) {
 	 * When you call this new players are not allowed to join this
 	 * session any more. Instead their promise will be rejected with a 
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}.
-	 * @protected
 	 */
 	Session.prototype.disablePlayerJoining = function () {
+		this.playerJoiningEnabled = false;
 		this.messageBus.send({
 			name: 'changePlayerJoining',
 			fromInstance: 'session',
@@ -232,9 +232,9 @@ define(function(require, exports, module) {
 	/**
 	 * A call to this method will allow new players to join this session
 	 * again.
-	 * @protected
 	 */
 	Session.prototype.enablePlayerJoining = function () {
+		this.playerJoiningEnabled = true;
 		this.messageBus.send({
 			name: 'changePlayerJoining',
 			fromInstance: 'session',
