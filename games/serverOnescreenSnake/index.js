@@ -50,12 +50,14 @@ exports.Game = function (session) {
 	}
 
 	function onEndGame() {
+		session.enablePlayerJoining();
 		clearInterval(interval);
 		session.message('finished');
 		session.removeListener('playerLeft', onPlayerLeft);
 	}
 
 	function onStartGame() {
+		session.disablePlayerJoining();
 		snakes = [];
 
 		for (var i in session.players) {
