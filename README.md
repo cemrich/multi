@@ -25,6 +25,9 @@ Multi comes with bundled libraries on client and server side:
 
 [MIT]: http://opensource.org/licenses/MIT
 
+### Security ###
+Multi is a bachelor thesis project and has not been security tested in any way. It uses no encryption ore secure handshaking at all and may be vulnerable to all kind of attacks. If you use it in production do so at your own risk.
+
 ### Licence ###
 
 The MIT License ([MIT])
