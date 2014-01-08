@@ -8,7 +8,9 @@ html {
 	background-position: center; 
 
 	font-family: monospace;
+	font-size: 1.2em;
 	color: white;
+	text-align: center;
 }
 
 html, body {
@@ -24,6 +26,10 @@ a {
 	&:hover {
 		color: grey;
 	}
+}
+
+p {
+	margin: 0 10px 10px 10px;
 }
 
 button {
@@ -50,7 +56,24 @@ canvas {
 	bottom: 20px;
 	left: 0px;
 	width: 100%;
-	text-align: center;
+}
+
+#joining {
+	input {
+		font-size: 200%;
+		width: 3em;
+		border: none;
+		text-align: center;
+		margin-bottom: 0.5em;
+		&::-webkit-outer-spin-button,
+		&::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+	}
+	& > div {
+		padding: 1em 0;
+	}
 }
 
 #danger-zone {
@@ -59,7 +82,6 @@ canvas {
 
 #error {
 	padding: 20px;
-	text-align: center;
 	color: red;
 	font-size: 1.7em;
 }
@@ -73,11 +95,13 @@ canvas {
 }
 
 #joined {
-	text-align: center;
-	padding: 20px;
-
 	.join-url {
-		font-size: 1.7em;
+		font-size: 1.2em;
+	}
+
+	.code {
+		font-size: 4em;
+		color: #fff;
 	}
 
 	.players {

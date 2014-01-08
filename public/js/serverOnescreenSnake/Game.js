@@ -20,9 +20,6 @@ define(function (require, exports, module) {
 		// VIEW SETUP
 		this.screen.updateBorders();
 		this.showSection('joined');
-		$('#status').text('connected');
-		$('.join-url').text(session.joinSessionUrl);
-		$('.join-url').attr('href', 'http://' + session.joinSessionUrl);
 
 
 		// LISTENERS
@@ -53,12 +50,14 @@ define(function (require, exports, module) {
 	};
 
 	Game.prototype.onStartGame = function () {
+		$('h1.title').hide();
 		this.screen.drawStartingPoint();
 		this.showSection('game');
 		this.joystick.start();
 	};
 
 	Game.prototype.onGameFinished = function () {
+		$('h1.title').show();
 		this.showSection('joined');
 		this.screen.clearPlayers();
 		this.joystick.stop();
@@ -90,6 +89,7 @@ define(function (require, exports, module) {
 	};
 
 	Game.prototype.stop = function () {
+		$('h1.title').hide();
 		this.onError('session has been destroyed');
 		this.joystick.stop();
 	};

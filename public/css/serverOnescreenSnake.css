@@ -4,7 +4,9 @@ html {
   background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
   background-position: center;
   font-family: monospace;
+  font-size: 1.2em;
   color: white;
+  text-align: center;
 }
 html,
 body {
@@ -20,15 +22,15 @@ a {
 a:hover {
   color: grey;
 }
+p {
+  margin: 0 10px 10px 10px;
+}
 button {
   border: 2px solid #FFF;
   background: #000;
   color: #FFF;
   padding: 0.5em 2em;
   text-transform: uppercase;
-}
-button:visited {
-  color: #FFF;
 }
 button:hover {
   border-color: grey;
@@ -45,14 +47,27 @@ canvas {
   bottom: 20px;
   left: 0px;
   width: 100%;
+}
+#joining input {
+  font-size: 200%;
+  width: 3em;
+  border: none;
   text-align: center;
+  margin-bottom: 0.5em;
+}
+#joining input::-webkit-outer-spin-button,
+#joining input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#joining > div {
+  padding: 1em 0;
 }
 #danger-zone {
   display: none;
 }
 #error {
   padding: 20px;
-  text-align: center;
   color: red;
   font-size: 1.7em;
 }
@@ -62,12 +77,12 @@ canvas {
 .section {
   display: none;
 }
-#joined {
-  text-align: center;
-  padding: 20px;
-}
 #joined .join-url {
-  font-size: 1.7em;
+  font-size: 1.2em;
+}
+#joined .code {
+  font-size: 4em;
+  color: #fff;
 }
 #joined .players {
   width: 100%;

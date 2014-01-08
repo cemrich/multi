@@ -5,8 +5,6 @@ define(function () {
 
 	var canvas = document.getElementById('canvas');
 	var context = canvas.getContext('2d');
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
 
 	var dangerZone = document.getElementById('danger-zone');
 	var pattern = context.createPattern(dangerZone, 'repeat');
@@ -15,6 +13,8 @@ define(function () {
 	var Screen = function (session, arranger) {
 		this.session = session;
 		this.arranger = arranger;
+		canvas.width = session.myself.width;
+		canvas.height = session.myself.height;
 	};
 
 	Screen.prototype.clearPlayers = function () {

@@ -26,17 +26,61 @@ requirejs(['../lib/multi', './Game', '../SERVER', '../lib/jquery-2.0.0.min'],
 	}
 
 	function onSession(session) {
+		var url = window.location.host;
+		if (window.location.port !== '' && window.location.port !== '80') {
+			url += ':' + window.location.port;
+		}
+		url += window.location.pathname;
+
+		$('#status').text('connected');
+		$('.join-url').text(url);
+		$('.join-url').attr('href', 'http://' + url);
+		$('#joined .code').text(session.token);
+
 		var game = new Game(session, onError, showSection);
 		session.on('destroyed', function () {
 			game.stop();
 		});
 	}
 
-	function onSessionFailed(error) {
+	function onCreateSessionFailed(error) {
 		onError(error.message);
 	}
 
+	function onJoinSessionFailed(error) {
+		if (error instanceof multiModule.NoSuchSessionError) {
+			$('#status').text('');
+			alert('This seems to be the wrong game code.\nPlease try again!');
+		} else {
+			onError(error.message);
+		}
+	}
+
+	function joinSession() {
+		$('#joining input.code').blur();
+		$('#status').text('loading');
+		var token = $('#joining input.code').val();
+		// timeout so the sofware keyboard can go away
+		setTimeout(function () {
+			multi.joinSession(token).then(onSession, onJoinSessionFailed).done();
+		}, 200);
+	}
+
 	var multi = multiModule.init(multiOptions);
-	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
+	$('#status').text('');
+	showSection('joining');
+
+	$('#joining button.join').click(joinSession);
+	$('#joining input.code').on('keypress', function (event) {
+		var key = event.keyCode || event.which;
+		if (key === 13) {
+			joinSession();
+		}
+	});
+
+	$('#joining button.start').click(function () {
+		$('#status').text('loading');
+		multi.createSession().then(onSession, onCreateSessionFailed).done();
+	});
 
 });

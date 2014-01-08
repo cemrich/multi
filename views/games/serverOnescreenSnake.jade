@@ -12,11 +12,32 @@ html
 
 
 	body
-
+		h1.title Like-A-Tron
 		#status loading
 		#error.section
+		#joining.section
+			.join
+				p 
+					| Want to join a running game?
+					br
+					| Enter the game code here:
+				input.code(type='number', placeholder='code', min=0, max=999, autofocus='autofocus')
+				br
+				button.join join game
+			.new
+				p 
+					| Want to start a new game?
+					br
+					| Click here to get your game code:
+				button.start new game
 		#joined.section
-			a.join-url
+			p
+				| Want more players?
+				br
+				| Visit 
+				a.join-url 
+				|  and enter the game code:
+			p.code
 			.players
 			button.start Start
 		#game.section
