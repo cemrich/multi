@@ -4,6 +4,15 @@ define(function (require, exports, module) {
 	var multiModule = require('../lib/multi');
 	var Joystick = require('../lib/joystick');
 
+	navigator.vibrate =
+		navigator.vibrate ||
+		navigator.webkitVibrate ||
+		navigator.mozVibrate;
+	function vibrate(args) {
+		if (navigator.vibrate) {
+			navigator.vibrate(args);
+		}
+	}
 
 	var Game = function(session, onError, showSection) {
 
@@ -14,6 +23,7 @@ define(function (require, exports, module) {
 		this.screen = new Screen(session, this.arranger);
 		this.joystick = new Joystick(30, function (direction) {
 				session.myself.attributes.direction = direction;
+				vibrate([20]);
 			}, false, $('.joystick'), $('html'));
 		
 
@@ -65,6 +75,7 @@ define(function (require, exports, module) {
 
 	Game.prototype.onPlayerDied = function () {
 		this.joystick.stop();
+		vibrate([200]);
 	};
 
 	Game.prototype.addPlayer = function (player) {
