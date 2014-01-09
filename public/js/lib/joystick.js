@@ -44,6 +44,12 @@ define(function () {
 			return pos;
 		}
 
+		function setPosition(element, x, y) {
+			element[0].style.transform =
+			element[0].style.webkitTransform =
+				'translate3d(' + x + 'px,' + y + 'px,0)';
+		}
+
 		function onMove(event) {
 			event.preventDefault();
 			var newDirection = direction;
@@ -68,8 +74,7 @@ define(function () {
 					directionCallback(direction);
 				}
 			}
-			moveMarker.css('top', pos.y);
-			moveMarker.css('left', pos.x);
+			setPosition(moveMarker, pos.x, pos.y);
 		}
 
 		function onUp(event) {
@@ -84,10 +89,8 @@ define(function () {
 			eventEmitter.one('touchend mouseup', onUp);
 			eventEmitter.on('touchmove mousemove', onMove);
 			startPos = getEventPosition(event);
-			downMarker.css('top', startPos.y);
-			downMarker.css('left', startPos.x);
-			moveMarker.css('top', startPos.y);
-			moveMarker.css('left', startPos.x);
+			setPosition(downMarker, startPos.x, startPos.y);
+			setPosition(moveMarker, startPos.x, startPos.y);
 			downMarker.show();
 			moveMarker.show();
 		}
