@@ -1,11 +1,11 @@
-/* global exports */
+/* global module */
 
 var multiModule = require('../../multi/server');
 var ScreenArranger = multiModule.screens.HorizontalArranger;
 var Snake = require('./snake');
 
 
-exports.Game = function (session) {
+module.exports = function (session) {
 
 	var COLORS = ['#01E2EC', '#EB0067', '#33D92C',
 		'#DA6A03', '#9D32FF','#F2F311', '#FD3333',

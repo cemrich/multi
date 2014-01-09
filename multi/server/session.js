@@ -11,6 +11,8 @@ var MessageSender = require('../shared/CustomMessageSender');
 var util = require('util');
 var token = require('./token');
 
+var SCRIPT_DIR = '../../games';
+var SCRIPT_NAME_REGEXP = /^(\d|[A-Za-z])+$/;
 
 /**
  * @classdesc A game session that connects and manages multiple players on 
@@ -33,14 +35,46 @@ var Session = function (io, options) {
 	this.messageSender = new MessageSender(this.messageBus, 'session');
 
 	this.onSessionReady();
-
-	if (this.scriptName !== null) {
-		var gameModule = require('../../' + options.scriptName);
-		gameModule.Game(this);
-	}
+	this.executeServerScript();
 };
 
 util.inherits(Session, AbstractSession);
+
+/**
+ * Validate path for the server side game script to circumvent unwanted
+ * code execution and execute it. On error this session will be destroyed.
+ * @private
+ */
+Session.prototype.executeServerScript = function () {
+	var session = this;
+
+	// destroy session after it has been fully constructed
+	var destroy = function () {
+		setTimeout(function () {
+			session.messageBus.send({
+				name: 'disconnect',
+				fromInstance: 'session'
+			});
+			session.destroy();
+		}, 1000);
+	};
+
+	if (this.scriptName !== null) {
+		if (SCRIPT_NAME_REGEXP.test(this.scriptName)) {
+			var path = SCRIPT_DIR + '/' + this.scriptName;
+			try {
+				new require(path)(this);
+			} catch (error) {
+				console.error('ERROR: could not load module at', path, ':', error);
+				destroy();
+			}
+		} else {
+			console.error('ERROR: only letters (A-Za-z) and digits (0-9) are allowed for sessionOptions.scriptName:',
+				this.scriptName);
+			destroy();
+		}
+	}
+};
 
 /**
  * @return The next unused player number. Gaps from disconnected

@@ -10,7 +10,7 @@ requirejs(['../lib/multi', './Game', '../SERVER', '../lib/jquery-2.0.0.min'],
 	var multiOptions = {
 		server: SERVER,
 		session: {
-			scriptName: 'games/serverOnescreenSnake/index.js'
+			scriptName: 'serverOnescreenSnake'
 		}
 	};
 

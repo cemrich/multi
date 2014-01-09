@@ -19,8 +19,11 @@ define(function(require, exports, module) {
 	/**
 	 * @typedef {Object} SessionOptions
 	 * @property {string} [scriptName] name of server side script file that should
-	 *  be executed when a new session is created. This module must provide a Game
-	 *  constructor that takes a session as only argument.
+	 *  be executed when a new session is created. This module must export a 
+	 *  constructor that takes a session as its only argument (module.exports = 
+	 *  function (session)). This property has to contain only numbers (0-9) and 
+	 *  letters (A-Za-z) for security reasons. Multi will look for the given module
+	 *  name inside a 'games' directory that lies next to the multi directory.
 	 * @property {string} [token.func='numeric']  name of a function inside the 
 	 *  {@link module:server/token} module that should generate the session token
 	 * @property {Array}  [token.args=[]]   argument array for the token 
