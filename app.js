@@ -37,6 +37,7 @@ app.use(function(req, res, next) {
 app.get('/', routes.index);
 // game routes
 app.get('/symbols', routes.symbols);
+app.get('/sound', routes.sound);
 app.get('/snake1p/presenter', routes.terminalControllerSnake1pPresenter);
 app.get('/snake1p', routes.terminalControllerSnake1pPlayer);
 app.get('/snakemp/presenter', routes.terminalControllerSnakeMpPresenter);

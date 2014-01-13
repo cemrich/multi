@@ -1,0 +1,33 @@
+extends ../layout
+
+block content
+
+	h1 Sound
+
+	#intro
+		p This is a demo for showing how sound can be used to transfer the session token.
+		button.new New game
+		br
+		button.join Join existing game
+
+	#new
+		p 
+			| You have started a new game!
+			br
+			| You should now hear beeping sounds. If not make sure to turn up
+			| the volume of this device.
+		img(src='../img/icons/tunes.svg' id='tune')
+
+	#join
+		p Hold your device near the game starter device to record its sound.
+		img(src='../img/icons/microphone.svg' id='microphone')
+
+	#created
+		img(src='../img/icons/star_bw.svg')
+		h2 You did it!
+
+	#loading
+		p loading...
+
+	link(rel='stylesheet', href='/css/sound.css')
+	script(data-main='/js/sound/index.js', src='/js/lib/require.js')

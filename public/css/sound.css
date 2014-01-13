@@ -1,0 +1,34 @@
+html {
+  text-align: center;
+  font-family: sans-serif;
+  color: white;
+  background-color: #222;
+  background-image: repeating-linear-gradient(-60deg, transparent, transparent 10px, rgba(255, 255, 255, 0.03) 10px, rgba(255, 255, 255, 0.03) 40px);
+  min-height: 100%;
+}
+button {
+  margin: 0.5em;
+  padding: 0.5em 1em;
+  font-size: 90%;
+  font-weight: bold;
+}
+#new,
+#join,
+#created {
+  display: none;
+}
+#loading {
+  width: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+#microphone {
+  opacity: 0.5;
+}
+#microphone.active {
+  opacity: 1;
+}
+#tune {
+  opacity: 0.5;
+}

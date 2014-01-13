@@ -19,6 +19,10 @@ exports.symbols = function(req, res) {
 	res.render('games/symbols');
 };
 
+exports.sound = function(req, res) {
+	res.render('games/sound');
+};
+
 exports.terminalControllerSnake1pPlayer = function(req, res) {
 	res.render('games/terminalControllerSnake1p/player');
 };
