@@ -3951,6 +3951,18 @@ define('../shared/errors',['require','exports','module','util'],function(require
 	util.inherits(exports.JoiningDisabledError, MultiError);
 
 
+	/**
+	 * @classdesc The script name you configured in the {@link SessionOptions}
+	 *  is not valid.
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.ScriptNameNotAllowedError = function () {
+		MultiError.call(this, 'only letters (A-Za-z) and digits (0-9) are allowed for sessionOptions.scriptName');
+	};
+	util.inherits(exports.ScriptNameNotAllowedError, MultiError);
+
+
 	return exports;
 
 });
@@ -4687,6 +4699,7 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * created {@link module:client/session~Session Session} instance.<br><br>
 	 * On error it will be rejected with either 
 	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError},
+	 * {@link module:shared/errors.ScriptNameNotAllowedError ScriptNameNotAllowedError},
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 *
 	 * @example
@@ -4724,6 +4737,10 @@ define('multi',['require','exports','module','events','util','./session','../sha
 			socket.on('createSessionFailed', function (event) {
 				if (event.reason === 'tokenAlreadyExists') {
 					deferred.reject(new errors.TokenAlreadyExistsError());
+				} else if (event.reason === 'scriptNameNotAllowed') {
+					deferred.reject(new errors.ScriptNameNotAllowedError());
+				} else {
+					deferred.reject(new errors.MultiError(event.reason));
 				}
 			});
 
@@ -4798,6 +4815,11 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * @type module:shared/errors.JoiningDisabledError
 	 */
 	exports.JoiningDisabledError = errors.JoiningDisabledError;
+
+	/**
+	 * @type module:shared/errors.ScriptNameNotAllowedError
+	 */
+	exports.ScriptNameNotAllowedError = errors.ScriptNameNotAllowedError;
 
 	/**
 	 * @type module:client/events.EventEmitter

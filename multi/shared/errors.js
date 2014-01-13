@@ -115,6 +115,18 @@ define(function(require, exports, module) {
 	util.inherits(exports.JoiningDisabledError, MultiError);
 
 
+	/**
+	 * @classdesc The script name you configured in the {@link SessionOptions}
+	 *  is not valid.
+	 * @class
+	 * @mixes module:shared/errors.MultiError
+	 */
+	exports.ScriptNameNotAllowedError = function () {
+		MultiError.call(this, 'only letters (A-Za-z) and digits (0-9) are allowed for sessionOptions.scriptName');
+	};
+	util.inherits(exports.ScriptNameNotAllowedError, MultiError);
+
+
 	return exports;
 
 });
