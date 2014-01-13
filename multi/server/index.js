@@ -19,6 +19,7 @@ var util = require('util');
 var sessionModule = require('./session');
 var playerModule = require('./player');
 var color = require('../shared/color');
+var errors = require('../shared/errors');
 var screensModule = require('../shared/screens');
 var HorizontalArranger = require('../shared/screens/HorizontalArranger');
 
@@ -85,13 +86,24 @@ var Multi = function (server) {
 		});
 		// create new session
 		socket.on('createSession', function(event) {
-			var session = sessionModule.create(io, event.options);
-			if (session === null) {
+			var session = null;
+
+			try {
+				session = sessionModule.create(io, event.options);
+			} catch (error) {
+				var reason = error.message;
+				if (error instanceof errors.TokenAlreadyExistsError) {
+					reason = 'tokenAlreadyExists';
+				} else if (error instanceof errors.ScriptNameNotAllowedError) {
+					reason = 'scriptNameNotAllowed';
+				}
 				socket.emit('createSessionFailed', {
 					token: event.token,
-					reason: 'tokenAlreadyExists'
+					reason: reason
 				});
-			} else {
+			}
+
+			if (session !== null) {
 				multi.emit('sessionCreated', { session: session });
 				var player = playerModule.create(socket.id, session.messageBus, event.playerParams);
 				player.number = session.getNextFreePlayerNumber();
