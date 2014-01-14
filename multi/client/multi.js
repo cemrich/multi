@@ -124,7 +124,7 @@ define(function(require, exports, module) {
 	 * {@link module:shared/errors.JoiningDisabledError JoiningDisabledError}, 
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 */
-	Multi.prototype.autoJoinElseCreateSession = function () {
+	Multi.prototype.autoJoinOrCreateSession = function () {
 		var that = this;
 
 		return this.autoJoinSession().catch(function (error) {

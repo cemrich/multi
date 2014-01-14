@@ -139,6 +139,6 @@ requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
 
 
 	var multi = multiModule.init(multiOptions);
-	multi.autoJoinElseCreateSession().then(onSession, onSessionFailed).done();
+	multi.autoJoinOrCreateSession().then(onSession, onSessionFailed).done();
 
 });
