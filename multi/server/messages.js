@@ -73,6 +73,7 @@ exports.MessageBus.prototype.addSocket = function (socket) {
 exports.MessageBus.prototype.sendToSockets = function (message, sockets) {
 	var volatile = message.volatile;
 	delete message.volatile;
+	delete message.fromClient;
 	delete message.toClient;
 	if (volatile) {
 		sockets.volatile.emit('multi', message);
@@ -120,8 +121,9 @@ exports.MessageBus.prototype.distribute = function (message, socket) {
  * @private
  */
 exports.MessageBus.prototype.onSocketMessage = function (message, socket) {
-	this.distribute(message, socket);
+	message.fromClient = socket.id;
 	this.pubSub.publish(message);
+	this.distribute(message, socket);
 };
 
 /**

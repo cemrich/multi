@@ -2933,7 +2933,7 @@ define('../shared/player',['require','exports','module','./SyncedObject','./Cust
 	 * @private
 	 * @abstract
 	 */
-	Player.prototype.onUserDisconnect = function () {};
+	Player.prototype.onUserDisconnect = function (message) {};
 
 	/**
 	 * Notifies the user about every change inside the given changeset.
@@ -3004,6 +3004,8 @@ define('../shared/player',['require','exports','module','./SyncedObject','./Cust
 
 	/**
 	 * Disconnect the client represented by this player from the framework.
+	 * Due to security reasons this will only work with the player that
+	 * represents this client (session.myself) and fail silently on all others.
 	 * @fires module:shared/player~Player#disconnected
 	 */
 	Player.prototype.disconnect = function () {
