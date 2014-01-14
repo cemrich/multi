@@ -3223,6 +3223,9 @@ define('../shared/session',['require','exports','module','events','util','./play
 		if (session.getPlayerCount() === session.minPlayerNeeded) {
 			session.emit('aboveMinPlayerNeeded');
 		}
+		if (session.getPlayerCount() === session.maxPlayerAllowed) {
+			session.emit('aboveMaxPlayerNeeded');
+		}
 	};
 
 	/**
@@ -3237,6 +3240,9 @@ define('../shared/session',['require','exports','module','events','util','./play
 
 		if (this.getPlayerCount() === (this.minPlayerNeeded-1)) {
 			this.emit('belowMinPlayerNeeded');
+		}
+		if (this.getPlayerCount() === (this.maxPlayerNeeded-1)) {
+			this.emit('belowMaxPlayerNeeded');
 		}
 	};
 
@@ -3406,6 +3412,20 @@ define('../shared/session',['require','exports','module','events','util','./play
 	 * You could listen for this event to start your game when
 	 * enough players have connected.
 	 * @event module:shared/session~Session#aboveMinPlayerNeeded
+	 */
+
+	/**
+	 * Fired when a new player has been added to this session and
+	 * there are now exactly as many players connected to this session
+	 * as stated in maxPlayerAllowed.
+	 * @event module:shared/session~Session#aboveMaxPlayerAllowed
+	 */
+
+	/**
+	 * Fired when a player has been removed from this session and
+	 * there are now less player connected to this session than stated 
+	 * in maxPlayerNeeded.
+	 * @event module:shared/session~Session#belowMaxPlayerAllowed
 	 */
 
 
