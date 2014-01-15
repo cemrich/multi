@@ -50,6 +50,15 @@ define(function () {
 				'translate3d(' + x + 'px,' + y + 'px,0)';
 		}
 
+		function setDirection(newDirection) {
+			var oppositeDir = (direction + 2) % 4;
+			if (newDirection !== direction && 
+				(allowOppositeDir || newDirection != oppositeDir)) {
+				direction = newDirection;
+				directionCallback(direction);
+			}
+		}
+
 		function onMove(event) {
 			event.preventDefault();
 			var newDirection = direction;
@@ -67,12 +76,7 @@ define(function () {
 					pos.y = startPos.y;
 					newDirection = (pos.x < startPos.x) ? 3 : 1;
 				}
-				var oppositeDir = (direction + 2) % 4;
-				if (newDirection !== direction && 
-					(allowOppositeDir || newDirection != oppositeDir)) {
-					direction = newDirection;
-					directionCallback(direction);
-				}
+				setDirection(newDirection);
 			}
 			setPosition(moveMarker, pos.x, pos.y);
 		}
@@ -95,6 +99,23 @@ define(function () {
 			moveMarker.show();
 		}
 
+		function onKey(event) {
+			switch (event.which) {
+				case 38:
+					setDirection(0);
+					break;
+				case 39:
+					setDirection(1);
+					break;
+				case 40:
+					setDirection(2);
+					break;
+				case 37:
+					setDirection(3);
+					break;
+			}
+		}
+
 
 		// PUBLIC
 
@@ -104,6 +125,7 @@ define(function () {
 		this.start = function () {
 			direction = null;
 			eventEmitter.on('touchstart mousedown', onDown);
+			eventEmitter.on('keydown', onKey);
 		};
 
 		/**
@@ -111,6 +133,7 @@ define(function () {
 		 */
 		this.stop = function () {
 			eventEmitter.off('touchstart mousedown', onDown);
+			eventEmitter.off('keydown', onKey);
 			downMarker.hide();
 			moveMarker.fadeOut();
 		};
