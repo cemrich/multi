@@ -2,7 +2,7 @@
 
 var multiModule = require('../../multi/server');
 var ScreenArranger = multiModule.screens.HorizontalArranger;
-var Snake = require('./snake');
+var Snake = require('./Snake');
 
 
 module.exports = function (session) {
