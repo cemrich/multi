@@ -37,8 +37,8 @@ exports.terminalControllerSnakeMpPresenter = function(req, res) {
 	res.render('games/terminalControllerSnakeMp/presenter');
 };
 
-exports.serverOnescreenSnake = function(req, res) {
-	res.render('games/serverOnescreenSnake');
+exports.tron = function(req, res) {
+	res.render('games/tron');
 };
 
 exports.image = function(req, res) {
