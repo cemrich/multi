@@ -38,10 +38,10 @@ app.get('/', routes.index);
 // game routes
 app.get('/symbols', routes.symbols);
 app.get('/sound', routes.sound);
-app.get('/snake1p/presenter', routes.terminalControllerSnake1pPresenter);
-app.get('/snake1p', routes.terminalControllerSnake1pPlayer);
-app.get('/snakemp/presenter', routes.terminalControllerSnakeMpPresenter);
-app.get('/snakemp', routes.terminalControllerSnakeMpPlayer);
+app.get('/snake/presenter', routes.snakePresenter);
+app.get('/snake', routes.snakePlayer);
+app.get('/snakemp/presenter', routes.snakeMpPresenter);
+app.get('/snakemp', routes.snakeMpPlayer);
 app.get('/tron', routes.tron);
 app.get('/image', routes.image);
 

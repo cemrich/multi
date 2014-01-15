@@ -23,18 +23,18 @@ exports.sound = function(req, res) {
 	res.render('games/sound');
 };
 
-exports.terminalControllerSnake1pPlayer = function(req, res) {
-	res.render('games/terminalControllerSnake1p/player');
+exports.snakePlayer = function(req, res) {
+	res.render('games/snake/player');
 };
-exports.terminalControllerSnake1pPresenter = function(req, res) {
-	res.render('games/terminalControllerSnake1p/presenter');
+exports.snakePresenter = function(req, res) {
+	res.render('games/snake/presenter');
 };
 
-exports.terminalControllerSnakeMpPlayer = function(req, res) {
-	res.render('games/terminalControllerSnakeMp/player');
+exports.snakeMpPlayer = function(req, res) {
+	res.render('games/snakeMp/player');
 };
-exports.terminalControllerSnakeMpPresenter = function(req, res) {
-	res.render('games/terminalControllerSnakeMp/presenter');
+exports.snakeMpPresenter = function(req, res) {
+	res.render('games/snakeMp/presenter');
 };
 
 exports.tron = function(req, res) {
