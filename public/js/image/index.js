@@ -4,7 +4,7 @@ requirejs.config({
 	}
 });
 
-requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
+requirejs(['../lib/multi', '../SERVER'],
 	function (multiModule, SERVER) {
 
 	var multiOptions = {
@@ -119,8 +119,13 @@ requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
 		session.myself.attributes.color = multiModule.color.random();
 		$('html').css('background-color', session.myself.attributes.color);
 
+		var fullUrl = 'http://' + session.joinSessionUrl;
 		$('.join-url').text(session.joinSessionUrl);
-		$('.join-url').attr('href', 'http://' + session.joinSessionUrl);
+		$('.join-url').attr('href', fullUrl);
+		$('#game .qr').qrcode({width: 150, height: 150, text: fullUrl});
+		$('#game .qr').on('click touchstart', function () {
+			$(this).hide();
+		});
 		session.getPlayerArray().forEach(addPlayer);
 		session.on('destroyed', onSessionDestroyed);
 		session.on('playerJoined', function (event) {

@@ -7,6 +7,8 @@ html
 		meta(name='mobile-web-app-capable', content='yes')
 
 		link(rel='stylesheet', href='/css/image.css')
+		script(src='/js/lib/jquery-2.0.0.min.js')
+		script(src='/js/lib/jquery.qrcode.min.js')
 		script(data-main='/js/image/index.js', src='/js/lib/require.js')
 
 
@@ -16,6 +18,7 @@ html
 		#error.section
 		#game.section
 			.line
+			.qr
 			a.join-url
 			img#image(src='/img/icons/star_bw.svg')
 			.players

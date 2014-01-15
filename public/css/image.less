@@ -41,6 +41,28 @@ a {
 		left: 0;
 		top: 50%;
 	}
+	.qr {
+		position: absolute;
+		top: 45%;
+		left: 50%;
+		margin: -85px 0 0 -85px;
+		border: 20px solid white;
+		width: 150px;
+		height: 150px;
+		canvas {
+			display: block;
+			margin-top: -13px;
+		}
+		&:before {
+			content: 'click to close';
+			text-align: center;
+			background-color: white;
+			font-size: 10px;
+			position: relative;
+			top: -20px;
+			display: block;
+		}
+	}
 }
 
 #error {
