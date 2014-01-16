@@ -8,6 +8,16 @@ define(function () {
 
 	var dangerZone = document.getElementById('danger-zone');
 	var pattern = context.createPattern(dangerZone, 'repeat');
+	var rightDirection = $('.direction.right');
+	var leftDirection = $('.direction.left');
+
+
+	function getBackgroundImage(color) {
+		return 'linear-gradient(' + color + ' 2px, transparent 2px),' +
+			'linear-gradient(90deg, ' + color + ' 2px, transparent 2px),' +
+			'linear-gradient(' + color + ' 1px, transparent 1px),' +
+			'linear-gradient(90deg, ' + color + ' 1px, transparent 1px)';
+	}
 
 
 	var Screen = function (session, arranger) {
@@ -15,6 +25,9 @@ define(function () {
 		this.arranger = arranger;
 		canvas.width = session.myself.width;
 		canvas.height = session.myself.height;
+		session.myself.getAttributeAsync('color').then(function (color) {
+			$('#bg').css('background-image', getBackgroundImage(color));
+		});
 	};
 
 	Screen.prototype.clearPlayers = function () {
@@ -38,8 +51,32 @@ define(function () {
 		context.closePath();
 	};
 
+	Screen.prototype.setArrows = function (player, arrow) {
+		if (player) {
+			arrow.show();
+			player.getAttributeAsync('color').then(function (color) {
+				arrow.css('color', color);
+			});
+		} else {
+			arrow.hide();
+		}
+	};
+
+	Screen.prototype.getPlayerY = function (player) {
+		var y = {};
+		var myScreen = this.session.myself.screen;
+
+		var globalStartY = player.screen.y;
+		y.start = Math.max(myScreen.globalToLocal(0, globalStartY).y, 0);
+		y.end = Math.min(y.start + player.height, myScreen.height);
+		y.start += BORDER_WIDTH;
+		y.end -= BORDER_WIDTH;
+
+		return y;
+	};
+
 	Screen.prototype.updateBorders = function () {
-		var globalStartY, myStartY, myEndY;
+		var y;
 
 		context.lineWidth = BORDER_WIDTH * 2;
 		context.strokeStyle = pattern;
@@ -48,22 +85,23 @@ define(function () {
 		context.globalCompositeOperation = 'destination-out';
 		context.beginPath();
 		var myScreen = this.session.myself.screen;
-		if (myScreen.rightPlayers[0]) {
-			globalStartY = myScreen.rightPlayers[0].screen.y;
-			myStartY = Math.max(myScreen.globalToLocal(0, globalStartY).y, 0);
-			myEndY = Math.min(myStartY + myScreen.rightPlayers[0].height,
-				myScreen.height);
-			context.moveTo(canvas.width, myStartY + BORDER_WIDTH);
-			context.lineTo(canvas.width, myEndY - BORDER_WIDTH);
+
+		var rightPlayer = myScreen.rightPlayers[0];
+		this.setArrows(rightPlayer, rightDirection);
+		if (rightPlayer) {
+			y = this.getPlayerY(rightPlayer);
+			context.moveTo(canvas.width, y.start);
+			context.lineTo(canvas.width, y.end);
 		}
-		if (myScreen.leftPlayers[0]) {
-			globalStartY = myScreen.leftPlayers[0].screen.y;
-			myStartY = Math.max(myScreen.globalToLocal(0, globalStartY).y, 0);
-			myEndY = Math.min(myStartY + myScreen.leftPlayers[0].height,
-				myScreen.height);
-			context.moveTo(0, myStartY + BORDER_WIDTH);
-			context.lineTo(0, myEndY - BORDER_WIDTH);
+
+		var leftPlayer = myScreen.leftPlayers[0];
+		this.setArrows(leftPlayer, leftDirection);
+		if (leftPlayer) {
+			y = this.getPlayerY(leftPlayer);
+			context.moveTo(0, y.start);
+			context.lineTo(0, y.end);
 		}
+
 		context.stroke();
 		context.closePath();
 		context.globalCompositeOperation = 'source-over';

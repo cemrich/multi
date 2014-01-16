@@ -1,12 +1,22 @@
 html {
   background-color: #160F0F;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-  background-position: center;
   font-family: monospace;
   font-size: 1.2em;
   color: white;
   text-align: center;
+}
+#bg {
+  content: "";
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-position: center;
+  opacity: 0.15;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: -1;
 }
 html,
 body {
@@ -96,6 +106,21 @@ canvas {
   margin: 4px;
   height: 50px;
   flex: 1;
+}
+.direction {
+  display: none;
+  position: absolute;
+  top: 50%;
+  font-size: 90px;
+  margin-top: -45px;
+  padding: 0;
+  opacity: 0.2;
+}
+.direction.left {
+  left: -10px;
+}
+.direction.right {
+  right: -10px;
 }
 .joystick > div {
   position: absolute;
