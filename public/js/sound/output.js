@@ -6,6 +6,8 @@ define(function(require, exports, module) {
 	var AudioContex = window.AudioContext ||
 		window.webkitAudioContext ||
 		window.mozAudioContext;
+
+	var tune = document.querySelector('#tune');
 	var audio = new AudioContex();
 	var interval = null;
 	var position = 0;
@@ -40,6 +42,7 @@ define(function(require, exports, module) {
 		if (freq) {
 			createOscillator(freq);
 		}
+		tune.style.opacity = 0.5 + note * 0.15;
 	}
 
 	exports.start = function (token) {

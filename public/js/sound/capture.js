@@ -10,6 +10,7 @@ define(function(require, exports, module) {
 		navigator.webkitGetUserMedia ||
 		navigator.mozGetUserMedia;
 
+	var microphone = document.querySelector('#microphone');
 	var audioContext = new AudioContext();
 	var analyser = audioContext.createAnalyser();
 	var notes = {
@@ -27,8 +28,8 @@ define(function(require, exports, module) {
 	var localStream = null;
 
 	function onNoteDetected(note) {
+		microphone.style.opacity = 0.5 + note * 0.15;
 		sequence += note;
-		console.log(sequence);
 		if (headerFound && sequence.length === TOKEN_LENGTH * 2 - 1) {
 			headerFound = false;
 			var decoded = '';
