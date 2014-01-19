@@ -8,18 +8,18 @@
   "dependencies": {
     "express": "3.2.6",
     "socket.io": "0.9.16",
-    "jade": "*",
-    "less-middleware": "*",
-    "qunit": "*"
+    "jade": "0.35.0",
+    "less-middleware": "0.1.12",
+    "qunit": "0.5.16"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
-    "grunt-contrib-qunit": "~0.2.2",
-    "grunt-contrib-jshint": "~0.6.4",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-jsdoc": "~0.4.2",
-    "grunt-contrib-requirejs": "~0.4.1",
-    "requirejs": "~2.1.9",
-    "amdefine": "~0.1.0"
+    "grunt": "0.4.1",
+    "grunt-contrib-qunit": "0.2.2",
+    "grunt-contrib-jshint": "0.6.4",
+    "grunt-contrib-watch": "0.5.3",
+    "grunt-jsdoc": "0.4.2",
+    "grunt-contrib-requirejs": "0.4.1",
+    "requirejs": "2.1.9",
+    "amdefine": "0.1.0"
   }
 }
