@@ -9,8 +9,7 @@
     "express": "3.4.8",
     "socket.io": "0.9.16",
     "jade": "1.1.5",
-    "less-middleware": "0.1.14",
-    "qunit": "0.5.16"
+    "less-middleware": "0.1.14"
   },
   "devDependencies": {
     "grunt": "0.4.1",
@@ -20,6 +19,7 @@
     "grunt-jsdoc": "0.4.2",
     "grunt-contrib-requirejs": "0.4.1",
     "requirejs": "2.1.9",
-    "amdefine": "0.1.0"
+    "amdefine": "0.1.0",
+    "qunit": "0.5.18"
   }
 }
