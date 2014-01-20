@@ -119,10 +119,8 @@ canvas {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   /* Webkit */
-
   -moz-user-select: none;
   /* Firefox */
-
   user-select: none;
 }
 #controller .points {
