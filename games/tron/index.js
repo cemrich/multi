@@ -2,7 +2,7 @@
 
 var multiModule = require('../../multi/server');
 var ScreenArranger = multiModule.screens.HorizontalArranger;
-var Snake = require('./Snake');
+var Lightcycle = require('./Lightcycle');
 
 
 module.exports = function (session) {
@@ -11,7 +11,7 @@ module.exports = function (session) {
 		'#DA6A03', '#9D32FF','#F2F311', '#FD3333',
 		'#0000FF', '#FD00F3'];
 
-	var snakes = null;
+	var lightcycles = null;
 	var interval = null;
 	var arranger = new ScreenArranger(session);
 
@@ -22,17 +22,17 @@ module.exports = function (session) {
 
 	function move() {
 		var dead = [];
-		snakes.forEach(function (snake) {
-			snake.update();
-			if (snake.isDead(snakes)) {
-				dead.push(snake);
-				snake.owner.message('died');
+		lightcycles.forEach(function (lightcycle) {
+			lightcycle.update();
+			if (lightcycle.isDead(lightcycles)) {
+				dead.push(lightcycle);
+				lightcycle.owner.message('died');
 			}
 		});
-		dead.forEach(function (snake) {
-			snakes.splice(snakes.indexOf(snake), 1);
+		dead.forEach(function (lightcycle) {
+			lightcycles.splice(lightcycles.indexOf(lightcycle), 1);
 		});
-		if (snakes.length === 0) {
+		if (lightcycles.length === 0) {
 			onEndGame();
 		}
 	}
@@ -58,10 +58,10 @@ module.exports = function (session) {
 
 	function onStartGame() {
 		session.disablePlayerJoining();
-		snakes = [];
+		lightcycles = [];
 
 		for (var i in session.players) {
-			snakes.push(new Snake(session.players[i], arranger));
+			lightcycles.push(new Lightcycle(session.players[i], arranger));
 		}
 
 		session.on('playerLeft', onPlayerLeft);

@@ -37,7 +37,7 @@ Segment.prototype.intersects = function (segment) {
 };
 
 
-function Snake (owner, arranger) {
+function Lightcycle (owner, arranger) {
 	this.owner = owner;
 	this.arranger = arranger;
 
@@ -55,12 +55,12 @@ function Snake (owner, arranger) {
 	this.segments = [];
 }
 
-Snake.prototype.update = function () {
+Lightcycle.prototype.update = function () {
 	this.move();
 	this.updateDisplay();
 };
 
-Snake.prototype.move = function () {
+Lightcycle.prototype.move = function () {
 	this.lastDir = this.dir;
 	this.dir = this.owner.attributes.direction || 0;
 
@@ -86,27 +86,28 @@ Snake.prototype.move = function () {
 	}
 };
 
-Snake.prototype.isDead = function (snakes) {
-	return !this.isInsidePlayingField() || this.hits(snakes);
+Lightcycle.prototype.isDead = function (lightcycles) {
+	return !this.isInsidePlayingField() || this.hits(lightcycles);
 };
 
-Snake.prototype.isInsidePlayingField = function () {
+Lightcycle.prototype.isInsidePlayingField = function () {
 	return this.arranger.isAnyPlayerHit(this.curSegment.x2, this.curSegment.y2);
 };
 
-Snake.prototype.hits = function (snakes) {
-	return snakes.some(function (snake) {
-		return snake.isHitBy(this);
+Lightcycle.prototype.hits = function (lightcycles) {
+	return lightcycles.some(function (lightcycle) {
+		return lightcycle.isHitBy(this);
 	}, this);
 };
 
-Snake.prototype.isHitBy = function (snake) {
+Lightcycle.prototype.isHitBy = function (lightcycle) {
 	return this.segments.some(function (segment) {
-		return segment !== snake.curSegment && segment.intersects(snake.curSegment);
+		return segment !== lightcycle.curSegment &&
+			segment.intersects(lightcycle.curSegment);
 	});
 };
 
-Snake.prototype.updateDisplay = function () {
+Lightcycle.prototype.updateDisplay = function () {
 	var width = this.curSegment.getWidth();
 	var height = this.curSegment.getHeight();
 	var left = this.curSegment.getLeft();
@@ -125,4 +126,4 @@ Snake.prototype.updateDisplay = function () {
 	}
 };
 
-module.exports = Snake;
+module.exports = Lightcycle;
