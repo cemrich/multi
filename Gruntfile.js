@@ -118,6 +118,15 @@ module.exports = function(grunt) {
 		grunt.util.spawn(options, finishCallback);
 	});
 
+	// q-unit callbacks
+	grunt.event.on('qunit.testStart', function (name) {
+		grunt.log.ok('test:', name);
+	});
+	grunt.event.on('qunit.fail.timeout', function () {
+		grunt.log.error('Is your server running under localhost:80?');
+		grunt.log.error('If not run "node app"');
+	});
+
 	grunt.registerTask('qunitAll', ['qunit', 'qunitServer', 'qunitShared']);
 	grunt.registerTask('test', ['jshint', 'qunitAll']);
 	grunt.registerTask('build', ['requirejs']);
