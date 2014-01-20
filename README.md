@@ -4,11 +4,21 @@
 - node.js (>= 0.8)
 - NPM package manager (apt-get install npm)
 
-### How it works ###
+### How to start ###
 Before starting run `npm install` in your terminal.
 
-To start the application run `node app` in your terminal and visit http://localhost. The application tries to bind to port 80 - so this command may require root permission on unix systems.
+To start the application run `node app` in your terminal and visit [http://localhost](http://localhost). 
+The application tries to bind to port 80 - so this command may require root permission on unix systems. To bind multi to another port run `export PORT=<portnr>` before you start the app.
 
+Before you check out the example games please make sure to adjust [public/js/SERVER.js](../js/SERVER.js) to your needs.
+
+It is recommended to build the documentation with `grunt jsdoc`. 
+After that you can view it under
+[public/documentation/index.html](../documentation) or 
+[http://localhost/documentation](http://localhost/documentation) 
+when the server is running.
+
+### Development ###
 
 For development run:
 
