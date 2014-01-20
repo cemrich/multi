@@ -62,7 +62,7 @@ module.exports = function(grunt) {
 			// build client lib on file change
 			client: {
 				files: ['multi/client/**/*.js', 'multi/shared/**/*.js'],
-				tasks: ['requirejs:client']
+				tasks: ['build:client']
 			}
 		}
 	});
@@ -120,5 +120,6 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('qunitAll', ['qunit', 'qunitServer', 'qunitShared']);
 	grunt.registerTask('test', ['jshint', 'qunitAll']);
+	grunt.registerTask('build', ['requirejs']);
 	grunt.registerTask('default', ['jsdoc']);
 };

@@ -23,7 +23,7 @@ when the server is running.
 For development run:
 
 - `grunt jsdoc` to generate documentation
-- `grunt requirejs` to build the client side library
+- `grunt build` to build the client side library
 - `grunt test` to run jshit and unit tests
 - `grunt watch` to jshint files on change and build client side library when required
 
