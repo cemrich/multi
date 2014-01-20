@@ -29,8 +29,12 @@ if ('development' === app.get('env')) {
 }
 
 app.use(function(req, res, next) {
-	res.status(404);
-	res.redirect('/');
+	if (typeof req.header('referrer') === 'undefined') {
+		res.redirect('/', 301);
+	} else {
+		res.status(404);
+	}
+	next();
 });
 
 // routes
