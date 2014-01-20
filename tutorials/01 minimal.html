@@ -1,0 +1,111 @@
+
+<h3>Create a new session</h3>
+<pre class="prettyprint lang-js" style="width: 100%">
+
+  // configure where multi can find your client side socket.io lib
+  requirejs.config({
+    paths: {
+      'socket.io': '/socket.io/socket.io.js'
+    }
+  });
+
+  // require the client side lib
+  // see {@link module:client/multi}
+  requirejs(['../lib/multi'], function (multiModule) {
+    
+    // say multi where to find the running socket server
+    // via {@link module:client/multi~MultiOptions MultiOptions}
+    var multiOptions = {
+      server: 'http://mySocketioServer/'
+    };
+    
+    // init multi with your options 
+    // a {@link module:client/multi~Multi Multi} instance will be returned
+    var multi = multiModule.init(multiOptions);
+    
+    // create a new session with success and error callback
+    // see: {@link module:client/multi~Multi#createSession Multi.createSession}
+    multi.createSession().then(onSession, onSessionFailed).done();
+    
+    // receive the {@link module:shared/session~Session Session} instance
+    function onSession(session) {
+      // token you can use to {@link module:client/multi~Multi#joinSession join} a session
+      console.log(session.token);
+    }
+    
+    // receive an {@link module:shared/errors.MultiError}
+    // all error types can be found inside the {@link module:client/multi multiModule}
+    function onSessionFailed(error) {
+      console.error(error);
+    }
+  };
+</pre>
+
+<h3>Join an existing session</h3>
+<p>Now you have created a session. Display its token and join it with another client:</p>
+<pre class="prettyprint lang-js" style="width: 100%">
+
+  requirejs.config({
+    paths: {
+      'socket.io': '/socket.io/socket.io.js'
+    }
+  });
+
+  requirejs(['../lib/multi'], function (multiModule) {
+    
+    var multiOptions = {
+      server: 'http://mySocketioServer/'
+    };
+    var multi = multiModule.init(multiOptions);
+    
+    // ask user for the session token
+    // and pass it to {@link module:client/multi~Multi#joinSession Session.joinSession}
+    multi.joinSession(token).then(onSession, onSessionFailed).done();
+    
+    function onSession(session) {
+      // display all connected players
+      console.log(session.getPlayerArray());
+    }
+    
+    function onSessionFailed(error) {
+      console.error(error);
+    }
+  };
+</pre>
+
+<h3>Communicate and listen to events</h3>
+
+<p>Once you successfully created or joined a session you can do some fancy stuff:</p>
+
+<pre class="prettyprint lang-js" style="width: 100%">
+  // receive the {@link module:client/session~Session Session} instance
+  function onSession(session) {
+
+    session.on('playerJoined' function (event) {
+      // received a {@link module:shared/player~Player Player} instance
+      var player = event.player;
+      console.log('player added: ' + player.id);
+      
+      // player {@link module:shared/player~Player#attributes attributes} will sync to all other clients
+      player.attributes.color = '#ff00ff';
+      
+      // you can wait for these attributes with:
+      player.getAttributeAsync('color').then(function (color) {
+        console.log('color set:', player.id, color);
+      });
+      
+      // you can subscribe to player events too
+      player.on('disconnected', function () {
+        console.log('player removed: ' + player.id);
+      });
+    });
+    
+    // send session messages to all clients width {@link module:shared/session~Session#message Session.message}
+    session.message('startGame', { speed: 50 });
+    
+    // listen to session events
+    session.on('startGame', function (event) {
+      console.log(event.data.speed); // 50
+    });
+  }
+</pre>

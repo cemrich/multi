@@ -1,0 +1,20 @@
+<pre class="prettyprint lang-js" style="width: 100%">
+
+session.on('playerJoined', function (event) {
+
+  var players = document.getElementById('players');
+  var playerDiv = document.getElementById('player');
+  playerDiv = document.cloneNode(playerDiv);
+  players.appendChild(playerDiv);
+
+  event.player.getAttributeAsync('color').then(function (color) {
+    playerDiv.style.backgroundColor = color;
+  });
+
+  event.player.on('disconnected', function () {
+    playerDiv.remove();
+  });
+
+}
+
+</pre>

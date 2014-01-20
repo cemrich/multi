@@ -27,6 +27,36 @@ For development run:
 - `grunt test` to run jshit and unit tests
 - `grunt watch` to jshint files on change and build client side library when required
 
+### API ###
+To use Multi in your javaScript file you have to use require.js at the moment:
+
+    // configure where multi can find your client side socket.io lib
+    requirejs.config({
+      paths: {
+        'socket.io': '/socket.io/socket.io.js'
+      }
+    });
+    
+    // require the {@link module:client/multi} client side lib
+    requirejs(['../lib/multi'], function (multiModule) {
+      
+      // say multi where to find the running socket server
+      // via {@link module:client/multi~MultiOptions}
+      var multiOptions = {
+        server: 'http://mySocketioServer/'
+      };
+      
+      // init multi with your options 
+      // a {@link module:client/multi~Multi} instance will be returned
+      var multi = multiModule.init(multiOptions);
+      
+      // create a new session with success and error callback
+      // see: {@link module:client/multi~Multi#createSession}
+      multi.createSession().then(onSession, onSessionFailed).done();
+    };
+
+For a minimal example of how to use the API visit the {@tutorial 01 minimal} tutorial.
+
 ### Bundled libraries ###
 Multi comes with bundled libraries on client and server side:
 

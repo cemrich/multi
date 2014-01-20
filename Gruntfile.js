@@ -9,6 +9,7 @@ module.exports = function(grunt) {
 				src: ['multi/client/**/*.js', 'multi/server/**/*.js', 'multi/shared/**/*.js', 'README.md'],
 				options: {
 					destination: './public/documentation/',
+					tutorials: './tutorials',
 					private: false
 				}
 			}
