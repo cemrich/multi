@@ -9,7 +9,8 @@ var express = require('express'),
 	routes = require('./routes'),
 	server = require('http').createServer(app),
 	path = require('path'),
-	multiModule = require('./multi/server');
+	multiModule = require('./multi/server'),
+	tokens = require('./multi/server/token');
 
 // all environments
 app.set('port', process.env.PORT || 80);
@@ -54,13 +55,18 @@ server.listen(app.get('port'), function() {
 });
 
 // initialize multi
-function onPlayerAdded(event) {
-	console.log('new player created!', event.player.id);
-}
+
+// token generator for sound example
+tokens.soundToken = function (halfLength) {
+	var token = '';
+	for (var i = 0; i < halfLength; i++) {
+		token += Math.random() < 0.5 ? '02' : '12';
+	}
+	return token;
+};
 
 function onSessionCreated(event) {
 	console.log('new session created!', event.session.token);
-	event.session.on('playerAdded', onPlayerAdded);
 }
 
 var multi = multiModule.init(server);

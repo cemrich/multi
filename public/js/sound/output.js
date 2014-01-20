@@ -1,6 +1,6 @@
 define(function(require, exports, module) {
 
-	var HEADER = '010101212';
+	var HEADER = '0101212';
 	var INTERVAL = 200;
 
 	var AudioContex = window.AudioContext ||
@@ -46,10 +46,7 @@ define(function(require, exports, module) {
 	}
 
 	exports.start = function (token) {
-		var encoded = token.split('').reduce(function (prev, curr) {
-			return prev + '2' + curr;
-		});
-		song = HEADER + '-' + encoded + '-';
+		song = HEADER + '-' + token + '-';
 		console.log(song);
 		interval = setInterval(play, INTERVAL);
 	};

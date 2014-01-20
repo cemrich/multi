@@ -11,8 +11,8 @@ requirejs(['./capture', './output', '../lib/multi', '../SERVER', '../lib/jquery-
 		server: SERVER,
 		session: {
 			token: {
-				func: 'numeric',
-				args: [8, 8, 2]
+				func: 'soundToken', // see app.js
+				args: [capture.HALF_TOKEN_LENGTH]
 			}
 		}
 	};

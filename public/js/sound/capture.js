@@ -1,7 +1,7 @@
 define(function(require, exports, module) {
 
-	var HEADER = '010101212';
-	var TOKEN_LENGTH = 8;
+	var HEADER = '0101212';
+	var HALF_TOKEN_LENGTH = 4;
 
 	var AudioContext = window.AudioContext ||
 		window.webkitAudioContext ||
@@ -30,13 +30,10 @@ define(function(require, exports, module) {
 	function onNoteDetected(note) {
 		microphone.style.opacity = 0.5 + note * 0.15;
 		sequence += note;
-		if (headerFound && sequence.length === TOKEN_LENGTH * 2 - 1) {
+		console.log(sequence);
+		if (headerFound && sequence.length === HALF_TOKEN_LENGTH * 2) {
 			headerFound = false;
-			var decoded = '';
-			for (var i = 0; i < sequence.length; i += 2) {
-				decoded += sequence.charAt(i);
-			}
-			onTokenFound(decoded);
+			onTokenFound(sequence);
 		}
 		if (!headerFound && sequence.indexOf(HEADER) !== -1) {
 			headerFound = true;
@@ -102,5 +99,7 @@ define(function(require, exports, module) {
 			localStream = null;
 		}
 	};
+
+	exports.HALF_TOKEN_LENGTH = HALF_TOKEN_LENGTH;
 
 });
