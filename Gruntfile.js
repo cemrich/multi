@@ -8,7 +8,7 @@ module.exports = function(grunt) {
 			multi : {
 				src: ['multi/client/**/*.js', 'multi/server/**/*.js', 'multi/shared/**/*.js', 'README.md'],
 				options: {
-					destination: './documentation/',
+					destination: './public/documentation/',
 					private: false
 				}
 			}
@@ -120,5 +120,5 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('qunitAll', ['qunit', 'qunitServer', 'qunitShared']);
 	grunt.registerTask('test', ['jshint', 'qunitAll']);
-	grunt.registerTask('default', ['test', 'jsdoc']);
+	grunt.registerTask('default', ['jsdoc']);
 };
