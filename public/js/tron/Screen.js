@@ -1,5 +1,7 @@
 
-define(function () {
+define(function(require, exports, module) {
+
+	require('../lib/jquery-2.0.0.min');
 
 	var BORDER_WIDTH = 14;
 
