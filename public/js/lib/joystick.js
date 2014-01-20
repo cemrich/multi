@@ -32,6 +32,13 @@ define(function () {
 		var direction = null;
 		var startPos;
 
+		if (downMarker.size() === 0) {
+			throw 'container must contain a .down node';
+		}
+		if (moveMarker.size() === 0) {
+			throw 'container must contain a .move node';
+		}
+
 		function getEventPosition(event) {
 			var pos = {};
 			if (typeof event.originalEvent.touches !== 'undefined') {
