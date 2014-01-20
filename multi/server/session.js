@@ -14,6 +14,8 @@ var token = require('./token');
 
 var SCRIPT_DIR = '../../games';
 var SCRIPT_NAME_REGEXP = /^(\d|[A-Za-z])+$/;
+// how often to create a new token if it already exits
+var TOKEN_RETRY_NUMBER = 5;
 
 /**
  * @classdesc A game session that connects and manages multiple players on 
@@ -127,7 +129,11 @@ Session.prototype.applyOptions = function (options) {
 		this.maxPlayerAllowed = options.maxPlayerAllowed;
 	}
 
-	this.token = tokenFunction.apply(this, tokenFunctionArgs);
+	var tries = 0;
+	do {
+		this.token = tokenFunction.apply(this, tokenFunctionArgs);
+		tries++;
+	} while (exports.getSession(this.token) && tries <= TOKEN_RETRY_NUMBER);
 };
 
 
