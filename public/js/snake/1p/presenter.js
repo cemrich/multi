@@ -42,7 +42,7 @@ define(['./game', '../sound', '../layout'], function (Game, sound, layout) {
 		}
 
 		// show url to join this session
-		var url = window.location.host + '/snake1p';
+		var url = window.location.host + '/snake';
 		$('#waiting .controllerUrl').text(url);
 		$('#waiting .controllerUrl').attr('href', 'http://' + url);
 		layout.showSection('#waiting');
