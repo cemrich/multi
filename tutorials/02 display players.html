@@ -1,16 +1,21 @@
 <pre class="prettyprint lang-js" style="width: 100%">
 
+// wait for additional players to join this session
 session.on('playerJoined', function (event) {
 
+  // copy player DOM element and append it to player list
   var players = document.getElementById('players');
   var playerDiv = document.getElementById('player');
   playerDiv = document.cloneNode(playerDiv);
   players.appendChild(playerDiv);
 
+  // wait for player.attributes.color to get set (i.e. by the server)
   event.player.getAttributeAsync('color').then(function (color) {
+    // apply the new color to the DOM element
     playerDiv.style.backgroundColor = color;
   });
 
+  // remove the DOM element when the player disconnects
   event.player.on('disconnected', function () {
     playerDiv.remove();
   });

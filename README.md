@@ -55,7 +55,7 @@ To use Multi in your javaScript file you have to use require.js at the moment:
       multi.createSession().then(onSession, onSessionFailed).done();
     };
 
-For a minimal example of how to use the API visit the {@tutorial 01 minimal} tutorial.
+For more examples of how to use the API visit the {@tutorial 01 quick start} tutorial.
 
 ### Bundled libraries ###
 Multi comes with bundled libraries on client and server side:

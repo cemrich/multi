@@ -4720,7 +4720,7 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	 * @return {external:Promise} On success the promise will be resolved with the 
 	 * created {@link module:client/session~Session Session} instance.<br><br>
 	 * On error it will be rejected with either 
-	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError},
+	 * {@link module:shared/errors.TokenAlreadyExistsError TokenAlreadyExistsError},<br>
 	 * {@link module:shared/errors.ScriptNameNotAllowedError ScriptNameNotAllowedError},
 	 * or {@link module:shared/errors.NoConnectionError NoConnectionError}.
 	 *

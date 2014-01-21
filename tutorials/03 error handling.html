@@ -1,0 +1,30 @@
+<pre class="prettyprint lang-js" style="width: 100%">
+
+// init multi with path to socket server
+var multi = multiModule.init({server: 'http://mySocketioServer/' });
+
+// try to create a new session
+// the {@link module:client/multi~Multi#createSession documentation} also lists all errors that may occur
+multi.createSession().then(onSession, onSessionFailed).done();
+
+function onSession(session) {
+  // everything worked
+}
+
+// an error occurred
+// see {@link module:client/multi multi-module} for all error types
+function onSessionFailed(error) {
+  if (error instanceof multiModule.NoConnectionError) {
+    // there is no connection to the socket server
+  } else if (error instanceof multiModule.TokenAlreadyExistsError) {
+    // a session with the same token does already exist on the server
+    // this should not happen when using the default token
+  } else if (error instanceof multiModule.ScriptNameNotAllowedError) {
+    // the script name defined inside the {@link SessionOptions} is invalid
+    // this should not happen with the default settings
+  } else if (error instanceof multiModule.MultiError){
+    // some other thing went wrong on the server side
+  }
+}
+
+</pre>
