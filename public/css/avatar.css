@@ -21,7 +21,9 @@ button {
   display: none;
 }
 #video {
-  width: 100%;
+  max-width: 100%;
+  width: 320px;
+  margin: auto;
 }
 #canvas {
   width: 100%;

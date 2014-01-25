@@ -4,8 +4,18 @@ requirejs.config({
 	}
 });
 
-var getUserMedia = navigator.getUserMedia || 
-	navigator.webkitGetUserMedia || 
+var VIDEO_OPTIONS = {
+	'audio': false,
+	'video': {
+		'mandatory': {
+			'maxWidth': '320',
+			'maxHeight': '240'
+		},
+	}
+};
+
+var getUserMedia = navigator.getUserMedia ||
+	navigator.webkitGetUserMedia ||
 	navigator.mozGetUserMedia;
 window.URL = (window.URL || window.mozURL || window.webkitURL);
 
@@ -26,21 +36,6 @@ requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
 	function showSection(section) {
 		$('.section').hide();
 		$('#' + section).show();
-	}
-
-	function addPlayer(player) {
-		var playerView = $('<div></div>');
-		playerView.addClass('player');
-		playerView[0].style.order = player.number;
-		$('.players').append(playerView);
-
-		player.getAttributeAsync('color').then(function (color) {
-			playerView.css('background-color', color);
-		});
-
-		player.on('disconnected', function () {
-			playerView.remove();
-		});
 	}
 
 	function onError(message) {
@@ -64,14 +59,14 @@ requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
 		var imgData = canvas.toDataURL('img/png');
 		session.myself.attributes.avatar = imgData;
 		$('.player.myself').attr('src', imgData);
-		$('#joined .instructions').show();
+		$('#joined .instructions').css('display', 'block');
 	}
 
 	function initCamera() {
 		if (!getUserMedia) {
 			onError('no camera support');
 		}
-		getUserMedia.call(navigator, {video: true, audio: false}, function(s) {
+		getUserMedia.call(navigator, VIDEO_OPTIONS, function(s) {
 			stream = s;
 			video.src = window.URL.createObjectURL(stream);
 			setTimeout(takeImage, 1000);
