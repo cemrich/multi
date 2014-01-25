@@ -49,6 +49,7 @@ app.get('/snakemp/presenter', routes.snakeMpPresenter);
 app.get('/snakemp', routes.snakeMpPlayer);
 app.get('/tron', routes.tron);
 app.get('/image', routes.image);
+app.get('/avatar', routes.avatar);
 
 server.listen(app.get('port'), function() {
 	console.log('Express server listening on port ' + app.get('port'));

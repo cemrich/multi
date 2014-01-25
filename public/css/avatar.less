@@ -1,0 +1,69 @@
+html {
+	text-align: center;
+	font-family: sans-serif;
+	color: white;
+	background-color: #333;
+}
+
+body {
+	max-width: 500px;
+	margin: auto;
+}
+
+a {
+	color: #ccc;
+}
+
+button {
+	margin: 0.5em;
+	padding: 0.5em 1em;
+	font-size: 90%;
+	font-weight: bold;
+}
+
+#canvas {
+	display: none;
+}
+
+#video {
+	width: 100%;
+}
+
+#canvas {
+	width: 100%;
+}
+
+#joined, #error {
+	display: none;
+}
+
+#loading {
+	width: 100%;
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+
+#joined {
+	.instructions {
+		position: relative;
+		top: 2em;
+		color: white;
+		text-shadow: 1px 1px 2px black;
+		pointer-events: none;
+		display: none;
+	}
+	.players {
+		.player {
+			width: 150px;
+			height: 100px;
+			background-color: black;
+			opacity: 0.5;
+			&.myself {
+				border: 4px solid white;
+				box-sizing: border-box;
+				opacity: 1;
+			}
+		}
+	}
+}

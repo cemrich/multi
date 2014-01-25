@@ -15,6 +15,10 @@ exports.index = function(req, res){
 
 // GAMES
 
+exports.avatar = function(req, res) {
+	res.render('games/avatar');
+};
+
 exports.symbols = function(req, res) {
 	res.render('games/symbols');
 };

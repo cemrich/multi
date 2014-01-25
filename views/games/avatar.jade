@@ -1,0 +1,23 @@
+doctype html
+html
+	head
+		title Avatar
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		meta(name='apple-mobile-web-app-capable', content='yes')
+		meta(name='mobile-web-app-capable', content='yes')
+
+		link(rel='stylesheet', href='/css/avatar.css')
+		script(data-main='/js/avatar/index.js', src='/js/lib/require.js')
+
+
+
+	body
+		h1.title Avatar
+		#status loading
+		a#join-url
+		#error.section
+		#joined.section
+			canvas(width='400' height='300')#canvas
+			span.instructions click to refresh your avatar
+			video(autoplay='autoplay')#video
+			.players
