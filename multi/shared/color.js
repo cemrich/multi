@@ -11,6 +11,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @module
  */
 define(function(require, exports, module) {
+	'use strict';
 
 	/**
 	 * @returns {string} a random color string using the format '#RRGGBB'

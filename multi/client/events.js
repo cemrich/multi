@@ -5,6 +5,7 @@
 */
 
 define(function(require, exports, module) {
+	'use strict';
 
 	/**
 	 * @classdesc EventEmitter from from socket.io

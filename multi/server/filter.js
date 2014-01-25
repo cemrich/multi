@@ -1,4 +1,6 @@
+/* jshint globalstrict: true */
 /* global exports */
+'use strict';
 
 /**
  * When you want to filter certain outgoing mesages, add a logger for them

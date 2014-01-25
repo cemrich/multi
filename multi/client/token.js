@@ -5,6 +5,7 @@
 */
 
 define(function(require, exports, module) {
+	'use strict';
 
 	var Q = require('../lib/q');
 	var errors = require('../shared/errors');

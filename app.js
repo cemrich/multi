@@ -1,4 +1,6 @@
+/* jshint globalstrict: true */
 /* global process, __dirname */
+'use strict';
 
 /*
  * Module dependencies.

@@ -4,6 +4,7 @@
 */
 
 define(function(require, exports, module) {
+	'use strict';
 
 	/**
 	* Inherit the prototype methods from one constructor into another.

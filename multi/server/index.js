@@ -1,4 +1,6 @@
+/* jshint globalstrict: true */
 /* global exports */
+'use strict';
 
 /**
 * Entry point for the server side multi library for developing

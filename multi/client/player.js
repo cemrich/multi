@@ -4,6 +4,7 @@
  */
  
 define(function(require, exports, module) {
+	'use strict';
 
 	var AbstractPlayer = require('../shared/player').Player;
 	var util = require('util');

@@ -12,6 +12,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @module shared/errors
  */
 define(function(require, exports, module) {
+	'use strict';
 
 	var util = require('util');
 

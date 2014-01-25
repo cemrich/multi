@@ -22,6 +22,7 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 
 define(function(require, exports, module) {
+	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');

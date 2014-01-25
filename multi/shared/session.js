@@ -10,6 +10,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @private
  */
 define(function(require, exports, module) {
+	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');

@@ -6,6 +6,7 @@
 */
 
 define('events',['require','exports','module','socket.io'],function(require, exports, module) {
+	'use strict';
 
 	/**
 	 * @classdesc EventEmitter from from socket.io
@@ -22,6 +23,7 @@ define('events',['require','exports','module','socket.io'],function(require, exp
 */
 
 define('util',['require','exports','module','socket.io'],function(require, exports, module) {
+	'use strict';
 
 	/**
 	* Inherit the prototype methods from one constructor into another.
@@ -86,7 +88,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
  * https://github.com/melanke/Watch.JS
  */
 
-
+"use strict";
 (function (factory) {
     if (typeof exports === 'object') {
         // Node. Does not work with strict CommonJS, but
@@ -596,7 +598,7 @@ define('util',['require','exports','module','socket.io'],function(require, expor
     }
 
 })(function () {
-
+"use strict";
 
 var hasStacks = false;
 try {
@@ -2477,6 +2479,7 @@ return Q;
 
 
 define('../shared/SyncedObject',['require','exports','module','../lib/watch','../lib/q','events','util'],function(require, exports, module) {
+	'use strict';
 
 	var WatchJS = require('../lib/watch');
 	var Q = require('../lib/q');
@@ -2702,6 +2705,7 @@ define('../shared/SyncedObject',['require','exports','module','../lib/watch','..
 
 
 define('../shared/CustomMessageSender',['require','exports','module'],function(require, exports, module) {
+	'use strict';
 
 	/**
 	 * @classdesc Util class for all objects that allow to send custom messages
@@ -2769,6 +2773,7 @@ define('../shared/CustomMessageSender',['require','exports','module'],function(r
  * @private
  */
 define('../shared/player',['require','exports','module','./SyncedObject','./CustomMessageSender','events','util'],function(require, exports, module) {
+	'use strict';
 
 	var SyncedObject = require('./SyncedObject');
 	var MessageSender = require('./CustomMessageSender');
@@ -3087,6 +3092,7 @@ define('../shared/player',['require','exports','module','./SyncedObject','./Cust
  * @private
  */
 define('../shared/session',['require','exports','module','events','util','./player'],function(require, exports, module) {
+	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
@@ -3441,6 +3447,7 @@ define('../shared/session',['require','exports','module','events','util','./play
  */
  
 define('player',['require','exports','module','../shared/player','util'],function(require, exports, module) {
+	'use strict';
 
 	var AbstractPlayer = require('../shared/player').Player;
 	var util = require('util');
@@ -3498,6 +3505,7 @@ define('player',['require','exports','module','../shared/player','util'],functio
 
 
 define('../shared/PubSub',['require','exports','module'],function(require, exports, module) {
+	'use strict';
 
 	/**
 	 * @classdesc A simple implementation of the content based
@@ -3605,6 +3613,7 @@ define('../shared/PubSub',['require','exports','module'],function(require, expor
  */
  
 define('messages',['require','exports','module','../shared/PubSub'],function(require, exports, module) {
+	'use strict';
 
 	var PubSub = require('../shared/PubSub');
 
@@ -3715,6 +3724,7 @@ define('messages',['require','exports','module','../shared/PubSub'],function(req
  */
 
 define('session',['require','exports','module','../shared/session','util','./player','./messages','../shared/CustomMessageSender'],function(require, exports, module) {
+	'use strict';
 
 	var AbstractSession = require('../shared/session').Session;
 	var util = require('util');
@@ -3843,6 +3853,7 @@ define('session',['require','exports','module','../shared/session','util','./pla
  * @module
  */
 define('../shared/color',['require','exports','module'],function(require, exports, module) {
+	'use strict';
 
 	/**
 	 * @returns {string} a random color string using the format '#RRGGBB'
@@ -3870,6 +3881,7 @@ define('../shared/color',['require','exports','module'],function(require, export
  * @module shared/errors
  */
 define('../shared/errors',['require','exports','module','util'],function(require, exports, module) {
+	'use strict';
 
 	var util = require('util');
 
@@ -3995,6 +4007,7 @@ define('../shared/errors',['require','exports','module','util'],function(require
 */
 
 define('token',['require','exports','module','../lib/q','../shared/errors'],function(require, exports, module) {
+	'use strict';
 
 	var Q = require('../lib/q');
 	var errors = require('../shared/errors');
@@ -4075,7 +4088,6 @@ define('token',['require','exports','module','../lib/q','../shared/errors'],func
 */
 
 
-
 /**
  * This module contains classes and utils that are useful
  * for working with multiple screens. To use a ScreenArranger inside your
@@ -4085,6 +4097,7 @@ define('token',['require','exports','module','../lib/q','../shared/errors'],func
  * @module shared/screens
  */
 define('../shared/screens/index',['require','exports','module','events','util'],function(require, exports, module) {
+	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');
@@ -4417,6 +4430,7 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 
 
 define('../shared/screens/HorizontalArranger',['require','exports','module','util','./index'],function(require, exports, module) {
+	'use strict';
 
 	var util = require('util');
 	var screensModule = require('./index');
@@ -4508,6 +4522,7 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 
 define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','./token','../shared/screens/index','../shared/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
+	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');

@@ -6,6 +6,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 
 define(function(require, exports, module) {
+	'use strict';
 
 	var util = require('util');
 	var screensModule = require('./index');

@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+	'use strict';
 
 	grunt.initConfig({
 
@@ -44,7 +45,8 @@ module.exports = function(grunt) {
 					},
 					optimize: 'none',
 					generateSourceMaps : true,
-					preserveLicenseComments : false
+					preserveLicenseComments : false,
+					useStrict: true
 				}
 			}
 		},

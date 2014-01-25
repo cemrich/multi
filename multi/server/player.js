@@ -1,4 +1,6 @@
+/* jshint globalstrict: true */
 /* global exports */
+'use strict';
 
 /**
  * @module server/player

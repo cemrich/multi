@@ -4,7 +4,6 @@
 */
 if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
-
 /**
  * This module contains classes and utils that are useful
  * for working with multiple screens. To use a ScreenArranger inside your
@@ -14,6 +13,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @module shared/screens
  */
 define(function(require, exports, module) {
+	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
 	var util = require('util');

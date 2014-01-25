@@ -4,6 +4,7 @@
  */
  
 define(function(require, exports, module) {
+	'use strict';
 
 	var PubSub = require('../shared/PubSub');
 

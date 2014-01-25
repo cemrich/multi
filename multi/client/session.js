@@ -4,6 +4,7 @@
  */
 
 define(function(require, exports, module) {
+	'use strict';
 
 	var AbstractSession = require('../shared/session').Session;
 	var util = require('util');

@@ -6,6 +6,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 
 define(function(require, exports, module) {
+	'use strict';
 
 	/**
 	 * @classdesc Util class for all objects that allow to send custom messages

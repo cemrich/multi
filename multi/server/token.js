@@ -1,4 +1,6 @@
+/* jshint globalstrict: true */
 /* global exports */
+'use strict';
 
 /**
  * Collects some helper functions for generating
