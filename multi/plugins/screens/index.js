@@ -8,9 +8,9 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * This module contains classes and utils that are useful
  * for working with multiple screens. To use a ScreenArranger inside your
  * game look up the 
- * {@link module:shared/screens.HorizontalArranger|HorizontalArranger}
+ * {@link module:plugins/screens.HorizontalArranger|HorizontalArranger}
  * documentation.
- * @module shared/screens
+ * @module plugins/screens
  */
 define(function(require, exports, module) {
 	'use strict';
@@ -136,10 +136,10 @@ define(function(require, exports, module) {
 	/**
 	 * @classdesc This is the base class for arranging players of the given
 	 * session to one big playing field. It will add a 
-	 * {@link module:shared/screens.Screen|screen} attribute to every joined 
+	 * {@link module:plugins/screens.Screen|screen} attribute to every joined 
 	 * player.<br><br>
 	 * Feel free to extend this class to create your own ScreenArranger. You
-	 * can use {@link module:shared/screens.HorizontalArranger} 
+	 * can use {@link module:plugins/screens.HorizontalArranger} 
 	 * as example implementation.
 	 * @class
 	 * @mixes external:EventEmitter
@@ -207,8 +207,8 @@ define(function(require, exports, module) {
 	 * @return {Array}    list of local objects of the form 
 	 *  { x: localX, y: localY, player: hitPlayer }. X and y are the upper-left
 	 *  corner of the given rectangle in the players local coordinate system.
-	 * @see module:shared/screens.Screen#globalToLocal
-	 * @see module:shared/screens.Screen#isHitByRect
+	 * @see module:plugins/screens.Screen#globalToLocal
+	 * @see module:plugins/screens.Screen#isHitByRect
 	 */
 	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
 		var locals = {};
@@ -265,8 +265,8 @@ define(function(require, exports, module) {
 	/**
 	 * This method by default gets called whenever a new player joins
 	 * the underlying session. It calls
-	 * {@link module:shared/screens.ScreenArranger#arrange|arrange} and 
-	 * {@link module:shared/screens.ScreenArranger#recaculateDimentions|recaculateDimentions}. <br>
+	 * {@link module:plugins/screens.ScreenArranger#arrange|arrange} and 
+	 * {@link module:plugins/screens.ScreenArranger#recaculateDimentions|recaculateDimentions}. <br>
 	 * You can override this method to write your own screen arranger.
 	 * In this case please make sure to arrange every player and 
 	 * update the dimentions of the whole playing field accordingly.
@@ -279,7 +279,7 @@ define(function(require, exports, module) {
 
 	/**
 	 * This method is called by the 
-	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} 
+	 * {@link module:plugins/screens.ScreenArranger#refresh|refresh} 
 	 * method by default. It takes the global position and dimentions of every 
 	 * player into account to update the global playing field width and height 
 	 * accordingly.<br>
@@ -298,7 +298,7 @@ define(function(require, exports, module) {
 
 	/**
 	 * This method is called by the 
-	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} method by default. 
+	 * {@link module:plugins/screens.ScreenArranger#refresh|refresh} method by default. 
 	 * It does  nothing for this base class and should be overridden by every 
 	 * child class.<br><br>
 	 * Please make sure to update the positions of every players screen here.
@@ -332,7 +332,7 @@ define(function(require, exports, module) {
 	/**
 	 * Fired when the screen layout changes. This may be because a player
 	 * joined or left the session.
-	 * @event module:shared/screens.ScreenArranger#arrangementChanged
+	 * @event module:plugins/screens.ScreenArranger#arrangementChanged
 	 */
 
 	return exports;

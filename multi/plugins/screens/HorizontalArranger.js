@@ -29,8 +29,8 @@ define(function(require, exports, module) {
 	 * console.log(firstPlayer.screen.width);
 	 * console.log(firstPlayer.screen.height);
 	 * @class
-	 * @mixes module:shared/screens.ScreenArranger
-	 * @memberOf module:shared/screens
+	 * @mixes module:plugins/screens.ScreenArranger
+	 * @memberOf module:plugins/screens
 	 * @param {module:shared/session~Session} 
 	 *  session session instance whose player you want to be arranged.
 	 */

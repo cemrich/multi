@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 
 		jsdoc : {
 			multi : {
-				src: ['multi/client/**/*.js', 'multi/server/**/*.js', 'multi/shared/**/*.js', 'README.md'],
+				src: ['multi/client/**/*.js', 'multi/server/**/*.js', 'multi/shared/**/*.js', 'multi/plugins/**/*.js', 'README.md'],
 				options: {
 					destination: './public/documentation/',
 					tutorials: './tutorials',
@@ -64,7 +64,7 @@ module.exports = function(grunt) {
 			},
 			// build client lib on file change
 			client: {
-				files: ['multi/client/**/*.js', 'multi/shared/**/*.js'],
+				files: ['multi/client/**/*.js', 'multi/shared/**/*.js', 'multi/plugins/**/*.js'],
 				tasks: ['build:client']
 			}
 		}

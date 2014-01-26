@@ -4092,11 +4092,11 @@ define('token',['require','exports','module','../lib/q','../shared/errors'],func
  * This module contains classes and utils that are useful
  * for working with multiple screens. To use a ScreenArranger inside your
  * game look up the 
- * {@link module:shared/screens.HorizontalArranger|HorizontalArranger}
+ * {@link module:plugins/screens.HorizontalArranger|HorizontalArranger}
  * documentation.
- * @module shared/screens
+ * @module plugins/screens
  */
-define('../shared/screens/index',['require','exports','module','events','util'],function(require, exports, module) {
+define('../plugins/screens/index',['require','exports','module','events','util'],function(require, exports, module) {
 	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
@@ -4220,10 +4220,10 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 	/**
 	 * @classdesc This is the base class for arranging players of the given
 	 * session to one big playing field. It will add a 
-	 * {@link module:shared/screens.Screen|screen} attribute to every joined 
+	 * {@link module:plugins/screens.Screen|screen} attribute to every joined 
 	 * player.<br><br>
 	 * Feel free to extend this class to create your own ScreenArranger. You
-	 * can use {@link module:shared/screens.HorizontalArranger} 
+	 * can use {@link module:plugins/screens.HorizontalArranger} 
 	 * as example implementation.
 	 * @class
 	 * @mixes external:EventEmitter
@@ -4291,8 +4291,8 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 	 * @return {Array}    list of local objects of the form 
 	 *  { x: localX, y: localY, player: hitPlayer }. X and y are the upper-left
 	 *  corner of the given rectangle in the players local coordinate system.
-	 * @see module:shared/screens.Screen#globalToLocal
-	 * @see module:shared/screens.Screen#isHitByRect
+	 * @see module:plugins/screens.Screen#globalToLocal
+	 * @see module:plugins/screens.Screen#isHitByRect
 	 */
 	exports.ScreenArranger.prototype.globalRectToLocals = function (x, y, width, height) {
 		var locals = {};
@@ -4349,8 +4349,8 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 	/**
 	 * This method by default gets called whenever a new player joins
 	 * the underlying session. It calls
-	 * {@link module:shared/screens.ScreenArranger#arrange|arrange} and 
-	 * {@link module:shared/screens.ScreenArranger#recaculateDimentions|recaculateDimentions}. <br>
+	 * {@link module:plugins/screens.ScreenArranger#arrange|arrange} and 
+	 * {@link module:plugins/screens.ScreenArranger#recaculateDimentions|recaculateDimentions}. <br>
 	 * You can override this method to write your own screen arranger.
 	 * In this case please make sure to arrange every player and 
 	 * update the dimentions of the whole playing field accordingly.
@@ -4363,7 +4363,7 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 
 	/**
 	 * This method is called by the 
-	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} 
+	 * {@link module:plugins/screens.ScreenArranger#refresh|refresh} 
 	 * method by default. It takes the global position and dimentions of every 
 	 * player into account to update the global playing field width and height 
 	 * accordingly.<br>
@@ -4382,7 +4382,7 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 
 	/**
 	 * This method is called by the 
-	 * {@link module:shared/screens.ScreenArranger#refresh|refresh} method by default. 
+	 * {@link module:plugins/screens.ScreenArranger#refresh|refresh} method by default. 
 	 * It does  nothing for this base class and should be overridden by every 
 	 * child class.<br><br>
 	 * Please make sure to update the positions of every players screen here.
@@ -4416,7 +4416,7 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 	/**
 	 * Fired when the screen layout changes. This may be because a player
 	 * joined or left the session.
-	 * @event module:shared/screens.ScreenArranger#arrangementChanged
+	 * @event module:plugins/screens.ScreenArranger#arrangementChanged
 	 */
 
 	return exports;
@@ -4429,7 +4429,7 @@ define('../shared/screens/index',['require','exports','module','events','util'],
 
 
 
-define('../shared/screens/HorizontalArranger',['require','exports','module','util','./index'],function(require, exports, module) {
+define('../plugins/screens/HorizontalArranger',['require','exports','module','util','./index'],function(require, exports, module) {
 	'use strict';
 
 	var util = require('util');
@@ -4453,8 +4453,8 @@ define('../shared/screens/HorizontalArranger',['require','exports','module','uti
 	 * console.log(firstPlayer.screen.width);
 	 * console.log(firstPlayer.screen.height);
 	 * @class
-	 * @mixes module:shared/screens.ScreenArranger
-	 * @memberOf module:shared/screens
+	 * @mixes module:plugins/screens.ScreenArranger
+	 * @memberOf module:plugins/screens
 	 * @param {module:shared/session~Session} 
 	 *  session session instance whose player you want to be arranged.
 	 */
@@ -4521,7 +4521,7 @@ multi.createSession().then(onSession, onSessionFailed).done();
 
 
 
-define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','./token','../shared/screens/index','../shared/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
+define('multi',['require','exports','module','events','util','./session','../shared/color','../shared/errors','./token','../plugins/screens/index','../plugins/screens/HorizontalArranger','../lib/q','socket.io'],function(require, exports, module) {
 	'use strict';
 
 	var EventEmitter = require('events').EventEmitter;
@@ -4530,8 +4530,8 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	var color = require('../shared/color');
 	var errors = require('../shared/errors');
 	var token = require('./token');
-	var screensModule = require('../shared/screens/index');
-	var HorizontalArranger = require('../shared/screens/HorizontalArranger');
+	var screensModule = require('../plugins/screens/index');
+	var HorizontalArranger = require('../plugins/screens/HorizontalArranger');
 	var Q = require('../lib/q');
 	var io = require('socket.io');
 
@@ -4879,7 +4879,7 @@ define('multi',['require','exports','module','events','util','./session','../sha
 	exports.token = token;
 
 	/**
-	 * @type module:shared/screens
+	 * @type module:plugins/screens
 	 */
 	exports.screens = screensModule;
 	exports.screens.HorizontalArranger = HorizontalArranger;

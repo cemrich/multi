@@ -22,8 +22,8 @@ var sessionModule = require('./session');
 var playerModule = require('./player');
 var color = require('../shared/color');
 var errors = require('../shared/errors');
-var screensModule = require('../shared/screens');
-var HorizontalArranger = require('../shared/screens/HorizontalArranger');
+var screensModule = require('../plugins/screens');
+var HorizontalArranger = require('../plugins/screens/HorizontalArranger');
 
 var instance = null;
 
@@ -153,7 +153,7 @@ exports.init = function (server) {
 exports.color = color;
 
 /**
- * @type module:shared/screens
+ * @type module:plugins/screens
  */
 exports.screens = screensModule;
 exports.screens.HorizontalArranger = HorizontalArranger;
