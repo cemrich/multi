@@ -224,6 +224,24 @@ define(function(require, exports, module) {
 	};
 
 	/**
+	 * Determines which Player overlaps with the given point and returns
+	 * it in his local coordinates.
+	 * @param  {integer}  x      global x-coordinate of in pixel
+	 * @param  {integer}  y      global y-coordinate of in pixel
+	 * @return {object|null}     local object of the form 
+	 *  { x: localX, y: localY, player: hitPlayer } or null.
+	 * @see module:plugins/screens.Screen#globalToLocal
+	 */
+	exports.ScreenArranger.prototype.globalToLocal = function (x, y) {
+		var player = this.getPlayerAtCoords(x, y);
+		if (player === null) {
+			return null;
+		} else {
+			return player.screen.globalToLocal(x, y);
+		}
+	};
+
+	/**
 	 * @param  {module:shared/player~Player} player 
 	 *  any player object connected to the arranged session
 	 * @param  {integer}  x  global x position in pixel
