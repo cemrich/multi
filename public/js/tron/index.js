@@ -52,7 +52,7 @@ requirejs(['../lib/multi', './Game', '../SERVER', '../lib/jquery-2.0.0.min'],
 		if (error instanceof multiModule.NoSuchSessionError) {
 			alert('This seems to be the wrong game code.\nPlease try again!');
 		} else if (error instanceof multiModule.JoiningDisabledError) {
-			alert('This seems is currently running.\nPlease try again later!');
+			alert('This game is currently running.\nPlease try again later!');
 		} else {
 			onError(error.message);
 		}
