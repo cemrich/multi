@@ -1,5 +1,8 @@
 ## Multi ##
 
+Multi is a framework for [http://christine-coenen.de/blog/2013/11/14/web-based-multi-screen-games/](web based multi-screen games) based on node.js and socket.io.
+It allows to connect multiple devices to one game session, to sync player attributes across all clients and to combine the devices screens to one big playing field. Visit [http://christine-coenen.de/demos/multi/documentation/](christine-coenen.de/demos/multi/documentation) for the full documentation and some [http://christine-coenen.de/demos/multi/documentation/tutorial-start.html](tutorials).
+
 ### Requirements ###
 - node.js (>= 0.8)
 - NPM package manager (apt-get install npm)
