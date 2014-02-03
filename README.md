@@ -1,7 +1,7 @@
 ## Multi ##
 
 Multi is a framework for [web based multi-screen games](http://christine-coenen.de/blog/2013/11/14/web-based-multi-screen-games/) based on node.js and socket.io.
-It allows to connect multiple devices to one game session, to sync player attributes across all clients and to combine the devices screens to one big playing field. Visit [christine-coenen.de/demos/multi/documentation](http://christine-coenen.de/demos/multi/documentation/) for the full documentation and some [tutorials](http://christine-coenen.de/demos/multi/documentation/tutorial-start.html).
+It allows to connect multiple devices to one game session, to sync player attributes across all clients and to combine the devices screens to one big playing field. Visit http://christine-coenen.de/demos/multi/documentation/ for the full documentation and some [tutorials](http://christine-coenen.de/demos/multi/documentation/tutorial-start.html).
 
 ### Requirements ###
 - node.js (>= 0.8)
@@ -10,16 +10,13 @@ It allows to connect multiple devices to one game session, to sync player attrib
 ### How to start ###
 Before starting run `npm install` in your terminal.
 
-To start the application run `node app` in your terminal and visit [http://localhost](http://localhost). 
+To start the application run `node app` in your terminal and visit http://localhost. 
 The application tries to bind to port 80 - so this command may require root permission on unix systems. To bind multi to another port run `export PORT=<portnr>` before you start the app.
 
-Before you check out the example games please make sure to adjust [public/js/SERVER.js](../js/SERVER.js) to your needs.
+Before you check out the example games please make sure to adjust [public/js/SERVER.js](public/js/SERVER.js) to your needs.
 
 It is recommended to build the documentation with `grunt jsdoc`. 
-After that you can view it under
-[public/documentation/index.html](../documentation) or 
-[http://localhost/documentation](http://localhost/documentation) 
-when the server is running.
+After that you can view it under [public/documentation/index.html](public/documentation) or [http://localhost/documentation](http://localhost/documentation) when the server is running.
 
 ### Development ###
 
@@ -33,6 +30,7 @@ For development run:
 ### API ###
 To use Multi in your javaScript file you have to use require.js at the moment:
 
+```javascript
     // configure where multi can find your client side socket.io lib
     requirejs.config({
       paths: {
@@ -40,25 +38,26 @@ To use Multi in your javaScript file you have to use require.js at the moment:
       }
     });
     
-    // require the {@link module:client/multi} client side lib
+    // require the [client/multi] client side lib
     requirejs(['../lib/multi'], function (multiModule) {
       
       // say multi where to find the running socket server
-      // via {@link module:client/multi~MultiOptions}
+      // via [client/multi~MultiOptions]
       var multiOptions = {
         server: 'http://mySocketioServer/'
       };
       
       // init multi with your options 
-      // a {@link module:client/multi~Multi} instance will be returned
+      // a [client/multi~Multi] instance will be returned
       var multi = multiModule.init(multiOptions);
       
       // create a new session with success and error callback
-      // see: {@link module:client/multi~Multi#createSession}
+      // see: [client/multi~Multi#createSession]
       multi.createSession().then(onSession, onSessionFailed).done();
     };
+```
 
-For more examples of how to use the API visit the {@tutorial 01 quick start} tutorial.
+For more examples of how to use the API visit the [quick start](http://christine-coenen.de/demos/multi/documentation/tutorial-start.html) tutorial.
 
 ### Bundled libraries ###
 Multi comes with bundled libraries on client and server side:
