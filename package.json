@@ -23,7 +23,9 @@
     "express": "3.4.8",
     "socket.io": "0.9.16",
     "jade": "1.1.5",
-    "less-middleware": "0.1.14"
+    "less-middleware": "0.1.14",
+    "requirejs": "2.1.9",
+    "amdefine": "0.1.0"
   },
   "devDependencies": {
     "grunt": "0.4.2",
@@ -32,8 +34,6 @@
     "grunt-contrib-watch": "0.5.3",
     "grunt-jsdoc": "0.5.1",
     "grunt-contrib-requirejs": "0.4.1",
-    "requirejs": "2.1.9",
-    "amdefine": "0.1.0",
     "qunit": "0.5.18"
   },
   "engines": {
