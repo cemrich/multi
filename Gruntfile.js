@@ -7,7 +7,7 @@ module.exports = function(grunt) {
 
 		jsdoc : {
 			multi : {
-				src: ['multi/client/**/*.js', 'multi/server/**/*.js', 'multi/shared/**/*.js', 'multi/plugins/**/*.js', 'README.md'],
+				src: ['multi/client/**/*.js', 'multi/server/**/*.js', 'multi/shared/**/*.js', 'multi/plugins/**/*.js', './public/documentation/frontpage.md'],
 				options: {
 					destination: './public/documentation/',
 					tutorials: './tutorials',
