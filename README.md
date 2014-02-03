@@ -1,7 +1,14 @@
 ## Multi ##
 
 Multi is a framework for [web based multi-screen games](http://christine-coenen.de/blog/2013/11/14/web-based-multi-screen-games/) based on node.js and socket.io.
-It allows to connect multiple devices to one game session, to sync player attributes across all clients and to combine the devices screens to one big playing field. Visit http://christine-coenen.de/demos/multi/documentation/ for the full documentation and some [tutorials](http://christine-coenen.de/demos/multi/documentation/tutorial-start.html).
+It allows to connect multiple devices to one game session, to sync player attributes across all clients and to combine the devices screens to one big playing field. Visit http://multi.christine-coenen.de/documentation/ for the full documentation and some [tutorials](http://multi.christine-coenen.de/documentation/tutorial-start.html).
+
+### Examples ###
+You can view some example apps at http://multi.christine-coenen.de/
+
+For these examples to work properly you may need an up-to-date version of firefox, chrome, firefox mobile or chrome for android. The presenter examples (One player snake and Multi player snake) can only be started once on this server. This is intended behaviour as these games are designed to run on local installations (e.g. on fairs, exhibitions, etc.).
+
+These games are examples to demonstrate the frameworks capabilities and not yet fully polished. If you find bugs - especially regarding player registration, syncing or crashes - please feel free to report them. 
 
 ### Requirements ###
 - node.js (>= 0.8)
@@ -57,7 +64,7 @@ To use Multi in your javaScript file you have to use require.js at the moment:
     };
 ```
 
-For more examples of how to use the API visit the [quick start](http://christine-coenen.de/demos/multi/documentation/tutorial-start.html) tutorial.
+For more examples of how to use the API visit the [quick start](http://multi.christine-coenen.de/documentation/tutorial-start.html) tutorial.
 
 ### Bundled libraries ###
 Multi comes with bundled libraries on client and server side:
