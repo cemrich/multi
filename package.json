@@ -1,9 +1,23 @@
 {
-  "name": "multi-example",
+  "name": "multi",
   "version": "0.0.1",
-  "private": true,
+  "description": "A framework based on web based multi-screen games using node.js and socket.io",
+  "main": "app.js",
+  "author": "Christine Coenen",
   "scripts": {
     "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cemrich/multi.git"
+  },
+  "keywords": [
+    "multi-screen",
+    "games"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cemrich/multi/issues"
   },
   "dependencies": {
     "express": "3.4.8",
@@ -21,5 +35,8 @@
     "requirejs": "2.1.9",
     "amdefine": "0.1.0",
     "qunit": "0.5.18"
+  },
+  "engines": {
+    "node": "0.10.x"
   }
 }
