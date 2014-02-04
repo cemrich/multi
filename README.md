@@ -6,7 +6,7 @@ It allows to connect multiple devices to one game session, to sync player attrib
 ### Examples ###
 You can view some example apps at http://multi.christine-coenen.de/
 
-For these examples to work properly you may need an up-to-date version of firefox, chrome, firefox mobile or chrome for android. The presenter examples (One player snake and Multi player snake) can only be started once on this server. This is intended behaviour as these games are designed to run on local installations (e.g. on fairs, exhibitions, etc.).
+For these examples to work properly you may need an up-to-date version of firefox, chrome, firefox mobile or chrome for android - tests on the iPhone do fail at the moment. The presenter examples (One player snake and Multi player snake) can only be started once on this server. This is intended behaviour as these games are designed to run on local installations (e.g. on fairs, exhibitions, etc.).
 
 These games are examples to demonstrate the frameworks capabilities and not yet fully polished. If you find bugs - especially regarding player registration, syncing or crashes - please feel free to report them. 
 
