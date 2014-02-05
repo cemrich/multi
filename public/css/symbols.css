@@ -148,6 +148,7 @@ button:focus {
 
 #new .players .player {
 	height: 100%;
+	width: 100%;
 
 	-webkit-box-flex: 1; /* old webkit */
 	-moz-box-flex: 1;    /* old firefox */
