@@ -18,8 +18,8 @@ define(['exports', '../lib/audio', '../lib/jsfx', '../lib/jsfxlib'], function (e
 	function play(key) {
 		try {
 			samples[key].currentTime = 0;
+			samples[key].play();
 		} catch(e) {}
-		samples[key].play();
 	}
 
 	exports.onButton = function() { play('beat2'); };
