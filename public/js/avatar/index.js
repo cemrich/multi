@@ -63,16 +63,13 @@ requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
 	}
 
 	function initCamera() {
-		if (!getUserMedia) {
-			onError('no camera support');
-		}
 		getUserMedia.call(navigator, VIDEO_OPTIONS, function(s) {
 			stream = s;
 			video.src = window.URL.createObjectURL(stream);
 			setTimeout(takeImage, 1000);
 			video.addEventListener('click', takeImage, false);
 		}, function () {
-			onError('no video access');
+			onError('Something went wrong while accessing the camera. Please try another example or use another browser.');
 		});
 	}
 
@@ -115,8 +112,11 @@ requirejs(['../lib/multi', '../SERVER', '../lib/jquery-2.0.0.min'],
 	}
 
 
-	var multi = multiModule.init(multiOptions);
-	multi.autoJoinOrCreateSession().then(onSession, onSessionFailed).done();
-	showSection('joined');
+	if (getUserMedia) {
+		var multi = multiModule.init(multiOptions);
+		multi.autoJoinOrCreateSession().then(onSession, onSessionFailed).done();
+	} else {
+		onError('Sadly this browser can\'t access your camera. Please try another example or use another browser.');
+	}
 
 });

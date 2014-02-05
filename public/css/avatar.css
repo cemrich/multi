@@ -32,6 +32,9 @@ button {
 #error {
   display: none;
 }
+#status {
+  font-weight: bold;
+}
 #loading {
   width: 100%;
   position: absolute;
