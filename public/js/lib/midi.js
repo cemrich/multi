@@ -11,8 +11,8 @@ midi.play('piano', 'C', 0.7);
 
 define(function () {
 
-	var Contex = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
-	var audio = new Contex();
+	var Context = window.AudioContext || window.webkitAudioContext || window.mozAudioContext;
+	var audio = Context ? new Context() : null;
 
 	var NOTES = {
 		C: 261.626,
@@ -79,13 +79,22 @@ define(function () {
 	}
 
 	function play(instrument, note, volume) {
+		if (audio === null) {
+			return;
+		}
+
 		volume = volume || 1;
 		var intr = INSTRUMENTS[instrument];
 		createOscillator(NOTES[note], intr.attack, intr.decay, intr.type, volume);
 	}
 
+	function isSupported() {
+		return Context;
+	}
+
 	return {
 		play: play,
+		isSupported: isSupported,
 		NOTES: Object.keys(NOTES),
 		INSTRUMENTS: Object.keys(INSTRUMENTS)
 	};
