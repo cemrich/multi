@@ -3,12 +3,16 @@ define(function(require, exports, module) {
 	var HEADER = '0101212';
 	var INTERVAL = 200;
 
-	var AudioContex = window.AudioContext ||
+	var AudioContext = window.AudioContext ||
 		window.webkitAudioContext ||
 		window.mozAudioContext;
 
+	exports.isSupported = function () {
+		return AudioContext;
+	};
+
 	var tune = document.querySelector('#tune');
-	var audio = new AudioContex();
+	var audio = null;
 	var interval = null;
 	var position = 0;
 	var song = '';
@@ -17,6 +21,10 @@ define(function(require, exports, module) {
 		1: 880,
 		2: 1500
 	};
+
+	if (exports.isSupported()) {
+		audio = new AudioContext();
+	}
 
 	function createOscillator(freq) {
 		var duration = 200;
@@ -50,6 +58,7 @@ define(function(require, exports, module) {
 		console.log(song);
 		interval = setInterval(play, INTERVAL);
 	};
+
 	exports.stop = function () {
 		clearInterval(interval);
 	};

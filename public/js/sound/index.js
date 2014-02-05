@@ -20,8 +20,14 @@ requirejs(['./capture', './output', '../lib/multi', '../SERVER', '../lib/jquery-
 	var multi = multiModule.init(multiOptions);
 	$('#loading').hide();
 
-	$('#intro .new').click(createSession);
-	$('#intro .join').click(joinSession);
+	if (capture.isSupported() && output.isSupported()) {
+		$('#intro .new').click(createSession);
+		$('#intro .join').click(joinSession);
+	} else {
+		$('#intro .new').attr('disabled', 'disabled');
+		$('#intro .join').attr('disabled', 'disabled');
+		alert('Sadly your browser does not support getUserMedia and/or the web audio API. Please try another example or use another browser.');
+	}
 
 
 	function onError(error) {

@@ -10,9 +10,13 @@ define(function(require, exports, module) {
 		navigator.webkitGetUserMedia ||
 		navigator.mozGetUserMedia;
 
+	exports.isSupported = function () {
+		return AudioContext && getUserMedia;
+	};
+
 	var microphone = document.querySelector('#microphone');
-	var audioContext = new AudioContext();
-	var analyser = audioContext.createAnalyser();
+	var audioContext = null;
+	var analyser = null;
 	var notes = {
 		0: 20,
 		1: 41,
@@ -26,6 +30,11 @@ define(function(require, exports, module) {
 	var onTokenFound = null;
 	var source = null;
 	var localStream = null;
+
+	if (exports.isSupported()) {
+		audioContext = new AudioContext();
+		analyser = audioContext.createAnalyser();
+	}
 
 	function onNoteDetected(note) {
 		microphone.style.opacity = 0.5 + note * 0.15;
@@ -79,7 +88,7 @@ define(function(require, exports, module) {
 
 	exports.start = function (tokenCallback, recordCallback) {
 		onTokenFound = tokenCallback;
-		if (getUserMedia) {
+		if (exports.isSupported()) {
 			getUserMedia.call(navigator, {audio: true}, function(stream) {
 				localStream = stream;
 				recordCallback();
