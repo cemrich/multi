@@ -2,6 +2,11 @@ html {
 	overflow: hidden;
 	font-family: sans-serif;
 	background-color: white;
+	background-image: -webkit-repeating-linear-gradient(-45deg,
+		rgba(255,255,255,.4),
+		rgba(255,255,255,.4) 35px,
+		rgba(255,255,255,.5) 35px,
+		rgba(255,255,255,.5) 70px);
 	background-image: repeating-linear-gradient(-45deg,
 		rgba(255,255,255,.4),
 		rgba(255,255,255,.4) 35px,
@@ -80,11 +85,21 @@ a {
 	position: absolute;
 	left: 0;
 	bottom: 0;
-	display: flex;
+
+	display: -webkit-box;  /* old webkit */
+	display: -moz-box;     /* old firefox */
+	display: -ms-flexbox;  /* IE 10 */
+	display: -webkit-flex; /* new webkit */
+	display: flex;         /* spec */
 
 	.player {
 		height: 25px;
-		flex: 1;
+
+		-webkit-box-flex: 1; /* old webkit */
+		-moz-box-flex: 1;    /* old firefox */
+		-ms-flex: 1;         /* IE 10 */
+		-webkit-flex: 1;     /* new webkit */
+		box-flex: 1;         /* spec */
 	}
 }
 

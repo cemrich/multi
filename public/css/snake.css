@@ -95,15 +95,29 @@ canvas {
   width: 100%;
   height: 50px;
   display: -webkit-box;
+  /* old webkit */
   display: -moz-box;
-  display: box;
+  /* old firefox */
+  display: -ms-flexbox;
+  /* IE 10 */
+  display: -webkit-flex;
+  /* new webkit */
+  display: flex;
+  /* spec */
 }
 #waiting .players .player {
   height: 100%;
-  -webkit-box-flex: 1;
-  -moz-box-flex: 1;
-  box-flex: 1;
   background-color: grey;
+  -webkit-box-flex: 1;
+  /* old webkit */
+  -moz-box-flex: 1;
+  /* old firefox */
+  -ms-flex: 1;
+  /* IE 10 */
+  -webkit-flex: 1;
+  /* new webkit */
+  box-flex: 1;
+  /* spec */
 }
 #waiting .start {
   display: none;

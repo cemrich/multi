@@ -15,10 +15,10 @@ define(function(require, exports, module) {
 
 
 	function getBackgroundImage(color) {
-		return 'linear-gradient(' + color + ' 2px, transparent 2px),' +
-			'linear-gradient(90deg, ' + color + ' 2px, transparent 2px),' +
-			'linear-gradient(' + color + ' 1px, transparent 1px),' +
-			'linear-gradient(90deg, ' + color + ' 1px, transparent 1px)';
+		return 'linear-gradient(white 2px, transparent 2px),' +
+			'linear-gradient(90deg, white 2px, transparent 2px),' +
+			'linear-gradient(' + color + ' 2px, transparent 2px),' +
+			'linear-gradient(90deg, ' + color + ' 2px, transparent 2px)';
 	}
 
 
@@ -92,16 +92,16 @@ define(function(require, exports, module) {
 		this.setArrows(rightPlayer, rightDirection);
 		if (rightPlayer) {
 			y = this.getPlayerY(rightPlayer);
-			context.moveTo(canvas.width, y.start);
-			context.lineTo(canvas.width, y.end);
+			context.moveTo(canvas.width-1, y.start);
+			context.lineTo(canvas.width-1, y.end);
 		}
 
 		var leftPlayer = myScreen.leftPlayers[0];
 		this.setArrows(leftPlayer, leftDirection);
 		if (leftPlayer) {
 			y = this.getPlayerY(leftPlayer);
-			context.moveTo(0, y.start);
-			context.lineTo(0, y.end);
+			context.moveTo(1, y.start);
+			context.lineTo(1, y.end);
 		}
 
 		context.stroke();

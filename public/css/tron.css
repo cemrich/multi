@@ -7,7 +7,7 @@ html {
 }
 #bg {
   content: "";
-  background-image: linear-gradient(rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.5) 2px, transparent 2px), linear-gradient(90deg, rgba(255, 255, 255, 0.5) 2px, transparent 2px);
   background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
   background-position: center;
   opacity: 0.15;
@@ -23,7 +23,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 a {
   color: white;
@@ -96,16 +96,43 @@ canvas {
 }
 #joined .players {
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   margin: 15px 0;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  display: -webkit-box;
+  /* old webkit */
+  display: -moz-box;
+  /* old firefox */
+  display: -ms-flexbox;
+  /* IE 10 */
+  display: -webkit-flex;
+  /* new webkit */
+  display: flex;
+  /* spec */
 }
 #joined .players .player {
   align-self: auto;
   margin: 4px;
+  width: 50px;
   height: 50px;
-  flex: 1;
+  -webkit-box-flex: 1;
+  /* old webkit */
+  -moz-box-flex: 1;
+  /* old firefox */
+  -ms-flex: 1;
+  /* IE 10 */
+  -webkit-flex: 1;
+  /* new webkit */
+  box-flex: 1;
+  /* spec */
 }
 .direction {
   display: none;

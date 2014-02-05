@@ -23,6 +23,8 @@ requirejs(['../lib/multi', '../SERVER'],
 		var playerView = $('<div></div>');
 		playerView.addClass('player');
 		playerView[0].style.order = player.number;
+		playerView[0].style.webkitBoxOrdinalGroup = player.number + 1;
+		playerView[0].style.msFlexOrder = player.number;
 		$('.players').append(playerView);
 
 		player.getAttributeAsync('color').then(function (color) {
