@@ -3,6 +3,8 @@
 Multi is a framework for [web based multi-screen games](http://christine-coenen.de/blog/2013/11/14/web-based-multi-screen-games/) based on node.js and socket.io.
 It allows to connect multiple devices to one game session, to sync player attributes across all clients and to combine the devices screens to one big playing field. Visit http://multi.christine-coenen.de/documentation/ for the full documentation and some [tutorials](http://multi.christine-coenen.de/documentation/tutorial-start.html).
 
+![three different snake games](./public/img/banner.jpg)
+
 ### Examples ###
 You can view some example apps at http://multi.christine-coenen.de/
 
