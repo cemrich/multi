@@ -3,23 +3,24 @@
 Multi is a framework for [web based multi-screen games](http://christine-coenen.de/blog/2013/11/14/web-based-multi-screen-games/) based on node.js and socket.io.
 It allows to connect multiple devices to one game session, to sync player attributes across all clients and to combine the devices screens to one big playing field.
 
+<img src="../img/banner.jpg" style="max-width:100%;"></img>
+
 ### Requirements ###
 - node.js (>= 0.8)
 - NPM package manager (apt-get install npm)
 
 ### How to start ###
-Before starting run `npm install` in your terminal.
+1. Clone this repository with `git clone git@github.com:cemrich/multi.git`
 
-To start the application run `node app` in your terminal and visit [http://localhost](http://localhost). 
-The application tries to bind to port 80 - so this command may require root permission on unix systems. To bind multi to another port run `export PORT=<portnr>` before you start the app.
+1. Before starting run `cd multi` and `npm install` in your terminal to install all dependencies.
 
-Before you check out the example games please make sure to adjust [public/js/SERVER.js](../js/SERVER.js) to your needs.
+1. To start the application run `node app` in your terminal and visit http://localhost. 
 
-It is recommended to build the documentation with `grunt jsdoc`. 
-After that you can view it under
-[public/documentation/index.html](../documentation) or 
-[http://localhost/documentation](http://localhost/documentation) 
-when the server is running.
+   The application tries to bind to port 80 - so this command may require root permission on unix systems. To bind multi to another port run `export PORT=<portnr>` before you start the app.
+
+1. Before you check out the example games please make sure to adjust [public/js/SERVER.js](public/js/SERVER.js) to your needs. Replace localhost with your machines external ip address and the port you told multi to use. If you don't make this modifications you can still use the examples on your local machine, but you will not be able to pair any other device with the server.
+
+1. It is recommended to build the documentation with `grunt jsdoc`. After that you can view it under [public/documentation/index.html](public/documentation) or [http://localhost/documentation](http://localhost/documentation) when the server is running.
 
 ### Development ###
 
