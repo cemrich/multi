@@ -24,7 +24,13 @@ define(function(require, exports, module) {
 	function onJoinSessionFailed(error) {
 		sound.onPlayerDisconnect();
 		$('#loading').hide();
-		alert('Oh, crap - this game does not exist. Try again!');
+		if (error instanceof multiModule.NoSuchSessionError) {
+			alert('Oh, crap - this game does not exist. Try again!');
+		} else if (error instanceof multiModule.SessionFullError) {
+			alert('Oh, crap - there are too many players connected!\n Try another game.');
+		} else {
+			alert('Oh, crap - something went wrong. Try again!');
+		}
 	}
 
 	function onSessionJoined(joinedSession) {
