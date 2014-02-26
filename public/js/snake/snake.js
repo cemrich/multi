@@ -44,6 +44,9 @@ define(['./sound', '../lib/canvasHelper'], function (sound, canvasHelper) {
 		}
 		var x = this.player.number / this.snakeCount * this.grid.width;
 		x -= x % this.grid.tileSize + this.grid.halfTileSize;
+		if (this.snakeCount === 1) {
+			x = this.grid.centerX;
+		}
 		var y = this.grid.centerY;
 		this.tailAnim = snakeAnim.slice(0, 1);
 		this.headAnim = snakeAnim.slice(1, 3);
